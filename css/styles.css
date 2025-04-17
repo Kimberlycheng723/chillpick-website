@@ -1,21 +1,43 @@
+/* app.css */
 body {
   background: url('../images/background.png') no-repeat center center fixed;
   background-size: cover;
-  display: flex;
-  justify-content: center;
   min-height: 100vh;
+  display: flex;
 }
 
+/* Main container adjustment */
+main.container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 100px;
+}
+
+/* Register form styling */
 .register-form {
   background: #fff;
-  padding: 2rem;
+  padding: 2.5rem;
   border-radius: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  max-width: 400px;
-  margin: 5% auto;
-  margin-left: 100px;
+  width: 100%;
+  max-width: 450px;
+  margin-left: 180px;
   margin-top: 80px;
+  margin: 5% auto;
   align-self: center;
+}
+
+.register-form .form-label {
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.register-form .form-control:focus {
+  border-color: #EB8826;
+  box-shadow: 0 0 0 0.25rem rgba(235, 136, 38, 0.25);
 }
 
 .validation-message {
@@ -23,38 +45,86 @@ body {
   color: red;
 }
 
-.btn-orange {
-    background-color: #ff9800; /* Use the exact orange color from your image (or a similar one) */
-    border-color: #ff9800; /* Match the border color to the background */
-    color: black; /* Set the text color to white for better contrast */
+/* Button styling */
+.btn-warning {
+  background-color: #EB8826;
+  border-color: #EB8826;
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: all 0.3s;
 }
-.btn-orange:hover {
-  background-color: #e2931d;
-  border-color: #e2931d;
+
+.btn-warning:hover {
+  background-color: #d67117;
+  border-color: #d67117;
 }
 
 
+/* Password toggle */
 .input-group-text {
   background-color: #fff;
   border-left: none;
+  cursor: pointer;
 }
 
-.form-control:focus {
-  box-shadow: none;
+/* Link styling */
+.orangeColor {
+  color: #EB8826;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.3s;
 }
 
+.orangeColor:hover {
+  color: #d67117;
+  text-decoration: underline;
+}
+
+/* Modal styling */
 .modal-content {
   text-align: center;
   padding: 2rem;
   border-radius: 20px;
+  border: none;
 }
 
 .modal-content img {
   width: 80px;
+  margin-bottom: 1rem;
 }
 
-.orangeColor {
+.modal-content h4 {
   color: #EB8826;
+  margin-bottom: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .register-form {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .register-form h3 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Remove default Bootstrap outline */
+.form-control:focus, 
+.btn:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
 }
 
 .forgot-container {
@@ -65,8 +135,8 @@ body {
   max-width: 400px;
   width: 100%;
   margin: 5% auto;
-  margin-left: 100px;
-  margin-top: 80px;
+  margin-left: 200px;
+  margin-top: 100px;
   align-self: center;}
 
 @media (max-width: 768px) {
@@ -98,67 +168,4 @@ body {
 
 .popup.active {
   display: block;
-}
-
-
-
-
-.profile-container {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  width: 400px;
-  max-width: 100%;
-  overflow: hidden;
-}
-.profile-header {
-  background: linear-gradient(135deg, #EB8826, #e67e22);
-  color: white;
-  padding: 30px;
-  text-align: center;
-}
-.profile-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-color: white;
-  margin: 0 auto 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  color: #EB8826;
-  font-weight: bold;
-}
-.profile-body {
-  padding: 30px;
-}
-.profile-field {
-  margin-bottom: 20px;
-}
-.profile-label {
-  font-weight: 600;
-  color: #555;
-  margin-bottom: 5px;
-}
-.profile-value {
-  background: #f8f9fa;
-  padding: 10px 15px;
-  border-radius: 8px;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
-.btn-logout {
-  background-color: #EB8826;
-  color: white;
-  border: none;
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: 500;
-  margin-top: 20px;
-}
-.btn-logout:hover {
-  background-color: #d67117;
 }
