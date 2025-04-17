@@ -15,32 +15,10 @@
           <li class="nav-item"><a class="nav-link" href="#">Discover</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Watchlist</a></li>
         </ul>
-        <div class="d-none d-lg-flex align-items-center" id="user-info">
-          <img src="../images/profile_pic.png" alt="User" class="profile-pic me-2" style="width: 40px; height: 40px; border-radius: 50%;">
-          <span class="user-name text-black"></span>
+        <div class="d-none d-lg-block">
+          <img src="assets/user-profile.jpg" alt="User" class="profile-pic">
         </div>
-        
       </div>
     </div>
   </nav>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const userInfo = JSON.parse(localStorage.getItem("userProfile"));
-  
-      if (userInfo) {
-        const profilePic = document.querySelector(".profile-pic");
-        const userName = document.querySelector(".user-name");
-  
-        if (profilePic) {
-          profilePic.src = userInfo.profilePic;
-        }
-  
-        if (userName) {
-          userName.textContent = userInfo.name;
-        }
-      }
-    });
-  </script>
-  
   
