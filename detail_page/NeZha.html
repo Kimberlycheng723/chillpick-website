@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width; initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <title>Entertainment</title>
+        <!--The icon in the webiste (beside the title)-->
+        <link rel="icon" type="image/x-icon" src="Image/logo.jpg" style="float: left; font-weight: 70; height: 70;">
+        <!--Bootsrap 5 CSS-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+       
+
+        <style>
+               :root {
+                 background-color: #F8F4EA;
+                 --card-color: #FFFFFF;
+                 accent-color: #5C6BC0;
+                 --text-dark: #333333;
+                 --text-medium: #666666;
+                 --star-color: #FFC107;
+
+                }
+
+                body{
+                    background-color:#f0f3e6 ;
+                }
+
+                .navbar{
+                background-color:#c6d1a2;
+                height: 20px;
+                margin-bottom: 0;
+                }
+
+                .back-button {
+                border: none;
+                background: none;
+                outline: none;
+                box-shadow: none;
+                }
+
+                .back-button:hover {
+                 background-color: #FFC107;
+                 color: black;
+                }
+
+
+                .btn-outline-orange:hover {
+                 background-color: #FFC107;
+                 outline-color: #FFC107;
+                 color: black;
+                }
+
+                .media-poster {
+                 border-radius: 8px;
+                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                 max-height: 600px;
+                 width: auto;
+                }
+
+                   
+                #btnWatchlist {
+                 color:#333333;
+                 border-color:#ffba00;
+                }
+
+                #btnWatchlist:hover {
+                 background-color: #ffba00;
+                 color: black;
+                }
+
+                #btnPlay {
+                 color: #333333;
+                 border-color: #ffba00;
+                }
+    
+                #btnPlay:hover {
+                 background-color: #ffba00;
+                 color: black;
+                }
+    
+                .rating-stars {
+                 color: var(--star-color);
+                 font-size: 1.2rem;
+                }
+
+                .details-section {
+                 background-color: var(--card-color);
+                 border-radius: 8px;
+                 padding: 2rem;
+                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+    
+                .trailer-container {
+                 position: relative;
+                 padding-bottom: 40.25%; /* 16:9 Aspect Ratio */
+                 height: 0;
+                 overflow: hidden;
+                 border-radius: 8px;
+                }
+    
+                .trailer-container iframe {
+                 position: absolute;
+                 top: 0;
+                 left: 0;
+                 width: 100%;
+                 height: 100%;
+                 border: none;
+                }
+
+                .img-fixed {
+                height: 300px; /* 🔧 Set your preferred height */
+                object-fit: cover;
+                }
+
+                #RecommendationCard-body {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 10px;
+                min-height: 60px; /* Minimum height */
+                }
+
+
+                #RecommendationCard-title {
+                margin-bottom: 4px;
+                font-size: 1rem;
+                }
+
+                .card-subtitle {
+                color: #5C4033;
+                font-size: 14px;
+                margin: 0;
+                }
+    
+    
+                .genre-badge {
+                 background-color: #e0e0e0;
+                 color: var(--text-dark);
+                 margin-right: 8px;
+                 margin-bottom: 8px;
+                }
+
+                .review-card {
+                 border-left: 3px solid var(--accent-color);
+                }
+
+                .card-title {
+                margin-top: 0.5rem;
+                }
+
+                .card-text {
+                font-size: 0.95rem;
+                }
+    
+            
+                #writeReviewBtn{
+                    background-color: #FFC107;
+                    color:#333333
+                }
+
+                #writeReviewBtn:hover{
+                    background-color: #e0e0e0;
+                    color:#333333
+                }
+
+                #ratingInput i {
+                font-size: 1.5rem;
+                cursor: pointer;
+                color: #ccc;
+                }
+
+                #ratingInput i.active {
+                color: orange;
+                }
+
+                .blurred-box .comment-text,
+                .blurred-box .card-title {
+                filter: blur(6px);
+                transition: filter 0.3s ease;
+                }
+
+
+                .blurred-box.visible .comment-text,
+                .blurred-box.visible .card-title {
+                filter: none;
+                }
+    
+                @media (max-width: 768px) {
+                 .media-poster {
+                 max-height: 350px;
+                 margin-bottom: 1.5rem;
+                 }
+                }
+        </style>
+    </head>
+
+    <body>
+        <!--Navagation bar-->
+        <nav class="navbar navbar-expand-md pt-5 pb-4">
+            <div class="container-xxl justify-content-left text-align-center mb-4">
+                <button class="back-button" data-bs-target=""><i class="bi bi-skip-backward"></i></button>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation"></button>
+
+                <div class="collapse navbar-collapse" id="nav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Movie</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="#">Music</a>
+                        </li>      
+                    </ul>
+                </div>
+            </div>
+
+            <div class="container-xxl d-flex justify-content-end text-align-center mb-4">
+                <button class="btn btn-outline-orange w-200" onclick="window.location.href=''">Back to Main Page</button>
+            </div>
+        </nav>
+
+        <!--Main Body-->
+        <main class="container my-5">
+
+            <!--Media Detail Section-->
+            <section class="mb-5">
+                <div class="row">
+                    <!--Poster-->
+                    <div class="col-md-4 text center">
+                        <img src="Image/哪吒.jpg" alt="Ne Zha Picture" class="media-poster img-fluid">
+
+                    </div>
+                    
+                    <!--Synopsis-->
+                    <div class="col-md-8">
+                        <h1 class="display-5 fw-bload mb-3">哪吒降魔童降生 Ne Zha</h1>
+
+                        <div class="mb-4">
+                            <span class="badge bg-secondary me-1"><i class="bi bi-film"></i></span>
+                            <span class="badge bg-secondary me-1">Animated feature film</span>
+                            <span class="badge bg-secondary me-1">1 hour 50 min</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="d-inline me-2">Genres:</h5>
+                            <span class="badge genre-badge">Fantasy</span>
+                            <span class="badge genre-badge">Mythology</span>
+                            <span class="badge genre-badge">Adventure</span>
+                            <span class="badge genre-badge">Action</span>
+                            <span class="badge genre-badge">Animation</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Synopsis</h5>
+                            <p class="lead" style="font-size: 15px;">Ne Zha (Chinese: 哪吒之魔童降世), also known as Ne Zha: Birth of the Demon Child, is a fantasy animated film written and directed by Jiaozi (real name: Yang Yu). The main voice cast includes Lü Yanting, Joseph, Han Mo, Chen Hao, Lü Qi, Zhang Jiaming, and Yang Wei. The film was released in mainland China on July 26, 2019, followed by releases in Australia on August 23, New Zealand on August 29, and the UK and Ireland on August 30.<br>The story is inspired by the mythological tale of Ne Zha from the Ming Dynasty classic The Investiture of the Gods (Fengshen Yanyi). The film reimagines Ne Zha as a misunderstood “demon child” born into a chaotic world due to a twist of fate, who frequently causes trouble. The narrative builds upon traditional mythology while giving it a fresh and modern interpretation.</p>
+                        </div>
+
+                        <!--Rate-->
+                        <div class="mb-4">
+                            <h5 class="d-inline me-2">Rate:</h5>
+                            <div class="d-inline-block rating-stars">
+                              <i class="bi bi-star-fill" data-rating="1"></i>
+                              <i class="bi bi-star-fill" data-rating="2"></i>
+                              <i class="bi bi-star-fill" data-rating="3"></i>
+                              <i class="bi bi-star-fill" data-rating="4"></i>
+                              <i class="bi bi-star-fill" data-rating="5"></i>
+                              <span class="bi bi-star-half"> 4.9/5</span>
+                            </div>
+                        </div>
+
+                         <!--button for watchlist & mark view-->
+                         <div class="row mt-4">
+                            <div class="col-lg-3">
+                            <button class="btn" id="btnWatchlist"><i class="bi bi-plus-lg"></i> Add to Watchlist</button>
+                            </div>
+                            <div class="col-lg-4">
+                            <button class="btn" id="btnPlay"><i class="bi bi-play-btn"></i> Play</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!--Trailer-->
+            <section class="mb-5 details-section">
+                <h3 class="mb-4"><i class="bi bi-play-circle-fill"></i> Trailer</h3>
+                <div class="trailer-container justify-content-center bg-white" style="position: relative; width: 100%; max-width: 640px; margin: auto;">
+                    <div id="trailer-placeholder" style="cursor: pointer; position: relative; padding-top: 56.25%; height: 0; overflow: hidden;">
+                        <img src="https://puui.qpic.cn/vpic_cover/a3512gp41n0/a3512gp41n0_1683379049_hz.jpg/1280" 
+                             alt="Trailer Thumbnail" 
+                             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+            </section>
+
+            <script>
+                document.getElementById("trailer-placeholder").addEventListener("click", function () {
+                    this.innerHTML = `<iframe src="https://www.youtube.com/embed/4IYzenrmBoo?autoplay=1"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>`;
+                });
+            </script>
+
+            <!--Recommendations-->
+            <section class="mb-5">
+                <h3 class="mb-4">You May Also Like</h3>
+                <div class="row g-4">
+                    <!-- Recommendation Card -->
+                    <div class="col-md-3 col-6">
+                        <div class="card h-100 text-center">
+                            <a href=""><img src="Image/千与千寻.jpg" class="card-img-top img-fixed" alt="Spirited Away"></a>
+                            <div class="card-body" id="RecommendationCard-body">
+                                <h6 class="card-title" id="RecommendationCard-title">Spirited Away</h6>
+                                <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Film • Fantasy • 2001</p>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="col-md-3 col-6">
+                        <div class="card h-100 text-center">
+                            <a href=""><img src="Image/你的名字.jpeg" class="card-img-top img-fixed" alt="Your Name"></a>
+                            <div class="card-body" id="RecommendationCard-body">
+                                <h6 class="card-title mb-1" id="RecommendationCard-title">Your Name</h6>
+                                <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Film • Romance • 2016</p>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="col-md-3 col-6">
+                        <div class="card h-100 text-center">
+                            <a href=""><img src="Image/天气之子.jpg" class="card-img-top img-fixed" alt="Weathering with You"></a>
+                            <div class="card-body" id="RecommendationCard-body">
+                                <h6 class="card-title" id="RecommendationCard-title">Weathering with You</h6>
+                                <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Film • Romance • 2019</p>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="col-md-3 col-6">
+                        <div class="card h-100 text-center">
+                            <a href=""><img src="Image/龙猫.jpg" class="card-img-top img-fixed" alt="Totoro"></a>
+                            <div class="card-body" id="RecommendationCard-body">
+                                <h6 class="card-title" id="RecommendationCard-title">Totoro</h6>
+                                <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Film • Fantasy • 1988</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Review Section -->
+            <section class="details-section">
+             <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="bi bi-chat-left-dots"></i> User Reviews</h3>
+                <button class="btn" id="writeReviewBtn">Write a Review</button>
+             </div>
+
+             <!-- Write Review Form (hidden by default) -->
+            <div id="reviewForm" class="card mb-4 p-3 border shadow-sm d-none">
+                  <h5>Write Your Review</h5>
+               <div class="mb-2">
+                   <div id="ratingInput">
+                     <i class="bi bi-star-fill" data-value="1"></i>
+                     <i class="bi bi-star-fill" data-value="2"></i>
+                     <i class="bi bi-star-fill" data-value="3"></i>
+                     <i class="bi bi-star-fill" data-value="4"></i>
+                     <i class="bi bi-star-fill" data-value="5"></i>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="confirmRatingCheck">
+                    <label class="form-check-label" for="confirmRatingCheck"> Spoiler</label>
+                  </div>
+              </div>
+              <div class="mb-2">
+                <textarea class="form-control" rows="3" placeholder="Write your comment..."></textarea>
+              </div>
+              <button class="btn" style="background-color: #FFC107;">Submit</button>
+            </div>
+
+           <!-- Review Card 1 -->
+           <div class="card mb-3 mt-3 border-0 shadow-sm review-card">
+              <div class="card-body">
+                 <div class="d-flex justify-content-between align-items-start mb-2">
+                     <div>
+                        <strong>Movie.Buff99</strong>
+                          <div class="rating-stars text-warning small">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                          </div>
+                     </div>
+                     <div class="d-flex align-items-center gap-2">
+                        <small class="text-muted">2 weeks ago</small>
+                        <button class="btn btn-sm btn-outline-primary toggle-blur-btn" title="Show comment">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                      
+                 </div>
+
+                  <!-- Blurred content -->
+                  <div class="blurred-box position-relative">
+                  <h5 class="card-title fw-bold">Creative but exhausting</h5>
+                  <div class="comment-text card-text text-secondary">The multiverse concept is brilliant, especially the way they use it to explore the protagonist's regrets. However, the hot dog fingers universe felt a bit too silly for me. The emotional payoff in the third act makes up for it though.</div>
+                  </div>
+
+                 <div class="d-flex justify-content-end">
+                    <button class="btn btn-sm btn-outline-secondary me-2 like-btn">
+                        <i class="bi bi-hand-thumbs-up"></i> <span class="like-count">100</span>
+                    </button>                      
+                    <button class="btn btn-sm btn-outline-secondary reply-btn"><i class="bi bi-chat-square-dots"></i> Reply</button>
+                 </div>
+
+                 <!-- Reply Form (hidden by default) -->
+                 <div class="reply-form mt-3 d-none">
+                    <textarea class="form-control mb-2" rows="2" placeholder="Write your reply..."></textarea>
+                    <button class="btn" style="background-color: #FFC107;">Submit Reply</button>
+                </div>
+               </div>
+             </div>
+
+
+           <!-- Review Card 2 -->
+           <div class="card mb-3 mt-3 border-0 shadow-sm review-card">
+            <div class="card-body">
+               <div class="d-flex justify-content-between align-items-start mb-2">
+                   <div>
+                      <strong>Sarah J.</strong>
+                        <div class="rating-stars text-warning small">
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                        </div>
+                   </div>
+                   <div class="d-flex align-items-center gap-2">
+                    <small class="text-muted">1 month ago</small>
+                    <button class="btn btn-sm btn-outline-primary toggle-blur-btn" title="Show comment">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+               </div>
+
+               <!-- Blurred content -->
+               <div class="blurred-box position-relative">
+               <h5 class="card-title fw-bold">That was amazing!</h5>
+               <div class="comment-text card-text text-secondary">The animation was stuning, and the story wa so emotional and powerful. I didn't expect to feel so connected to Ne Zha</div>
+               </div>
+
+               <div class="d-flex justify-content-end">
+                <button class="btn btn-sm btn-outline-secondary me-2 like-btn">
+                    <i class="bi bi-hand-thumbs-up"></i> <span class="like-count">18</span>
+                </button>                  
+                <button class="btn btn-sm btn-outline-secondary reply-btn"><i class="bi bi-chat-square-dots"></i> Reply</button>
+               </div>
+
+               <!-- Reply Form (hidden by default) -->
+               <div class="reply-form mt-3 d-none">
+                  <textarea class="form-control mb-2" rows="2" placeholder="Write your reply..."></textarea>
+                  <button class="btn btn-sm btn-primary">Submit Reply</button>
+              </div>
+             </div>
+           </div>
+
+            <!-- Load More -->
+            <div class="text-center mt-4">
+                <button class="btn" style="background-color: #FFC107;">Load More Reviews</button>
+           </div>
+        </section>
+
+        
+        <script>
+            // Show Write Review form
+            document.getElementById('writeReviewBtn').addEventListener('click', function () {
+              document.getElementById('reviewForm').classList.toggle('d-none');
+            });
+          
+            // Handle star rating selection
+            document.querySelectorAll('#ratingInput i').forEach(star => {
+              star.addEventListener('click', function () {
+                let rating = this.getAttribute('data-value');
+                document.querySelectorAll('#ratingInput i').forEach(s => {
+                  s.classList.remove('active');
+                  if (s.getAttribute('data-value') <= rating) {
+                    s.classList.add('active');
+                  }
+                });
+              });
+            });
+          
+            // Blur/unblur the comment
+            document.querySelectorAll('.toggle-blur-btn').forEach(btn => {
+              btn.addEventListener('click', function () {
+                const cardBody = btn.closest('.card-body');
+                const blurredBox = cardBody.querySelector('.blurred-box');
+                const icon = btn.querySelector('i');
+          
+                blurredBox.classList.toggle('visible');
+          
+                // Toggle icon
+                icon.classList.toggle('bi-eye');
+                icon.classList.toggle('bi-eye-slash');
+              });
+            });
+          
+            // Toggle Reply Form
+            document.querySelectorAll('.reply-btn').forEach(btn => {
+              btn.addEventListener('click', function () {
+                const card = btn.closest('.card-body');
+                const replyForm = card.querySelector('.reply-form');
+                replyForm.classList.toggle('d-none');
+              });
+            });
+
+            // Like toggle logic
+            document.querySelectorAll('.like-btn').forEach(button => {
+            let liked = false; // Set default state
+
+            button.addEventListener('click', () => {
+            const countSpan = button.querySelector('.like-count');
+            let count = parseInt(countSpan.textContent);
+
+            if (!button.classList.contains('liked')) {
+            count += 1;
+            button.classList.add('liked');
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-warning');
+            } else {
+            count -= 1;
+            button.classList.remove('liked');
+            button.classList.remove('btn-warning');
+            button.classList.add('btn-outline-secondary');
+            }
+
+            countSpan.textContent = count;
+            });
+            });
+
+          </script>
+          
+
+        </main>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+    </body>
+</html>
