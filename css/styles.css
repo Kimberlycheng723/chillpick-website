@@ -1,0 +1,164 @@
+body {
+  background: url('../images/background.png') no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.register-form {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  margin: 5% auto;
+  margin-left: 100px;
+  margin-top: 80px;
+  align-self: center;
+}
+
+.validation-message {
+  font-size: 0.85rem;
+  color: red;
+}
+
+.btn-orange {
+    background-color: #ff9800; /* Use the exact orange color from your image (or a similar one) */
+    border-color: #ff9800; /* Match the border color to the background */
+    color: black; /* Set the text color to white for better contrast */
+}
+.btn-orange:hover {
+  background-color: #e2931d;
+  border-color: #e2931d;
+}
+
+
+.input-group-text {
+  background-color: #fff;
+  border-left: none;
+}
+
+.form-control:focus {
+  box-shadow: none;
+}
+
+.modal-content {
+  text-align: center;
+  padding: 2rem;
+  border-radius: 20px;
+}
+
+.modal-content img {
+  width: 80px;
+}
+
+.orangeColor {
+  color: #EB8826;
+}
+
+.forgot-container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  max-width: 400px;
+  width: 100%;
+  margin: 5% auto;
+  margin-left: 100px;
+  margin-top: 80px;
+  align-self: center;}
+
+@media (max-width: 768px) {
+  .forgot-container {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+}
+
+.forgot-container input {
+  margin-top: 15px;
+}
+
+.popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.popup.active {
+  display: block;
+}
+
+
+
+
+.profile-container {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  max-width: 100%;
+  overflow: hidden;
+}
+.profile-header {
+  background: linear-gradient(135deg, #EB8826, #e67e22);
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: white;
+  margin: 0 auto 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: #EB8826;
+  font-weight: bold;
+}
+.profile-body {
+  padding: 30px;
+}
+.profile-field {
+  margin-bottom: 20px;
+}
+.profile-label {
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 5px;
+}
+.profile-value {
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 8px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.btn-logout {
+  background-color: #EB8826;
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-top: 20px;
+}
+.btn-logout:hover {
+  background-color: #d67117;
+}
