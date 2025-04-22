@@ -92,9 +92,9 @@ h1 {
 
 .filter-btn {
   background: none;
-  border: 1px solid #ddd;
+  border: none;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 20px;
   cursor: pointer;
   transition: all 0.3s;
   font-weight: 500;
@@ -107,7 +107,7 @@ h1 {
   background: none;
   border: 1px solid #ddd;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 15px;
   cursor: pointer;
   transition: all 0.3s;
   font-weight: 500;
