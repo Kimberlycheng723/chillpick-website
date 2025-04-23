@@ -101,21 +101,23 @@ h1 {
   margin-left: auto;
 }
 .filter-btn:hover {
-  background-color: #F8F4EA;
+  background-color: #E8E1D1;
 }
 .history-btn {
+  color: black;
   background: none;
   border: 1px solid #ddd;
   padding: 8px 16px;
   border-radius: 15px;
   cursor: pointer;
   transition: all 0.3s;
+  text-decoration: none; /* removes underline */
   font-weight: 500;
   margin-left: auto;
 }
 
 .history-btn:hover {
-  background-color: #F8F4EA;
+  background-color: #E8E1D1;
 }
 
 /* Watchlist Items */
