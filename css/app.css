@@ -4,6 +4,169 @@ body {
     color: #333;
   }
   
+  .welcome-section {
+    text-align: center;
+    padding: 2rem 0;
+}
+.welcome-section h1 {
+    font-size: 3rem;
+    color: #5a4a3a;
+    font-weight: 600;
+}
+.welcome-section p {
+    font-size: 1.2rem;
+    color: #6B4F3D;
+}
+
+.card {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s;
+    margin-bottom: 1rem;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.media-card {
+    height: 100%;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+.media-image {
+    height: 200px;
+    object-fit: cover;
+}
+.card-body {
+    padding: 1rem;
+}
+.card-title {
+    font-weight: 600;
+    font-size: medium;
+    text-align: center;
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+}
+.card-description {
+    font-size: 0.75rem;
+    color: #673b1c;
+    text-align: center;
+}
+.section-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden; /* Ensures header corners stay smooth */
+  margin-bottom: 1.5rem;
+  padding: 0; /* Remove this to prevent header from being pushed in */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1); /* soft shadow */
+}
+
+.section-header {
+  background-color: #F9DC8E;
+  padding: 15px 20px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+.see-all {
+    color: #C00F0C;
+    text-decoration: none;
+    font-weight: bold;
+    font-weight: 600;
+}
+.small-media-card {
+    padding-left: 0.75rem;
+    display: flex;
+    align-items: center; /* Vertically center the info beside the image */
+    margin-bottom: 1rem;
+}
+.small-media-image {
+    width: 80px;
+    height: 100px; /* Set a fixed height */
+    object-fit: cover;
+    margin-right: 1rem;
+    border-radius: 5px;
+}
+.small-media-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 12px;
+}
+.plan-to-watch {
+    width: 100px;
+    height: 20px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    color: #007bff;
+    background-color: #deedfc;
+    margin-top: 8px;
+}
+.in-progress {
+    width: 100px;
+    height: 20px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    color: #eab523;
+    background-color: #fcf8ed;
+    margin-top: 8px;
+}
+
+.added-description{
+    font-size: 0.75rem;
+    color: #655f5a;
+    margin-left: 20px;
+    padding: 3px;
+}
+
+.added-title{
+  font-weight: 600;
+  font-size: medium;
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.activity-card {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ffffff;
+    align-items: center;
+}
+
+.profile_pic-image{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-left: 1rem;
+}
+
+.activity-description{
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-align: center;
+}
 
   .navbar-chillpick {
     background-color: #EBE8D5;
