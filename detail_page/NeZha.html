@@ -4,12 +4,14 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width; initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <title>Entertainment</title>
+        <title>Movies</title>
         <!--The icon in the webiste (beside the title)-->
         <link rel="icon" type="image/x-icon" src="Image/logo.jpg" style="float: left; font-weight: 70; height: 70;">
         <!--Bootsrap 5 CSS-->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="css/app.css">
+
        
 
         <style>
@@ -198,30 +200,6 @@
     </head>
 
     <body>
-        <!--Navagation bar-->
-        <nav class="navbar navbar-expand-md pt-5 pb-4">
-            <div class="container-xxl justify-content-left text-align-center mb-4">
-                <button class="back-button" data-bs-target=""><i class="bi bi-skip-backward"></i></button>
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation"></button>
-
-                <div class="collapse navbar-collapse" id="nav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Movie</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="#">Music</a>
-                        </li>      
-                    </ul>
-                </div>
-            </div>
-
-            <div class="container-xxl d-flex justify-content-end text-align-center mb-4">
-                <button class="btn btn-outline-orange w-200" onclick="window.location.href=''">Back to Main Page</button>
-            </div>
-        </nav>
-
         <!--Main Body-->
         <main class="container my-5">
 
@@ -230,7 +208,7 @@
                 <div class="row">
                     <!--Poster-->
                     <div class="col-md-4 text center">
-                        <img src="Image/哪吒.jpg" alt="Ne Zha Picture" class="media-poster img-fluid">
+                        <img src="../images/Detail/Image/哪吒.jpg" alt="Ne Zha Picture" class="media-poster img-fluid">
 
                     </div>
                     
@@ -313,7 +291,7 @@
                     <!-- Recommendation Card -->
                     <div class="col-md-3 col-6">
                         <div class="card h-100 text-center">
-                            <a href=""><img src="Image/千与千寻.jpg" class="card-img-top img-fixed" alt="Spirited Away"></a>
+                            <a href=""><img src="../images/Detail/Image/千与千寻.jpg" class="card-img-top img-fixed" alt="Spirited Away"></a>
                             <div class="card-body" id="RecommendationCard-body">
                                 <h6 class="card-title" id="RecommendationCard-title">Spirited Away</h6>
                                 <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Film • Fantasy • 2001</p>
@@ -323,7 +301,7 @@
             
                     <div class="col-md-3 col-6">
                         <div class="card h-100 text-center">
-                            <a href=""><img src="Image/你的名字.jpeg" class="card-img-top img-fixed" alt="Your Name"></a>
+                            <a href=""><img src="../images/Detail/Image/你的名字.jpeg" class="card-img-top img-fixed" alt="Your Name"></a>
                             <div class="card-body" id="RecommendationCard-body">
                                 <h6 class="card-title mb-1" id="RecommendationCard-title">Your Name</h6>
                                 <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Film • Romance • 2016</p>
@@ -333,7 +311,7 @@
             
                     <div class="col-md-3 col-6">
                         <div class="card h-100 text-center">
-                            <a href=""><img src="Image/天气之子.jpg" class="card-img-top img-fixed" alt="Weathering with You"></a>
+                            <a href=""><img src="../images/Detail/Image/天气之子.jpg" class="card-img-top img-fixed" alt="Weathering with You"></a>
                             <div class="card-body" id="RecommendationCard-body">
                                 <h6 class="card-title" id="RecommendationCard-title">Weathering with You</h6>
                                 <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Film • Romance • 2019</p>
@@ -343,7 +321,7 @@
             
                     <div class="col-md-3 col-6">
                         <div class="card h-100 text-center">
-                            <a href=""><img src="Image/龙猫.jpg" class="card-img-top img-fixed" alt="Totoro"></a>
+                            <a href=""><img src="../images/Detail/Image/龙猫.jpg" class="card-img-top img-fixed" alt="Totoro"></a>
                             <div class="card-body" id="RecommendationCard-body">
                                 <h6 class="card-title" id="RecommendationCard-title">Totoro</h6>
                                 <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Film • Fantasy • 1988</p>
@@ -550,5 +528,6 @@
         </main>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
-    </body>
+
+    </body>   
 </html>
