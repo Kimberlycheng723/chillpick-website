@@ -1,0 +1,14 @@
+.body{
+    background-color: #F3F3E6;
+    color:#333333;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.nav{
+    background-color: #EBE8D5;
+}
+
+.rating-stars {
+    color:#FFC107;;
+    font-size: 1.2rem;
+}
