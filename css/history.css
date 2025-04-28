@@ -75,6 +75,12 @@ body {
  /* Filter Buttons */
 .history-filters {
     margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .filter-options {
@@ -92,6 +98,27 @@ body {
     transition: all 0.3s;
     font-weight: 500;
     color: #555;
+}
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.share-btn {
+  background:none;
+  color: black;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.share-btn:hover {
+  background-color: #b3b3b3;
 }
 
 .filter-btn:hover,
@@ -160,6 +187,17 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .history-filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  
     .history-item {
         flex-direction: column;
         gap: 15px;

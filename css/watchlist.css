@@ -99,6 +99,7 @@ h1 {
   transition: all 0.3s;
   font-weight: 500;
   margin-left: auto;
+  color: #555;
 }
 .filter-btn:hover {
   background-color: #E8E1D1;
@@ -159,6 +160,29 @@ h1 {
 }
 
 /* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.share-btn {
+  background:none;
+  color: black;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.share-btn:hover {
+  background-color: #b3b3b3;
+}
+
 .item-actions {
   display: flex;
   flex-direction: column;
@@ -194,7 +218,8 @@ h1 {
   background-color: #3498db;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -210,7 +235,8 @@ h1 {
   background-color: #C00F0C;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 4px 6px;
+  font-size: 0.8rem;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -232,6 +258,13 @@ h1 {
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
+  .action-buttons {
+    margin-left: 0;
+    margin-top: 10px;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
   .watchlist-item {
       flex-direction: column;
   }
@@ -246,9 +279,6 @@ h1 {
       justify-content: center;
   }
   
-  .watchlist-filters {
-      justify-content: center;
-  }
   
   .history-btn {
       margin-left: 0;
@@ -256,7 +286,8 @@ h1 {
   }
   
   .action-list {
-      margin-top: 10px;
+      margin-top: 6px;
+      gap: 6px;
       justify-content: flex-end;
   }
 }
