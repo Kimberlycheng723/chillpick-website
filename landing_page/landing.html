@@ -6,9 +6,8 @@
   <title>Chillpick Discovery</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -18,16 +17,14 @@
     }
 
     .hero-section {
+      background: url('../../images/landing_page/landingBackground.jpg') center / cover no-repeat;
       position: relative;
-      background: url('../../images/landing_page/landingBackground.jpg') center center / cover no-repeat;
     }
 
     .hero-section::before {
       content: '';
       position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background-color: rgba(255, 255, 255, 0.7);
       z-index: 1;
     }
@@ -40,24 +37,19 @@
     }
 
     .hero-section h1 {
-      font-family: 'Poppins', sans-serif;
       font-size: 3.2rem;
       font-weight: 800;
       color: #6b4f3d;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
     .hero-section p {
-      font-family: 'Poppins', sans-serif;
       font-size: 1.25rem;
       color: #524E4E;
-      line-height: 1.8;
-      text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
     }
 
-      .charts-toggle {
+    .charts-toggle {
       background: #fff;
-      padding: 3rem 1rem 0.05rem 1rem;
+      padding: 3rem 1rem;
       text-align: center;
     }
 
@@ -68,54 +60,19 @@
       color: #6B4F3D;
     }
 
-    .chart-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  border-bottom: 2px solid #e5e5e5;
-  max-width: 400px;
-  margin: 0 auto 0 auto; /* 🔧 Adjust this line */
-}
-
-    .tab-btn {
-      background: none;
-      border: none;
-      font-size: 1rem;
-      color: #6B4F3D;
-      padding-bottom: 0.5rem;
-      position: relative;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s;
+    .nezha-card {
+      width: 214px;
+      height: 283px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s;
     }
 
-    .tab-btn::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100px;
-      height: 3px;
-      background: transparent;
-      transition: 0.0s;
-      border-radius: 2px;
-    }
-
-    .tab-btn.active {
-      color: #6B4F3D;
-      font-weight: 600;
-    }
-
-    .tab-btn.active::after {
-      background: #6B4F3D;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .nezha-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .cinematic-nezha {
@@ -131,12 +88,9 @@
     }
 
     .nezha-overlay {
-      background: rgba(0, 0, 0, 0.45);
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
       z-index: 1;
     }
 
@@ -153,61 +107,20 @@
     .nezha-info {
       max-width: 40%;
       padding-top: 50px;
-      line-height: 30px;
-    }
-
-    .nezha-info h1 {
-      font-size: 2.5rem;
-      font-weight: bold;
     }
 
     .nezha-carousel {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  width: 460px; /* ~4 thumbnails (4x100px + gaps) */
-  justify-content: flex-start;
-  padding-bottom: 1rem;
-  margin-left: auto; /* ✅ push it to the right */
-  z-index: 2;
-  scroll-behavior: smooth;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  
-}
-
-.nezha-carousel::-webkit-scrollbar {
-  display: none;
-}
-
-.nezha-card {
-  width: 214px;
-  height: 283px;
-  border-radius: 10px;
-  flex-shrink: 0;
-  scroll-snap-align: start;
-  overflow: hidden;
-  border: 3px solid transparent;
-  transition: transform 0.3s, border 0.3s;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-
-
-    .nezha-card.active {
-  transform: scale(1.1);
-  
-}
-    .nezha-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      width: 460px;
+      padding-bottom: 1rem;
+      margin-left: auto;
+      scroll-behavior: smooth;
     }
 
     .nezha-dots {
-      position: relative;
-      z-index: 2;
       display: flex;
       justify-content: center;
       gap: 0.5rem;
@@ -233,25 +146,10 @@
       padding: 9rem 1rem;
     }
 
-    .call-to-action h2 {
-      font-size: 1.8rem;
-      color:#5D4536;
-      font-weight: bold;
-      margin-bottom: 1.5rem;
-    }
-
-    .call-to-action p {
-      font-size: 1.1rem;
-      margin-bottom: 2.5rem;
-      color:#524E4E;
-    }
-
     .btn-warning {
       background-color: #F5D47A;
       color:#382110;
-      padding:16px;
-      padding-left:30px;
-      padding-right:30px;
+      padding:16px 30px;
       border: none;
       font-weight: 200;
     }
@@ -267,27 +165,27 @@
     </div>
   </section>
 
-  <!-- ✅ UPDATED TAB SECTION START -->
+  <!-- Movie Chart -->
   <section class="charts-toggle">
-    <h3>Top Entertainment Charts</h3>
-
-    <div class="chart-tabs">
-      <button class="tab-btn active" data-target="#movies"><i class="bi bi-film"></i> Movies</button>
-      <button class="tab-btn" data-target="#books"><i class="bi bi-book"></i> Books</button>
+    <h3>Top Movie Charts</h3>
+    <p id="lastUpdated" style="font-size: 0.9rem; color: #888; margin-top: -1rem;">Loading...</p>
+    <div class="text-center mb-4">
+      <select onchange="updateChartMetric(this.value)" class="form-select w-auto mx-auto"
+        style="border: 2px solid #F4A259; border-radius: 8px; color: #6B4F3D;">
+        <option value="rating">IMDb Rating</option>
+        <option value="popularity">Popularity</option>
+      </select>
     </div>
-
-   
+    <div class="container">
+      <div id="entertainmentChart"></div>
+    </div>
   </section>
-  <!-- ✅ UPDATED TAB SECTION END -->
 
-  <section id="cinematicSection" class="cinematic-nezha" style="background-image: url('https://picsum.photos/id/1011/1200/800');">
+  <!-- Cinematic -->
+  <section id="cinematicSection" class="cinematic-nezha">
     <div class="nezha-overlay"></div>
     <div class="nezha-content container">
-      <div class="nezha-info" id="nezhaInfo">
-        <h1>The Gate Keeper</h1>
-        <p>Learn more, dive in and encounter towering AI threats from visionary storytellers.</p>
-        <button class="btn btn-outline-light">Details</button>
-      </div>
+      <div class="nezha-info" id="nezhaInfo"></div>
       <div>
         <div class="nezha-carousel" id="nezhaCarousel"></div>
         <div class="nezha-dots" id="nezhaDots"></div>
@@ -295,8 +193,29 @@
     </div>
   </section>
 
+
+  <!-- Book Chart -->
+  <section class="charts-toggle">
+    <h3>Top Books Chart</h3>
+    <p id="booksLastUpdated" style="font-size: 0.9rem; color: #888; margin-top: -1rem;">Loading...</p>
+    <div class="container">
+      <div id="booksChart"></div>
+    </div>
+  </section>
+  <!-- Book Cinematic Section -->
+<section id="bookCinematicSection" class="cinematic-nezha">
+  <div class="nezha-overlay"></div>
+  <div class="nezha-content container">
+    <div class="nezha-info" id="bookInfo"></div>
+    <div>
+      <div class="nezha-carousel" id="bookCarousel"></div>
+      <div class="nezha-dots" id="bookDots"></div>
+    </div>
+  </div>
+</section>
+
   <section class="call-to-action">
-    <h2>Ready to start tracking your entertainment?</h2>
+    <h2 style="color: #5D4536; font-weight: 510"> Ready to start tracking your entertainment?</h2>
     <p>Join millions of users discovering and sharing their favorite movies and music</p>
     <button class="btn btn-warning fw-semibold">Sign Up – It's Free</button>
   </section>
@@ -304,212 +223,253 @@
   <div id="footer"></div>
 
   <script>
- const movies = [
-  {
-    title: "The Gate Keeper",
-    desc: "Learn more, dive in and encounter towering AI threats from visionary storytellers.",
-    image: "https://picsum.photos/id/1011/1200/800",
-    thumb: "https://picsum.photos/id/1011/400/300"
-  },
-  {
-    title: "Hidden Legends",
-    desc: "Unveil the truth behind ancient powers in a hidden fantasy realm.",
-    image: "https://picsum.photos/id/1015/1200/800",
-    thumb: "https://picsum.photos/id/1015/400/300"
-  },
-  {
-    title: "Eternal Bonds",
-    desc: "An emotional journey of friendship tested by time and fate.",
-    image: "https://picsum.photos/id/1016/1200/800",
-    thumb: "https://picsum.photos/id/1016/400/300"
-  },
-  {
-    title: "Cyber Drift",
-    desc: "Futuristic racing with a glitch in reality.",
-    image: "https://picsum.photos/id/1022/1200/800",
-    thumb: "https://picsum.photos/id/1022/400/300"
-  },
-  {
-    title: "Dream Watchers",
-    desc: "Explore lucid dreams and astral mysteries.",
-    image: "https://picsum.photos/id/1023/1200/800",
-    thumb: "https://picsum.photos/id/1023/400/300"
-  },
-  {
-    title: "Echoed Futures",
-    desc: "Time echoes through destiny in a multi-timeline thriller.",
-    image: "https://picsum.photos/id/1024/1200/800",
-    thumb: "https://picsum.photos/id/1024/400/300"
-  },
-  {
-    title: "Frozen Sparks",
-    desc: "When love and war collide under icy skies.",
-    image: "https://picsum.photos/id/1025/1200/800",
-    thumb: "https://picsum.photos/id/1025/400/300"
-  },
-  {
-    title: "Silent Core",
-    desc: "Inside a power plant where silence speaks the loudest.",
-    image: "https://picsum.photos/id/1026/1200/800",
-    thumb: "https://picsum.photos/id/1026/400/300"
-  },
-  {
-    title: "Final Beacon",
-    desc: "Last transmission from the edge of the galaxy.",
-    image: "https://picsum.photos/id/1027/1200/800",
-    thumb: "https://picsum.photos/id/1027/400/300"
-  },
-  {
-    title: "Winds of Iron",
-    desc: "Steampunk rebellion takes flight.",
-    image: "https://picsum.photos/id/1028/1200/800",
-    thumb: "https://picsum.photos/id/1028/400/300"
-  }
-];
+    const tmdbApiKey = '4154b8dfb44ef69e6cf3a7d880438188';
+    const nytApiKey = 'MPAFCu7iswN9hpJgf7Exv2MG2tkVsru6';
   
-    const books = [
-  {
-    title: "The Wisdom Within",
-    desc: "Unlock timeless teachings from ancient thinkers reshaped for the modern mind.",
-    image: "https://picsum.photos/id/1012/1200/800",
-    thumb: "https://picsum.photos/id/1012/400/300"
-  },
-  {
-    title: "Beyond the Stars",
-    desc: "A space odyssey that questions reality and purpose in an ever-expanding universe.",
-    image: "https://picsum.photos/id/1013/1200/800",
-    thumb: "https://picsum.photos/id/1013/400/300"
-  },
-  {
-    title: "Mindful Motion",
-    desc: "A self-growth story framed by adventure and emotional healing.",
-    image: "https://picsum.photos/id/1014/1200/800",
-    thumb: "https://picsum.photos/id/1014/400/300"
-  },
-  {
-    title: "Echoes of Time",
-    desc: "A time travel tale unraveling destiny and personal truth.",
-    image: "https://picsum.photos/id/1015/1200/800",
-    thumb: "https://picsum.photos/id/1015/400/300"
-  },
-  {
-    title: "Crimson Letters",
-    desc: "Mystery unfolds in a series of haunting handwritten notes.",
-    image: "https://picsum.photos/id/1016/1200/800",
-    thumb: "https://picsum.photos/id/1016/400/300"
-  },
-  {
-    title: "Lunar Horizons",
-    desc: "Exploring society’s rebirth in a faraway lunar colony.",
-    image: "https://picsum.photos/id/1017/1200/800",
-    thumb: "https://picsum.photos/id/1017/400/300"
-  },
-  {
-    title: "Digital Soul",
-    desc: "A philosophical journey into AI, ethics, and emotion.",
-    image: "https://picsum.photos/id/1018/1200/800",
-    thumb: "https://picsum.photos/id/1018/400/300"
-  },
-  {
-    title: "Fragments of Light",
-    desc: "A poetic meditation on memory and personal discovery.",
-    image: "https://picsum.photos/id/1019/1200/800",
-    thumb: "https://picsum.photos/id/1019/400/300"
-  },
-  {
-    title: "The Memory Keeper",
-    desc: "A futuristic archivist discovers her past is fabricated.",
-    image: "https://picsum.photos/id/1020/1200/800",
-    thumb: "https://picsum.photos/id/1020/400/300"
-  },
-  {
-    title: "Paper Realms",
-    desc: "Stories come alive in a magical library beyond imagination.",
-    image: "https://picsum.photos/id/1021/1200/800",
-    thumb: "https://picsum.photos/id/1021/400/300"
-  }
-];
+    const imageBase = 'https://image.tmdb.org/t/p/w780';
+    const thumbBase = 'https://image.tmdb.org/t/p/w342';
   
-    const hero = document.getElementById("cinematicSection");
-    const carousel = document.getElementById("nezhaCarousel");
-    const dots = document.getElementById("nezhaDots");
-    const info = document.getElementById("nezhaInfo");
+    let movieData = [], chart, bookChart;
   
-    function renderCinematicContent(list) {
+    async function loadMovieData() {
+      try {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${tmdbApiKey}`);
+        const data = await res.json();
+        movieData = data.results.map(m => ({
+          title: m.title,
+          rating: m.vote_average,
+          popularity: m.popularity,
+          overview: m.overview,
+          image: m.backdrop_path ? imageBase + m.backdrop_path : 'https://via.placeholder.com/780x439?text=No+Image',
+          thumb: m.poster_path ? thumbBase + m.poster_path : 'https://via.placeholder.com/342x513?text=No+Poster',
+        }));
+        document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleString();
+        renderByMetric("rating");
+      } catch (err) {
+        console.error("Movie API error:", err);
+      }
+    }
+  
+    function renderByMetric(metric) {
+      const topMovies = [...movieData].sort((a, b) => b[metric] - a[metric]).slice(0, 5);
+      renderMovieChart(metric, topMovies);
+      renderHeroSection(topMovies);
+    }
+  
+    function renderMovieChart(metric, sortedData) {
+      const options = {
+        chart: { type: 'bar', height: 400, toolbar: { show: true } },
+        series: [{
+          name: metric === 'rating' ? 'IMDb Rating' : 'Popularity',
+          data: sortedData.map(m => m[metric])
+        }],
+        plotOptions: {
+          bar: { borderRadius: 10, columnWidth: '50%', distributed: true }
+        },
+        dataLabels: {
+          enabled: true,
+          style: { colors: ['#fff'], fontWeight: 'bold' }
+        },
+        xaxis: {
+          categories: sortedData.map(m => m.title),
+          labels: { rotate: -30, style: { fontSize: '13px', colors: '#6B4F3D' } }
+        },
+        yaxis: {
+          title: {
+            text: metric === 'rating' ? 'IMDb Ratings' : 'Popularity Score',
+            style: { color: '#6B4F3D', fontSize: '14px', fontWeight: 600 }
+          },
+          max: metric === 'rating' ? 10 : undefined
+        },
+        tooltip: {
+          custom: ({ dataPointIndex }) => {
+            const m = sortedData[dataPointIndex];
+            return `<div style="padding:10px">
+              <strong>🎬 ${m.title}</strong><br>
+              ⭐ IMDb: ${m.rating}<br>
+              🔥 Popularity: ${Math.round(m.popularity)}
+            </div>`;
+          }
+        },
+        colors: ['#6B4F3D'],
+        legend: { show: false }
+      };
+  
+      if (!chart) {
+        chart = new ApexCharts(document.querySelector("#entertainmentChart"), options);
+        chart.render();
+      } else {
+        chart.updateOptions(options);
+      }
+    }
+  
+    function renderHeroSection(movies) {
+      const hero = document.getElementById("cinematicSection");
+      const carousel = document.getElementById("nezhaCarousel");
+      const dots = document.getElementById("nezhaDots");
+      const info = document.getElementById("nezhaInfo");
+  
       carousel.innerHTML = "";
       dots.innerHTML = "";
   
-      hero.style.backgroundImage = `url('${list[0].image}')`;
-      info.innerHTML = `
-        <h1>${list[0].title}</h1>
-        <p>${list[0].desc}</p>
-        <button class="btn btn-outline-light">Details</button>
-      `;
+      const first = movies[0];
+      hero.style.backgroundImage = `url('${first.image}')`;
+      info.innerHTML = `<h1>${first.title}</h1><p>${first.overview}</p><button class="btn btn-outline-light">Details</button>`;
   
-      list.forEach((item, index) => {
+      movies.forEach((m, i) => {
         const card = document.createElement("div");
         card.className = "nezha-card";
-        if (index === 0) card.classList.add("active");
-        card.innerHTML = `<img src="${item.thumb}" alt="thumb">`;
+        if (i === 0) card.classList.add("active");
+        card.innerHTML = `<img src="${m.thumb}" alt="${m.title}">`;
         card.onclick = () => {
-          hero.style.backgroundImage = `url('${item.image}')`;
-          info.innerHTML = `
-            <h1>${item.title}</h1>
-            <p>${item.desc}</p>
-            <button class="btn btn-outline-light">Details</button>
-          `;
+          hero.style.backgroundImage = `url('${m.image}')`;
+          info.innerHTML = `<h1>${m.title}</h1><p>${m.overview}</p><button class="btn btn-outline-light">Details</button>`;
           document.querySelectorAll('.nezha-card').forEach(c => c.classList.remove('active'));
           document.querySelectorAll('.nezha-dot').forEach(d => d.classList.remove('active'));
           card.classList.add('active');
-          dots.children[index].classList.add('active');
+          dots.children[i].classList.add('active');
         };
         carousel.appendChild(card);
   
         const dot = document.createElement("div");
         dot.className = "nezha-dot";
-        if (index === 0) dot.classList.add("active");
+        if (i === 0) dot.classList.add("active");
         dot.onclick = card.onclick;
         dots.appendChild(dot);
       });
     }
   
-    // Initial render with movies
-    renderCinematicContent(movies);
+    async function loadBookData() {
+      try {
+        const res = await fetch(`https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${nytApiKey}`);
+        const data = await res.json();
+        const books = data.results.books.slice(0, 5);
+        document.getElementById('booksLastUpdated').textContent = 'Last updated: ' + new Date(data.last_modified).toLocaleString();
+        renderBookHeroSection(books);
+        renderBookChart(books);
+      } catch (err) {
+        document.getElementById('booksLastUpdated').textContent = '⚠️ Failed to load books.';
+        console.error("Book API error:", err);
+      }
+    }
   
-    // Tab switching
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    tabButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-  
-        const type = button.innerText.includes('Movies') ? 'movies' : 'books';
-        renderCinematicContent(type === 'movies' ? movies : books);
-      });
-    });
-  
-    // Load header and footer
-    window.addEventListener('DOMContentLoaded', () => {
-      fetch('../../partials/header.html')
-        .then(res => res.text())
-        .then(data => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(data, 'text/html');
-          const userElement = doc.querySelector('.profile-pic')?.parentElement;
-          if (userElement) {
-            userElement.innerHTML = '<button class="btn btn-outline-light">Login</button>';
+    function renderBookChart(books) {
+      const options = {
+        chart: { type: 'bar', height: 400, toolbar: { show: false } },
+        series: [{
+          name: "Rank",
+          data: books.map(book => 11 - book.rank)
+        }],
+        plotOptions: {
+          bar: { borderRadius: 10, columnWidth: '50%', distributed: true }
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: (_, { dataPointIndex }) => `#${books[dataPointIndex].rank}`,
+          style: { colors: ['#fff'], fontWeight: 'bold' }
+        },
+        xaxis: {
+          categories: books.map(b => b.title),
+          labels: { rotate: -30, style: { fontSize: '13px', colors: '#6B4F3D' } }
+        },
+        yaxis: {
+          title: {
+            text: 'Ranking',
+            style: { color: '#6B4F3D', fontSize: '14px', fontWeight: 600 }
+          },
+          min: 0,
+          max: 10
+        },
+        tooltip: {
+          custom: ({ dataPointIndex }) => {
+            const b = books[dataPointIndex];
+            return `<div style="padding:10px">
+              <strong>📚 ${b.title}</strong><br>
+              ✍️ ${b.author}<br>
+              📝 ${b.description}
+            </div>`;
           }
-          document.getElementById('header').innerHTML = doc.body.innerHTML;
+        },
+        colors: ['#6B4F3D'],
+        legend: { show: false }
+      };
+  
+      if (!bookChart) {
+        bookChart = new ApexCharts(document.querySelector("#booksChart"), options);
+        bookChart.render();
+      } else {
+        bookChart.updateOptions(options);
+      }
+    }
+  
+    function renderBookHeroSection(books) {
+      const hero = document.getElementById("bookCinematicSection");
+      const carousel = document.getElementById("bookCarousel");
+      const dots = document.getElementById("bookDots");
+      const info = document.getElementById("bookInfo");
+  
+      carousel.innerHTML = "";
+      dots.innerHTML = "";
+  
+      const first = books[0];
+      hero.style.backgroundImage = `
+        linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)),
+        url('${first.book_image}')
+      `;
+      hero.style.backgroundSize = 'cover';
+      hero.style.backgroundPosition = 'center';
+      hero.style.backgroundRepeat = 'no-repeat';
+  
+      info.innerHTML = `<h1>${first.title}</h1><p>${first.description}</p><button class="btn btn-outline-light">Details</button>`;
+  
+      books.forEach((b, i) => {
+        const card = document.createElement("div");
+        card.className = "nezha-card";
+        if (i === 0) card.classList.add("active");
+        card.innerHTML = `<img src="${b.book_image}" alt="${b.title}">`;
+        card.onclick = () => {
+          hero.style.backgroundImage = `
+            linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)),
+            url('${b.book_image}')
+          `;
+          info.innerHTML = `<h1>${b.title}</h1><p>${b.description}</p><button class="btn btn-outline-light">Details</button>`;
+          document.querySelectorAll('#bookCarousel .nezha-card').forEach(c => c.classList.remove('active'));
+          document.querySelectorAll('#bookDots .nezha-dot').forEach(d => d.classList.remove('active'));
+          card.classList.add('active');
+          dots.children[i].classList.add('active');
+        };
+        carousel.appendChild(card);
+  
+        const dot = document.createElement("div");
+        dot.className = "nezha-dot";
+        if (i === 0) dot.classList.add("active");
+        dot.onclick = card.onclick;
+        dots.appendChild(dot);
+      });
+    }
+  
+    function updateChartMetric(metric) {
+      renderByMetric(metric);
+    }
+  
+    // DOM Ready
+    window.addEventListener('DOMContentLoaded', () => {
+      loadMovieData();
+      loadBookData();
+  
+      loadPartial('../../partials/header.html')
+        .then(res => res.ok ? res.text() : Promise.reject())
+        .then(html => document.getElementById('header').innerHTML = html)
+        .catch(() => {
+          document.getElementById('header').innerHTML = `<header class="bg-light p-3 text-center"><h1>ChillPick</h1></header>`;
         });
   
       fetch('../../partials/footer.html')
-        .then(res => res.text())
-        .then(data => {
-          document.getElementById('footer').innerHTML = data;
+        .then(res => res.ok ? res.text() : Promise.reject())
+        .then(html => document.getElementById('footer').innerHTML = html)
+        .catch(() => {
+          document.getElementById('footer').innerHTML = `<footer class="bg-dark text-white text-center py-4"><p>© 2025 ChillPick</p></footer>`;
         });
     });
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  </body>
