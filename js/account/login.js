@@ -34,12 +34,12 @@ app.get('/discover', (req, res) => res.render('discover'));
 app.get('/watchlist', (req, res) => res.render('watchlist/watchlist'));
 app.get('/history', (req, res) => res.render('watchlist/history'));
 
-// ✅ Profile/account routes
+
 app.get('/profile', (req, res) => res.redirect('/account/profile'));
 app.get('/account/profile', (req, res) => res.render('account/profile'));
-app.get('/login', (req, res) => res.render('account/login'));
-app.get('/register', (req, res) => res.render('account/register'));
-app.get('/forgotPassword', (req, res) => res.render('account/forgotPassword'));
+app.get('/account/login', (req, res) => res.render('account/login'));
+app.get('/account/register', (req, res) => res.render('account/register'));
+app.get('/account/forgotPassword', (req, res) => res.render('account/forgotPassword'));
 
 // Start server
 const PORT = process.env.PORT || 3000;
