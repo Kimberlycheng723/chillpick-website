@@ -1,18 +1,10 @@
-/* app.css */
 body {
   background: url('../images/background.png') no-repeat center center fixed;
   background-size: cover;
   min-height: 100vh;
   display: flex;
-}
-
-/* Main container adjustment */
-main.container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 100px;
+  justify-content: flex-start; /* Changed from default center to flex-start */
+  padding-left: 130px; /* Add some padding from the left edge */
 }
 
 /* Register form styling */
@@ -23,12 +15,11 @@ main.container {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 450px;
-  margin-left: 180px;
-  margin-top: 80px;
-  margin: 5% auto;
+  margin: 5% 0; 
   align-self: center;
 }
 
+/* Remove the main.container styles if not needed */
 .register-form .form-label {
   font-weight: 500;
   color: #555;
@@ -129,19 +120,17 @@ main.container {
 
 .forgot-container {
   background: #fff;
-  padding: 2rem;
+  padding: 2.5rem;
   border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   width: 100%;
-  margin: 5% auto;
-  margin-left: 200px;
-  margin-top: 100px;
-  align-self: center;}
+  max-width: 450px;
+  margin: 5% 0; 
+  align-self: center;
+}
 
 @media (max-width: 768px) {
   .forgot-container {
-    margin-left: 20px;
     margin-right: 20px;
   }
 }
