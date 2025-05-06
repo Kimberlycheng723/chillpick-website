@@ -1,0 +1,182 @@
+
+:root {
+  background-color: #F8F4EA;
+  --card-color: #FFFFFF;
+  accent-color: #5C6BC0;
+  --text-dark: #333333;
+  --text-medium: #666666;
+  --star-color: #FFC107;
+
+ }
+
+ body{
+     background-color:#f0f3e6 ;
+ }
+
+ .navbar{
+ background-color:#c6d1a2;
+ height: 20px;
+ margin-bottom: 0;
+ }
+
+ .back-button {
+ border: none;
+ background: none;
+ outline: none;
+ box-shadow: none;
+ }
+
+ .back-button:hover {
+  background-color: #FFC107;
+  color: black;
+ }
+
+
+ .btn-outline-orange:hover {
+  background-color: #FFC107;
+  outline-color: #FFC107;
+  color: black;
+ }
+
+ .media-poster {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-height: 600px;
+  width: auto;
+ }
+
+    
+ #btnWatchlist {
+  color:#333333;
+  border-color:#ffba00;
+ }
+
+ #btnWatchlist:hover {
+  background-color: #ffba00;
+  color: black;
+ }
+
+ #btnPlay {
+  color: #333333;
+  border-color: #ffba00;
+ }
+
+ #btnPlay:hover {
+  background-color: #ffba00;
+  color: black;
+ }
+
+ .rating-stars {
+  color: var(--star-color);
+  font-size: 1.2rem;
+ }
+
+ .details-section {
+  background-color: var(--card-color);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+ }
+
+ .trailer-container {
+  position: relative;
+  padding-bottom: 40.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+ }
+
+ .trailer-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+ }
+
+ .img-fixed {
+ height: 300px; /* 🔧 Set your preferred height */
+ object-fit: cover;
+ }
+
+ #RecommendationCard-body {
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ padding: 10px;
+ min-height: 60px; /* Minimum height */
+ }
+
+
+ #RecommendationCard-title {
+ margin-bottom: 4px;
+ font-size: 1rem;
+ }
+
+ .card-subtitle {
+ color: #5C4033;
+ font-size: 14px;
+ margin: 0;
+ }
+
+
+ .genre-badge {
+  background-color: #e0e0e0;
+  color: var(--text-dark);
+  margin-right: 8px;
+  margin-bottom: 8px;
+ }
+
+ .review-card {
+  border-left: 3px solid var(--accent-color);
+ }
+
+ .card-title {
+ margin-top: 0.5rem;
+ }
+
+ .card-text {
+ font-size: 0.95rem;
+ }
+
+
+ #writeReviewBtn{
+     background-color: #FFC107;
+     color:#333333
+ }
+
+ #writeReviewBtn:hover{
+     background-color: #e0e0e0;
+     color:#333333
+ }
+
+ #ratingInput i {
+ font-size: 1.5rem;
+ cursor: pointer;
+ color: #ccc;
+ }
+
+ #ratingInput i.active {
+ color: orange;
+ }
+
+ .blurred-box .comment-text,
+ .blurred-box .card-title {
+ filter: blur(6px);
+ transition: filter 0.3s ease;
+ }
+
+
+ .blurred-box.visible .comment-text,
+ .blurred-box.visible .card-title {
+ filter: none;
+ }
+
+ @media (max-width: 768px) {
+  .media-poster {
+  max-height: 350px;
+  margin-bottom: 1.5rem;
+  }
+ }
