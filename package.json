@@ -1,0 +1,24 @@
+{
+  "name": "chillpick-website",
+  "version": "1.0.0",
+  "description": "🚧 This project is a work in progress.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kimberlycheng723/chillpick-website.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kimberlycheng723/chillpick-website/issues"
+  },
+  "homepage": "https://github.com/Kimberlycheng723/chillpick-website#readme",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  }
+}
