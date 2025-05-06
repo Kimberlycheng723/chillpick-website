@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width; initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <title>Book</title>
+        <!--The icon in the webiste (beside the title)-->
+        <link rel="icon" type="image/x-icon" src="Image/logo.jpg" style="float: left; font-weight: 70; height: 70;">
+        <!--Bootsrap 5 CSS-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="css/app.css">
+
+
+        <style>
+
+            body{
+                background-color: #f0f3e6;
+            }
+
+            .navbar{
+                background-color:#c6d1a2;
+                height: 20px;
+                margin-bottom: 0;
+            }
+
+            .back-button {
+                border: none;
+                background: none;
+                outline: none;
+                box-shadow: none;
+            }
+
+            .back-button:hover {
+                background-color: #FFC107;
+                color: black;
+            }
+
+            .btn-outline-orange:hover {
+                background-color: #FFC107;
+                outline-color: #FFC107;
+                color: black;
+            }
+
+            .media-poster {
+                 border-radius: 8px;
+                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                 max-height: 600px;
+                 width: auto;
+            }
+
+            .rating-stars {
+                color: orange;
+                font-size: 1.2rem;
+            }
+
+            #btnBooklist {
+                color:#333333;
+                border-color:#ffba00;
+            }
+
+            .genre-badge {
+            background-color: #e0e0e0;
+            color: black;
+            margin-right: 10px;
+            }
+
+            #btnBooklist:hover {
+                background-color: #ffba00;
+                color: black;
+            }
+
+            #btnRead {
+                color: #333333;
+                border-color: #ffba00;
+            }
+    
+            #btnRead:hover {
+                background-color: #ffba00;
+                color: black;
+            }
+
+            /* Book Detail Section */
+            .content-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: var(--transition);
+            }
+        
+            .content-section:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            }
+        
+            #BookDetailSectionTitle {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            color: var(--primary);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            position: relative;
+            }
+        
+            #BookDetailSectionTitle::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            }
+        
+            .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            }
+        
+            .detail-item {
+            margin-bottom: 15px;
+            }
+        
+            .detail-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            }
+        
+            .detail-label i {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            }
+
+             /* Author Section */
+             .author-card-custom {
+             background: rgba(78, 107, 255, 0.05);
+             border-radius: 15px;
+             padding: 20px;
+             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+             }
+
+           .author-info h4 {
+           font-family: 'Playfair Display', serif;
+           font-size: 1.4rem;
+           margin-bottom: 8px;
+           color: var(--primary);
+           }
+
+           .author-bio {
+           font-size: 0.95rem;
+           color: var(--gray);
+           margin-bottom: 0;
+           }
+
+           /*Recommendations*/
+           .img-fixed {
+           height: 300px; /* 🔧 Set your preferred height */
+           object-fit: cover;
+           }
+
+           #RecommendationCard-body {
+           display: flex;
+           flex-direction: column;
+           justify-content: center;
+           align-items: center;
+           padding: 10px;
+           min-height: 60px; /* Minimum height */
+           }
+
+           #RecommendationCard-title {
+           margin-bottom: 4px;
+           font-size: 1rem;
+           }
+
+           .card-subtitle {
+           color: #5C4033;
+           font-size: 14px;
+           margin: 0;
+           }
+
+           /*Review*/
+           .review-card {
+           border-left: 3px solid var(--accent-color);
+           }
+
+           .card-title {
+           margin-top: 0.5rem;
+           margin-left: 3px;
+           }
+
+           .card-text {
+           font-size: 0.95rem;
+           }
+    
+           #writeReviewBtn{
+           background-color: #FFC107;
+           color:#333333;
+           padding: 0.5rem 1rem;
+           font-weight: 500;
+           border-radius: 8px;
+           margin-top: 0.5rem;
+           margin-right: 10px;
+           }
+
+           #writeReviewBtn:hover{
+           background-color: #e0e0e0;
+           color:#333333;
+           }
+
+           #ratingInput i {
+           font-size: 1.5rem;
+           cursor: pointer;
+           color: #ccc;
+           }
+
+           #ratingInput i.active {
+           color: orange;
+           }
+
+           .blurred-box .comment-text,
+           .blurred-box .card-title {
+           filter: blur(6px);
+           transition: filter 0.3s ease;
+           }
+
+           .blurred-box.visible .comment-text,
+           .blurred-box.visible .card-title {
+           filter: none;
+           }
+    
+           @media (max-width: 768px) {
+           .media-poster {
+            max-height: 350px;
+            margin-bottom: 1.5rem;
+            }
+           }
+
+           @media (max-width: 576px) {
+           .details-section .d-flex {
+           flex-direction: column;
+           align-items: flex-start;
+           }
+           }
+
+
+        </style>
+</head>  
+
+<body>
+   <!--Main Body-->
+    <main class="container my-5">
+
+        <!--Media Detail Section-->
+        <section class="mb-5">
+            <div class="row">
+                <!--Poster-->
+                <div class="col-md-4 text center">
+                    <img src="../images/Detail/Image/The-Great-Gatsby (book).jpg" alt="The-Great-Gatsby" class="media-poster img-fluid">
+
+                </div>
+                
+                <!--Synopsis-->
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bload mb-3">The-Great-Gatsby</h1>
+
+                    <div class="mb-4">
+                        <span class="badge bg-secondary me-2"><i class="bi bi-person-heart"></i>F. Scott Fitzgerald</span>
+                        <span class="badge bg-secondary me-2"></b><i class="bi bi-book"></i>180 pages</span>
+                        <span class="badge bg-secondary me-2"><i class="bi bi-tags-fill"></i> Fiction, Classic</span>
+                        <span class="badge bg-secondary me-2"><i class="bi bi-calendar-heart"></i> 1925</span>
+                        <span class="badge bg-secondary me-2"><i class="bi bi-upc"></i> 9780743273565</span>
+    
+                    </div>
+
+                    <!--Rate-->
+                    <div class="mb-4">
+                        <h5 class="d-inline me-2">Rate:</h5>
+                        <div class="d-inline-block rating-stars">
+                          <i class="bi bi-star-fill" data-rating="1"></i>
+                          <i class="bi bi-star-fill" data-rating="2"></i>
+                          <i class="bi bi-star-fill" data-rating="3"></i>
+                          <i class="bi bi-star-fill" data-rating="4"></i>
+                          <span class="bi bi-star-half"> 4.5/5</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="d-inline me-2">Genres:</h5>
+                        <span class="badge genre-badge bg-secondary">Literary Fiction</span>
+                        <span class="badge genre-badge bg-secondary">Classic</span>
+                        <span class="badge genre-badge bg-secondary">Must Read</span>
+                    </div>
+                    
+
+
+                    <div class="mb-4">
+                        <h5>Synopsis</h5>
+                        <p class="lead" style="font-size: 15px;"> The Great Gatsby, F. Scott Fitzgerald's third book, stands as the supreme achievement of his career. This exemplary novel of the Jazz Age has been acclaimed by generations of readers. The story of the fabulously wealthy Jay Gatsby and his love for the beautiful Daisy Buchanan, of lavish parties on Long Island at a time when The New York Times noted "gin was the national drink and sex the national obsession," it is an exquisitely crafted tale of America in the 1920s.</p>
+                    </div>
+
+                    
+                     <!--button for Booklist & mark view-->
+                     <div class="row mt-4">
+                        <div class="col-lg-3">
+                        <button class="btn" id="btnBooklist"><i class="bi bi-plus-lg"></i> Add to Watchlist</button>
+                        </div>
+                        <div class="col-lg-4">
+                        <button class="btn" id="btnRead"><i class="bi bi-book-half"></i> Read</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!--Book Detail-->
+        <section class="content-section animated delay-1">
+            <h2 class="section-title mb-4" id="BookDetailSectionTitle">Book Details</h2>
+            <div class="container">
+                <div class="row g-4">
+                    <!-- Author -->
+                    <div class="col-md-6">
+                        <div class="detail-item">
+                            <div class="detail-label fw-bold"><i class="bi bi-person-fill me-2"></i>Author</div>
+                            <div>F. Scott Fitzgerald</div>
+                        </div>
+                    </div>
+        
+                    <!-- Published -->
+                    <div class="col-md-6">
+                        <div class="detail-item">
+                            <div class="detail-label fw-bold"><i class="bi bi-calendar-heart me-2"></i>Published</div>
+                            <div>April 10, 1925</div>
+                        </div>
+                    </div>
+        
+                    <!-- Pages -->
+                    <div class="col-md-6">
+                        <div class="detail-item">
+                            <div class="detail-label fw-bold"><i class="bi bi-book me-2"></i>Pages</div>
+                            <div>180</div>
+                        </div>
+                    </div>
+        
+                    <!-- Language -->
+                    <div class="col-md-6">
+                        <div class="detail-item">
+                            <div class="detail-label fw-bold"><i class="bi bi-translate me-2"></i>Language</div>
+                            <div>English</div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+      <!-- Author Section -->
+      <section style="background-color: white; padding: 40px 0; border-radius: 15px;">
+         <h3 class="section-title text-center mb-4">About the Author</h3>
+           <div class="container">
+             <div class="author-card-custom d-flex align-items-center">
+               
+               <!-- Author Info -->
+              <div class="author-info">
+                <h4>F. Scott Fitzgerald</h4>
+                <p class="author-bio">Francis Scott Key Fitzgerald (1896–1940) was an American novelist, essayist, and short story writer. He is best known for his novels depicting the flamboyance and excess of the Jazz Age—a term he popularized.</p>
+              </div>
+             </div>
+          </div>
+      </section>
+
+       <!--Recommendations-->
+       <section class="mb-5">
+        <h3 class="mb-4 mt-5">You May Also Like</h3>
+        <div class="row g-4">
+            <!-- Recommendation Card -->
+            <div class="col-md-3 col-6">
+                <div class="card h-100 text-center">
+                    <a href=""><img src="../images/Detail/Image/The-Little-Prince (book).jpg" class="card-img-top img-fixed" alt="Spirited Away"></a>
+                    <div class="card-body" id="RecommendationCard-body">
+                        <h6 class="card-title" id="RecommendationCard-title">The Little Prince</h6>
+                        <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Book • Fantasy • 1943</p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-md-3 col-6">
+                <div class="card h-100 text-center">
+                    <a href=""><img src="../images/Detail/Image/Sleeping-Beauty (book).jpg" class="card-img-top img-fixed" alt="Your Name"></a>
+                    <div class="card-body" id="RecommendationCard-body">
+                        <h6 class="card-title mb-1" id="RecommendationCard-title">Sleeping Beauty</h6>
+                        <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Book • Fairy Tale • 1697</p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-md-3 col-6">
+                <div class="card h-100 text-center">
+                    <a href=""><img src="../images/Detail/Image/Jack-And-Beanstalk (book).jpg" class="card-img-top img-fixed" alt="Weathering with You"></a>
+                    <div class="card-body" id="RecommendationCard-body">
+                        <h6 class="card-title" id="RecommendationCard-title">Jack and Beanstalk</h6>
+                        <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Book • Adventure • 1734</p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-md-3 col-6">
+                <div class="card h-100 text-center">
+                    <a href=""><img src="../images/Detail/Image/Charlotte's-Web (book).jpg" class="card-img-top img-fixed" alt="Totoro"></a>
+                    <div class="card-body" id="RecommendationCard-body">
+                        <h6 class="card-title" id="RecommendationCard-title">Charlotte's Web</h6>
+                        <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Book • Fantasy • 1952</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+     <!-- Review Section -->
+     <section class="details-section" style="background-color: white; border-radius: 15px; height:900px">
+        <div class="d-flex justify-content-between align-items-center mb-4 " style="margin-left: 10px; margin-top: px; padding-top: 15px;">
+           <h3><i class="bi bi-chat-left-dots me-2"></i> User Reviews</h3>
+           <button class="btn" id="writeReviewBtn">Write a Review</button>
+        </div>
+
+        <!-- Write Review Form (hidden by default) -->
+       <div id="reviewForm" class="card mb-4 my-3 p-3 border shadow-sm d-none">
+             <h5 style="margin-right: 3px;">Write Your Review</h5>
+          <div class="mb-2">
+              <div id="ratingInput">
+                <i class="bi bi-star-fill" data-value="1"></i>
+                <i class="bi bi-star-fill" data-value="2"></i>
+                <i class="bi bi-star-fill" data-value="3"></i>
+                <i class="bi bi-star-fill" data-value="4"></i>
+                <i class="bi bi-star-fill" data-value="5"></i>
+             </div>
+             <div class="form-check">
+               <input class="form-check-input" type="checkbox" id="confirmRatingCheck">
+               <label class="form-check-label" for="confirmRatingCheck"> Spoiler</label>
+             </div>
+         </div>
+         <div class="mb-2">
+           <textarea class="form-control" rows="3" placeholder="Write your comment..."></textarea>
+         </div>
+         <button class="btn" style="background-color: #FFC107;">Submit</button>
+       </div>
+
+      <!-- Review Card 1 -->
+      <div class="card mb-3 mt-5 my-5 border-0 shadow-sm review-card">
+         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                   <strong>Movie.Buff99</strong>
+                     <div class="rating-stars text-warning small">
+                       <i class="bi bi-star-fill"></i>
+                       <i class="bi bi-star-fill"></i>
+                       <i class="bi bi-star-fill"></i>
+                       <i class="bi bi-star-fill"></i>
+                       <i class="bi bi-star-half"></i>
+                     </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                   <small class="text-muted">2 weeks ago</small>
+                   <button class="btn btn-sm btn-outline-primary toggle-blur-btn" title="Show comment">
+                     <i class="bi bi-eye"></i>
+                   </button>
+               </div>
+                 
+            </div>
+
+             <!-- Blurred content -->
+             <div class="blurred-box position-relative">
+             <h5 class="card-title fw-bold">Creative but exhausting</h5>
+             <div class="comment-text card-text text-secondary">While the writing is beautiful, I found the characters largely unlikable and the plot somewhat thin. It's an important historical document of the Jazz Age, but as a novel, it hasn't aged as well as some of its contemporaries.</div>
+             </div>
+
+            <div class="d-flex justify-content-end">
+               <button class="btn btn-sm btn-outline-secondary me-2 like-btn">
+                   <i class="bi bi-hand-thumbs-up"></i> <span class="like-count">100</span>
+               </button>                      
+               <button class="btn btn-sm btn-outline-secondary reply-btn"><i class="bi bi-chat-square-dots"></i> Reply</button>
+            </div>
+
+            <!-- Reply Form (hidden by default) -->
+            <div class="reply-form mt-3 d-none">
+               <textarea class="form-control mb-2" rows="2" placeholder="Write your reply..."></textarea>
+               <button class="btn" style="background-color: #FFC107;">Submit Reply</button>
+           </div>
+          </div>
+        </div>
+
+
+      <!-- Review Card 2 -->
+      <div class="card mb-3 mt-3 my-5 border-0 shadow-sm review-card">
+       <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                 <strong>Sarah J.</strong>
+                   <div class="rating-stars text-warning small">
+                     <i class="bi bi-star-fill"></i>
+                     <i class="bi bi-star-fill"></i>
+                     <i class="bi bi-star-fill"></i>
+                     <i class="bi bi-star-fill"></i>
+                     <i class="bi bi-star-fill"></i>
+                   </div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+               <small class="text-muted">1 month ago</small>
+               <button class="btn btn-sm btn-outline-primary toggle-blur-btn" title="Show comment">
+                 <i class="bi bi-eye"></i>
+               </button>
+           </div>
+          </div>
+
+          <!-- Blurred content -->
+          <div class="blurred-box position-relative">
+          <h5 class="card-title fw-bold">That was amazing!</h5>
+          <div class="comment-text card-text text-secondary">The Great Gatsby is a masterpiece of American literature. Fitzgerald's prose is breathtaking, and his portrayal of the American Dream's corruption is as relevant today as it was in the 1920s. The characters are complex and unforgettable.</div>
+          </div>
+
+          <div class="d-flex justify-content-end">
+           <button class="btn btn-sm btn-outline-secondary me-2 like-btn">
+               <i class="bi bi-hand-thumbs-up"></i> <span class="like-count">18</span>
+           </button>                  
+           <button class="btn btn-sm btn-outline-secondary reply-btn"><i class="bi bi-chat-square-dots"></i> Reply</button>
+          </div>
+
+          <!-- Reply Form (hidden by default) -->
+          <div class="reply-form mt-3 d-none">
+             <textarea class="form-control mb-2" rows="2" placeholder="Write your reply..."></textarea>
+             <button class="btn btn-sm btn-primary">Submit Reply</button>
+         </div>
+        </div>
+      </div>
+
+       <!-- Load More -->
+       <div class="text-center mt-4 mb-10">
+           <button class="btn" style="background-color: #FFC107;">Load More Reviews</button>
+      </div>
+   </section>
+
+   
+   <script>
+       // Show Write Review form
+       document.getElementById('writeReviewBtn').addEventListener('click', function () {
+         document.getElementById('reviewForm').classList.toggle('d-none');
+       });
+     
+       // Handle star rating selection
+       document.querySelectorAll('#ratingInput i').forEach(star => {
+         star.addEventListener('click', function () {
+           let rating = this.getAttribute('data-value');
+           document.querySelectorAll('#ratingInput i').forEach(s => {
+             s.classList.remove('active');
+             if (s.getAttribute('data-value') <= rating) {
+               s.classList.add('active');
+             }
+           });
+         });
+       });
+     
+       // Blur/unblur the comment
+       document.querySelectorAll('.toggle-blur-btn').forEach(btn => {
+         btn.addEventListener('click', function () {
+           const cardBody = btn.closest('.card-body');
+           const blurredBox = cardBody.querySelector('.blurred-box');
+           const icon = btn.querySelector('i');
+     
+           blurredBox.classList.toggle('visible');
+     
+           // Toggle icon
+           icon.classList.toggle('bi-eye');
+           icon.classList.toggle('bi-eye-slash');
+         });
+       });
+     
+       // Toggle Reply Form
+       document.querySelectorAll('.reply-btn').forEach(btn => {
+         btn.addEventListener('click', function () {
+           const card = btn.closest('.card-body');
+           const replyForm = card.querySelector('.reply-form');
+           replyForm.classList.toggle('d-none');
+         });
+       });
+
+       // Like toggle logic
+       document.querySelectorAll('.like-btn').forEach(button => {
+       let liked = false; // Set default state
+
+       button.addEventListener('click', () => {
+       const countSpan = button.querySelector('.like-count');
+       let count = parseInt(countSpan.textContent);
+
+       if (!button.classList.contains('liked')) {
+       count += 1;
+       button.classList.add('liked');
+       button.classList.remove('btn-outline-secondary');
+       button.classList.add('btn-warning');
+       } else {
+       count -= 1;
+       button.classList.remove('liked');
+       button.classList.remove('btn-warning');
+       button.classList.add('btn-outline-secondary');
+       }
+
+       countSpan.textContent = count;
+       });
+       });
+
+     </script>
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+    </body>
+    
+
+</html>
+

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chillpick Discovery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .hero-section {
+      background: url('../../images/landing_page/landingBackground.jpg') center / cover no-repeat;
+      position: relative;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-color: rgba(255, 255, 255, 0.7);
+      z-index: 1;
+    }
+
+    .hero-section .overlay {
+      padding: 15rem 2rem;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-section h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: #6b4f3d;
+    }
+
+    .hero-section p {
+      font-size: 1.25rem;
+      color: #524E4E;
+    }
+
+    .charts-toggle {
+      background: #fff;
+      padding: 3rem 1rem;
+      text-align: center;
+    }
+
+    .charts-toggle h3 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #6B4F3D;
+    }
+
+    .nezha-card {
+      width: 214px;
+      height: 283px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s;
+    }
+
+    .nezha-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cinematic-nezha {
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      min-height: 80vh;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3rem;
+    }
+
+    .nezha-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 1;
+    }
+
+    .nezha-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .nezha-info {
+      max-width: 40%;
+      padding-top: 50px;
+    }
+
+    .nezha-carousel {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      width: 460px;
+      padding-bottom: 1rem;
+      margin-left: auto;
+      scroll-behavior: smooth;
+    }
+
+    .nezha-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .nezha-dot {
+      width: 10px;
+      height: 10px;
+      background: white;
+      opacity: 0.5;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .nezha-dot.active {
+      opacity: 1;
+    }
+
+    .call-to-action {
+      background: #F3F1E6;
+      text-align: center;
+      padding: 9rem 1rem;
+    }
+
+    .btn-warning {
+      background-color: #F5D47A;
+      color:#382110;
+      padding:16px 30px;
+      border: none;
+      font-weight: 200;
+    }
+  </style>
+</head>
+<body>
+  <div id="header"></div>
+
+  <section class="hero-section">
+    <div class="overlay">
+      <h1>Discover Your Next Favourites</h1>
+      <p>Track what you’ve watched and read. Find personalized<br> recommendations from our community.</p>
+    </div>
+  </section>
+
+  <!-- Movie Chart -->
+  <section class="charts-toggle">
+    <h3>Top Movie Charts</h3>
+    <p id="lastUpdated" style="font-size: 0.9rem; color: #888; margin-top: -1rem;">Loading...</p>
+    <div class="text-center mb-4">
+      <select onchange="updateChartMetric(this.value)" class="form-select w-auto mx-auto"
+        style="border: 2px solid #F4A259; border-radius: 8px; color: #6B4F3D;">
+        <option value="rating">IMDb Rating</option>
+        <option value="popularity">Popularity</option>
+      </select>
+    </div>
+    <div class="container">
+      <div id="entertainmentChart"></div>
+    </div>
+  </section>
+
+  <!-- Cinematic -->
+  <section id="cinematicSection" class="cinematic-nezha">
+    <div class="nezha-overlay"></div>
+    <div class="nezha-content container">
+      <div class="nezha-info" id="nezhaInfo"></div>
+      <div>
+        <div class="nezha-carousel" id="nezhaCarousel"></div>
+        <div class="nezha-dots" id="nezhaDots"></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Book Chart -->
+  <section class="charts-toggle">
+    <h3>Top Books Chart</h3>
+    <p id="booksLastUpdated" style="font-size: 0.9rem; color: #888; margin-top: -1rem;">Loading...</p>
+    <div class="container">
+      <div id="booksChart"></div>
+    </div>
+  </section>
+  <!-- Book Cinematic Section -->
+<section id="bookCinematicSection" class="cinematic-nezha">
+  <div class="nezha-overlay"></div>
+  <div class="nezha-content container">
+    <div class="nezha-info" id="bookInfo"></div>
+    <div>
+      <div class="nezha-carousel" id="bookCarousel"></div>
+      <div class="nezha-dots" id="bookDots"></div>
+    </div>
+  </div>
+</section>
+
+  <section class="call-to-action">
+    <h2 style="color: #5D4536; font-weight: 510"> Ready to start tracking your entertainment?</h2>
+    <p>Join millions of users discovering and sharing their favorite movies and music</p>
+    <button class="btn btn-warning fw-semibold">Sign Up – It's Free</button>
+  </section>
+
+  <div id="footer"></div>
+
+  <script>
+    const tmdbApiKey = '4154b8dfb44ef69e6cf3a7d880438188';
+    const nytApiKey = 'MPAFCu7iswN9hpJgf7Exv2MG2tkVsru6';
+  
+    const imageBase = 'https://image.tmdb.org/t/p/w780';
+    const thumbBase = 'https://image.tmdb.org/t/p/w342';
+  
+    let movieData = [], chart, bookChart;
+  
+    async function loadMovieData() {
+      try {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${tmdbApiKey}`);
+        const data = await res.json();
+        movieData = data.results.map(m => ({
+          title: m.title,
+          rating: m.vote_average,
+          popularity: m.popularity,
+          overview: m.overview,
+          image: m.backdrop_path ? imageBase + m.backdrop_path : 'https://via.placeholder.com/780x439?text=No+Image',
+          thumb: m.poster_path ? thumbBase + m.poster_path : 'https://via.placeholder.com/342x513?text=No+Poster',
+        }));
+        document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleString();
+        renderByMetric("rating");
+      } catch (err) {
+        console.error("Movie API error:", err);
+      }
+    }
+  
+    function renderByMetric(metric) {
+      const topMovies = [...movieData].sort((a, b) => b[metric] - a[metric]).slice(0, 5);
+      renderMovieChart(metric, topMovies);
+      renderHeroSection(topMovies);
+    }
+  
+    function renderMovieChart(metric, sortedData) {
+      const options = {
+        chart: { type: 'bar', height: 400, toolbar: { show: true } },
+        series: [{
+          name: metric === 'rating' ? 'IMDb Rating' : 'Popularity',
+          data: sortedData.map(m => m[metric])
+        }],
+        plotOptions: {
+          bar: { borderRadius: 10, columnWidth: '50%', distributed: true }
+        },
+        dataLabels: {
+          enabled: true,
+          style: { colors: ['#fff'], fontWeight: 'bold' }
+        },
+        xaxis: {
+          categories: sortedData.map(m => m.title),
+          labels: { rotate: -30, style: { fontSize: '13px', colors: '#6B4F3D' } }
+        },
+        yaxis: {
+          title: {
+            text: metric === 'rating' ? 'IMDb Ratings' : 'Popularity Score',
+            style: { color: '#6B4F3D', fontSize: '14px', fontWeight: 600 }
+          },
+          max: metric === 'rating' ? 10 : undefined
+        },
+        tooltip: {
+          custom: ({ dataPointIndex }) => {
+            const m = sortedData[dataPointIndex];
+            return `<div style="padding:10px">
+              <strong>🎬 ${m.title}</strong><br>
+              ⭐ IMDb: ${m.rating}<br>
+              🔥 Popularity: ${Math.round(m.popularity)}
+            </div>`;
+          }
+        },
+        colors: ['#6B4F3D'],
+        legend: { show: false }
+      };
+  
+      if (!chart) {
+        chart = new ApexCharts(document.querySelector("#entertainmentChart"), options);
+        chart.render();
+      } else {
+        chart.updateOptions(options);
+      }
+    }
+  
+    function renderHeroSection(movies) {
+      const hero = document.getElementById("cinematicSection");
+      const carousel = document.getElementById("nezhaCarousel");
+      const dots = document.getElementById("nezhaDots");
+      const info = document.getElementById("nezhaInfo");
+  
+      carousel.innerHTML = "";
+      dots.innerHTML = "";
+  
+      const first = movies[0];
+      hero.style.backgroundImage = `url('${first.image}')`;
+      info.innerHTML = `<h1>${first.title}</h1><p>${first.overview}</p><button class="btn btn-outline-light">Details</button>`;
+  
+      movies.forEach((m, i) => {
+        const card = document.createElement("div");
+        card.className = "nezha-card";
+        if (i === 0) card.classList.add("active");
+        card.innerHTML = `<img src="${m.thumb}" alt="${m.title}">`;
+        card.onclick = () => {
+          hero.style.backgroundImage = `url('${m.image}')`;
+          info.innerHTML = `<h1>${m.title}</h1><p>${m.overview}</p><button class="btn btn-outline-light">Details</button>`;
+          document.querySelectorAll('.nezha-card').forEach(c => c.classList.remove('active'));
+          document.querySelectorAll('.nezha-dot').forEach(d => d.classList.remove('active'));
+          card.classList.add('active');
+          dots.children[i].classList.add('active');
+        };
+        carousel.appendChild(card);
+  
+        const dot = document.createElement("div");
+        dot.className = "nezha-dot";
+        if (i === 0) dot.classList.add("active");
+        dot.onclick = card.onclick;
+        dots.appendChild(dot);
+      });
+    }
+  
+    async function loadBookData() {
+      try {
+        const res = await fetch(`https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${nytApiKey}`);
+        const data = await res.json();
+        const books = data.results.books.slice(0, 5);
+        document.getElementById('booksLastUpdated').textContent = 'Last updated: ' + new Date(data.last_modified).toLocaleString();
+        renderBookHeroSection(books);
+        renderBookChart(books);
+      } catch (err) {
+        document.getElementById('booksLastUpdated').textContent = '⚠️ Failed to load books.';
+        console.error("Book API error:", err);
+      }
+    }
+  
+    function renderBookChart(books) {
+      const options = {
+        chart: { type: 'bar', height: 400, toolbar: { show: false } },
+        series: [{
+          name: "Rank",
+          data: books.map(book => 11 - book.rank)
+        }],
+        plotOptions: {
+          bar: { borderRadius: 10, columnWidth: '50%', distributed: true }
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: (_, { dataPointIndex }) => `#${books[dataPointIndex].rank}`,
+          style: { colors: ['#fff'], fontWeight: 'bold' }
+        },
+        xaxis: {
+          categories: books.map(b => b.title),
+          labels: { rotate: -30, style: { fontSize: '13px', colors: '#6B4F3D' } }
+        },
+        yaxis: {
+          title: {
+            text: 'Ranking',
+            style: { color: '#6B4F3D', fontSize: '14px', fontWeight: 600 }
+          },
+          min: 0,
+          max: 10
+        },
+        tooltip: {
+          custom: ({ dataPointIndex }) => {
+            const b = books[dataPointIndex];
+            return `<div style="padding:10px">
+              <strong>📚 ${b.title}</strong><br>
+              ✍️ ${b.author}<br>
+              📝 ${b.description}
+            </div>`;
+          }
+        },
+        colors: ['#6B4F3D'],
+        legend: { show: false }
+      };
+  
+      if (!bookChart) {
+        bookChart = new ApexCharts(document.querySelector("#booksChart"), options);
+        bookChart.render();
+      } else {
+        bookChart.updateOptions(options);
+      }
+    }
+  
+    function renderBookHeroSection(books) {
+      const hero = document.getElementById("bookCinematicSection");
+      const carousel = document.getElementById("bookCarousel");
+      const dots = document.getElementById("bookDots");
+      const info = document.getElementById("bookInfo");
+  
+      carousel.innerHTML = "";
+      dots.innerHTML = "";
+  
+      const first = books[0];
+      hero.style.backgroundImage = `
+        linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)),
+        url('${first.book_image}')
+      `;
+      hero.style.backgroundSize = 'cover';
+      hero.style.backgroundPosition = 'center';
+      hero.style.backgroundRepeat = 'no-repeat';
+  
+      info.innerHTML = `<h1>${first.title}</h1><p>${first.description}</p><button class="btn btn-outline-light">Details</button>`;
+  
+      books.forEach((b, i) => {
+        const card = document.createElement("div");
+        card.className = "nezha-card";
+        if (i === 0) card.classList.add("active");
+        card.innerHTML = `<img src="${b.book_image}" alt="${b.title}">`;
+        card.onclick = () => {
+          hero.style.backgroundImage = `
+            linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)),
+            url('${b.book_image}')
+          `;
+          info.innerHTML = `<h1>${b.title}</h1><p>${b.description}</p><button class="btn btn-outline-light">Details</button>`;
+          document.querySelectorAll('#bookCarousel .nezha-card').forEach(c => c.classList.remove('active'));
+          document.querySelectorAll('#bookDots .nezha-dot').forEach(d => d.classList.remove('active'));
+          card.classList.add('active');
+          dots.children[i].classList.add('active');
+        };
+        carousel.appendChild(card);
+  
+        const dot = document.createElement("div");
+        dot.className = "nezha-dot";
+        if (i === 0) dot.classList.add("active");
+        dot.onclick = card.onclick;
+        dots.appendChild(dot);
+      });
+    }
+  
+    function updateChartMetric(metric) {
+      renderByMetric(metric);
+    }
+  
+    // DOM Ready
+    window.addEventListener('DOMContentLoaded', () => {
+      loadMovieData();
+      loadBookData();
+  
+      loadPartial('../../partials/header.html')
+        .then(res => res.ok ? res.text() : Promise.reject())
+        .then(html => document.getElementById('header').innerHTML = html)
+        .catch(() => {
+          document.getElementById('header').innerHTML = `<header class="bg-light p-3 text-center"><h1>ChillPick</h1></header>`;
+        });
+  
+      fetch('../../partials/footer.html')
+        .then(res => res.ok ? res.text() : Promise.reject())
+        .then(html => document.getElementById('footer').innerHTML = html)
+        .catch(() => {
+          document.getElementById('footer').innerHTML = `<footer class="bg-dark text-white text-center py-4"><p>© 2025 ChillPick</p></footer>`;
+        });
+    });
+  </script>
+  </body>
