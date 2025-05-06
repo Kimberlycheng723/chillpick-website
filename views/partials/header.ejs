@@ -1,0 +1,14 @@
+<header class="bg-light p-3 d-flex justify-content-between align-items-center" style="background-color: #f1eddc;">
+  <div class="d-flex align-items-center gap-2">
+    <img src="/images/chillpick-logo.png" alt="ChillPick Logo" style="height: 40px;">
+    <strong class="fs-5" style="color: #6B4F3D;">CHILLPICK</strong>
+  </div>
+  <nav class="d-flex gap-4">
+    <a href="/dashboard" class="fw-semibold text-dark text-decoration-none">Dashboard</a>
+    <a href="/discover" class="fw-semibold text-dark text-decoration-none">Discover</a>
+    <a href="/watchlist" class="fw-semibold text-dark text-decoration-none">Watchlist</a>
+  </nav>
+  <a href="/profile">
+    <img src="<%= currentUser.profilePicture %>" alt="Profile" class="rounded-circle" style="height: 36px; width: 36px; object-fit: cover;">
+  </a>
+</header>
