@@ -33,11 +33,14 @@ app.get('/dashboard', (req, res) => res.render('dashboard'));
 app.get('/discover', (req, res) => res.render('discover'));
 app.get('/watchlist', (req, res) => res.render('watchlist/watchlist'));
 app.get('/history', (req, res) => res.render('watchlist/history'));
-app.get('/profile', (req, res) => res.redirect('/acount/profile'));
+
+// ✅ Profile/account routes
+app.get('/profile', (req, res) => res.redirect('/account/profile'));
+app.get('/account/profile', (req, res) => res.render('account/profile'));
 app.get('/login', (req, res) => res.render('account/login'));
 app.get('/register', (req, res) => res.render('account/register'));
-app.get('/forgotPassword', (req, res) => res.render('profile/forgotPassword'));
+app.get('/forgotPassword', (req, res) => res.render('account/forgotPassword'));
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
