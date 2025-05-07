@@ -35,22 +35,24 @@ app.get('/discover', (req, res) => res.render('discover'));
 app.get('/watchlist', (req, res) => res.render('watchlist/watchlist'));
 app.get('/history', (req, res) => res.render('watchlist/history'));
 
-app.get('/profile', (req, res) => {
-    if (res.locals.currentUser) {
-      console.log('✅ User logged in, redirecting to profile');
-      res.redirect('/account/profile');
-    } else {
-      console.log('🚫 Not logged in, redirecting to login');
-      res.redirect('/login');
-    }
-  });
 
-// ✅ Add this:
-app.get('/account/profile', (req, res) => res.render('account/profile'));
+app.get('/account/login', (req, res) => res.render('account/login'));
 
-app.get('/login', (req, res) => res.send('✅ Login route is working.'));
-app.get('/register', (req, res) => res.render('account/register'));
-app.get('/forgotPassword', (req, res) => res.render('account/forgotPassword'));
+
+app.get('/account/register', (req, res) => res.render('account/register'));
+
+
+app.get('/account/profile', (req, res) => {
+  //if (res.locals.currentUser) {
+    console.log('✅ User logged in, rendering profile');
+    res.render('account/profile');
+  // } else {
+  //   console.log('🚫 Not logged in, redirecting to login');
+  //   res.redirect('/account/login');
+  // }
+});
+
+app.get('/account/forgotPassword', (req, res) => res.render('account/forgotPassword'));
 
 // Start server
 const PORT = process.env.PORT || 3000;
