@@ -21,7 +21,7 @@ app.use((req, res, next) => {
   // Dev-only: Toggle login state with URL query
   if (req.query.login === 'true') {
     res.cookie('isLoggedIn', 'true');
-    return res.redirect(req.path);
+    return res.redirect('/');
   }
 
   if (req.query.login === 'false') {
@@ -30,6 +30,7 @@ app.use((req, res, next) => {
   }
 
   const isLoggedIn = req.cookies.isLoggedIn === 'true';
+  console.log('isLoggedIn:', isLoggedIn);
 
   if (isLoggedIn) {
     res.locals.currentUser = {
@@ -37,12 +38,18 @@ app.use((req, res, next) => {
       profilePicture: '/images/profile_pic.png'
     };
     res.locals.showHomeLink = true;
+    res.locals.showDashboardLink = true;
     res.locals.showDiscoverLink = true;
+    res.locals.showWatchlistLink = true;
   } else {
     res.locals.currentUser = null;
-    res.locals.showHomeLink = true;
+    res.locals.showHomeLink = false;
+    res.locals.showDashboardLink = false;
     res.locals.showDiscoverLink = false;
+    res.locals.showWatchlistLink = false;
   }
+
+  res.locals.isLoggedIn = isLoggedIn;
 
   next();
 });
@@ -75,6 +82,19 @@ app.get('/profile', (req, res) => {
 app.get('/account/login', (req, res) => res.render('account/login'));
 app.get('/account/register', (req, res) => res.render('account/register'));
 app.get('/account/forgotPassword', (req, res) => res.render('account/forgotPassword'));
+
+// Fake login processing (replace with real DB validation later)
+app.post('/account/login', (req, res) => {
+  const { email, password } = req.body;
+
+  // Simulated login logic
+  if (email === 'test@example.com' && password === '123456') {
+    res.cookie('isLoggedIn', 'true');
+    return res.redirect('/account/profile');
+  } else {
+    return res.send('❌ Invalid email or password');
+  }
+});
 
 app.get('/account/profile', (req, res) => {
   console.log('✅ User logged in, rendering profile');
