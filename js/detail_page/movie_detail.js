@@ -1,3 +1,16 @@
+document.addEventListener('DOMContentLoaded', function () {
+  fetch('/partials/header')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('header').innerHTML = data;
+    });
+
+  fetch('/partials/footer')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('footer').innerHTML = data;
+    });
+});
 
 // Show Write Review form
 document.getElementById('writeReviewBtn').addEventListener('click', function () {
@@ -64,4 +77,3 @@ button.classList.add('btn-outline-secondary');
 countSpan.textContent = count;
 });
 });
-

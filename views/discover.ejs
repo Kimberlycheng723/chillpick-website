@@ -48,6 +48,7 @@
 
     <div class="filter-line"></div>
 
+    <!-- Cards will be inserted here dynamically by discover.js and should link to /movie/:id or /book/:id -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="mediaContainer"></div>
 
     <nav class="d-flex justify-content-center mt-5">
@@ -61,8 +62,7 @@
     </nav>
   </div>
 
-  <div id="footer"></div>
-
+  <%- include('partials/footer') %>
   <script src="../js/discover.js"></script>
 </body>
 

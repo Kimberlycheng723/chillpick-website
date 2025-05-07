@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const router = express.Router();
 const app = express();
 
@@ -12,17 +13,33 @@ app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-// Middleware to simulate login state
+app.use(cookieParser());
+
 app.use((req, res, next) => {
-  const isLoggedIn = false; // Change to true to simulate logged in
+  // Dev-only: Toggle login state with URL query
+  if (req.query.login === 'true') {
+    res.cookie('isLoggedIn', 'true');
+    return res.redirect(req.path);
+  }
+
+  if (req.query.login === 'false') {
+    res.clearCookie('isLoggedIn');
+    return res.redirect(req.path);
+  }
+
+  const isLoggedIn = req.cookies.isLoggedIn === 'true';
 
   if (isLoggedIn) {
     res.locals.currentUser = {
-      username: 'hELLO',
+      username: 'Kimberly',
       profilePicture: '/images/profile_pic.png'
     };
+    res.locals.showHomeLink = true;
+    res.locals.showDiscoverLink = true;
   } else {
     res.locals.currentUser = null;
+    res.locals.showHomeLink = true;
+    res.locals.showDiscoverLink = false;
   }
 
   next();
@@ -51,7 +68,17 @@ app.get('/account/profile', (req, res) => res.render('account/profile'));
 app.get('/login', (req, res) => res.send('✅ Login route is working.'));
 app.get('/register', (req, res) => res.render('account/register'));
 app.get('/forgotPassword', (req, res) => res.render('account/forgotPassword'));
+app.get('/movie_detail', (req, res) => {
+    res.render('detail_page/movie_detail'); // make sure this file exists
+  });
+  app.get('/book_detail', (req, res) => {
+    res.render('detail_page/book_detail');
+  });
 
+app.get('/aboutus', (req, res) => res.render('utility/AboutUs'));
+app.get('/contactus', (req, res) => res.render('utility/ContactUs'));
+app.get('/faq', (req, res) => res.render('utility/FAQ'));
+app.get('/privacypolicy', (req, res) => res.render('utility/PrivacyPolicy'));
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));

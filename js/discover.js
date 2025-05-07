@@ -1,10 +1,15 @@
-
     const data = [
-      { title: 'Ne Zha', type: 'movie', rating: 4.6,  image: '../images/Detail/Image/哪吒.jpg'},
-      { title: 'Ne Zha', type: 'movie', rating: 4.6,  image: '../images/Detail/Image/哪吒.jpg'},
-      { title: 'Ne Zha', type: 'movie', rating: 4.6,  image: '../images/Detail/Image/哪吒.jpg'},
-      { title: 'Ne Zha', type: 'movie', rating: 4.6,  image: '../images/Detail/Image/哪吒.jpg'},
-
+      { id: 1, title: 'Ne Zha', type: 'movie', rating: 4.6, image: '../images/Detail/Image/哪吒.jpg' },
+      { id: 2, title: 'Ne Zha', type: 'movie', rating: 4.6, image: '../images/Detail/Image/哪吒.jpg' },
+      { id: 3, title: 'Ne Zha', type: 'movie', rating: 4.6, image: '../images/Detail/Image/哪吒.jpg' },
+      { id: 4, title: 'Ne Zha', type: 'movie', rating: 4.6, image: '../images/Detail/Image/哪吒.jpg' },
+      {
+        id: 101,
+        title: 'The Great Gatsby',
+        type: 'book',
+        rating: 4.5,
+        image: '../images/Detail/Image/The-Great-Gatsby (book).jpg'
+      }
     ];
 
     function renderCards(items) {
@@ -13,17 +18,19 @@
       items.forEach(item => {
         container.innerHTML += `
           <div class="col">
-            <div class="card card-custom">
-              <img src="${item.image}" class="card-img-top" alt="${item.title}">
-              <div class="card-body">
-                <h6 class="fw-bold">哪吒之魔童降世 <span class="fw-semibold">${item.title}</span></h6>
-                <div class="d-flex align-items-center small text-muted mt-1">
-                  <i class="bi bi-film me-1"></i> Movie
-                  <span class="ms-auto text-dark fw-semibold">${item.rating} <i class="bi bi-star-fill rating-star"></i></span>
+            <a href="${item.type === 'movie' ? '/movie_detail' : '/book_detail'}" class="text-decoration-none text-dark">
+              <div class="card card-custom">
+                <img src="${item.image}" class="card-img-top" alt="${item.title}">
+                <div class="card-body">
+                  <h6 class="fw-bold">哪吒之魔童降世 <span class="fw-semibold">${item.title}</span></h6>
+                  <div class="d-flex align-items-center small text-muted mt-1">
+                    <i class="bi bi-film me-1"></i> Movie
+                    <span class="ms-auto text-dark fw-semibold">${item.rating} <i class="bi bi-star-fill rating-star"></i></span>
+                  </div>
+                  <button class="btn watchlist-btn mt-3 w-100" onclick="toggleWatchlist(this)"><i class="bi bi-plus-circle me-1"></i> Watchlist</button>
                 </div>
-                <button class="btn watchlist-btn mt-3 w-100" onclick="toggleWatchlist(this)"><i class="bi bi-plus-circle me-1"></i> Watchlist</button>
               </div>
-            </div>
+            </a>
           </div>
         `;
       });
