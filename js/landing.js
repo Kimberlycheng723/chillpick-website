@@ -247,4 +247,8 @@
           document.getElementById('footer').innerHTML = `<footer class="bg-dark text-white text-center py-4"><p>© 2025 ChillPick</p></footer>`;
         });
     });
+
+    document.getElementById('signupBtn').addEventListener('click', function () {
+        window.location.href = '/account/register';
+    });
  
