@@ -14,6 +14,8 @@ app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   // Dev-only: Toggle login state with URL query
@@ -45,14 +47,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
-app.get('/', (req, res) => res.render('landing'));
+app.get('/', (req, res) => res.render('landing')); // ✅
 app.get('/dashboard', (req, res) => res.render('dashboard'));
 app.get('/discover', (req, res) => res.render('discover'));
 app.get('/watchlist', (req, res) => res.render('watchlist/watchlist'));
 app.get('/history', (req, res) => res.render('watchlist/history'));
-
-app.get('/account/login', (req, res) => res.render('account/login'));
 
 app.get('/login', (req, res) => res.send('✅ Login route is working.'));
 app.get('/register', (req, res) => res.render('account/register'));
@@ -64,13 +63,23 @@ app.get('/book_detail', (req, res) => {
   res.render('detail_page/book_detail');
 });
 
+app.get('/profile', (req, res) => {
+  if (res.locals.currentUser) {
+    console.log('✅ User logged in, redirecting to profile');
+    res.redirect('/account/profile');
+  } else {
+    res.redirect('/login');
+  }
+});
+
+app.get('/account/login', (req, res) => res.render('account/login'));
+app.get('/account/register', (req, res) => res.render('account/register'));
+app.get('/account/forgotPassword', (req, res) => res.render('account/forgotPassword'));
 
 app.get('/account/profile', (req, res) => {
   console.log('✅ User logged in, rendering profile');
   res.render('account/profile');
 });
-
-app.get('/account/forgotPassword', (req, res) => res.render('account/forgotPassword'));
 
 app.get('/aboutus', (req, res) => res.render('utility/AboutUs'));
 app.get('/contactus', (req, res) => res.render('utility/ContactUs'));
