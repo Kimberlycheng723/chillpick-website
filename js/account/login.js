@@ -64,6 +64,8 @@
     localStorage.setItem("currentUser", user.email);
     localStorage.setItem("currentSession", sessionId);
 
+    localStorage.setItem("isLoggedIn", "true");
+
     // Debug
     console.log("✅ Login complete. Redirecting to /account/profile");
 
