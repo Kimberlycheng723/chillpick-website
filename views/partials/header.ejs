@@ -106,6 +106,17 @@
     const authNav = document.getElementById("authNav");
 
     if (isLoggedIn) {
+      const currentUserEmail = localStorage.getItem("currentUser");
+      if (currentUserEmail) {
+        const profileData = JSON.parse(localStorage.getItem(`profile_${currentUserEmail}`)) || {};
+        const profilePicUrl = profileData.profilePicture;
+        if (profilePicUrl) {
+          const headerImg = userIcon.querySelector("img");
+          if (headerImg) {
+            headerImg.src = profilePicUrl;
+          }
+        }
+      }
       userIcon.style.display = "inline-block";
       loginLink.style.display = "none";
       if (userIconMobile) userIconMobile.style.display = "inline-block";
