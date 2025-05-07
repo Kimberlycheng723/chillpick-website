@@ -24,7 +24,7 @@
           </li>
         <% } else { %>
           <li class="nav-item d-lg-none">
-            <a class="nav-link nav-custom" href="/login">Sign In</a>
+            <a class="nav-link nav-custom" href="/account/login">Sign In</a>
           </li>
         <% } %>
       </ul>
@@ -33,11 +33,11 @@
     <!-- Desktop (large screen) -->
     <div class="d-none d-lg-block">
       <% if (currentUser && currentUser.profilePicture) { %>
-        <a href="/profile">
+        <a href="/account/profile">
           <img src="<%= currentUser.profilePicture %>" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px;">
         </a>
       <% } else { %>
-        <a href="/login" class="btn btn-outline-dark rounded-pill px-3">Sign In</a>
+        <a href="/account/login" class="btn btn-outline-dark rounded-pill px-3">Sign In</a>
       <% } %>
     </div>
 
@@ -45,11 +45,11 @@
     <ul class="navbar-nav d-lg-none">
       <% if (currentUser && currentUser.profilePicture) { %>
         <li class="nav-item">
-          <a class="nav-link nav-custom" href="/profile">Profile</a>
+          <a class="nav-link nav-custom" href="account/profile">Profile</a>
         </li>
       <% } else { %>
         <li class="nav-item">
-          <a class="nav-link nav-custom" href="/login">Sign In</a>
+          <a class="nav-link nav-custom" href="/account/login">Sign In</a>
         </li>
       <% } %>
     </ul>
@@ -86,3 +86,30 @@
 
 <!-- Bootstrap JavaScript Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const currentUserEmail = localStorage.getItem('currentUser');
+    if (!currentUserEmail) return;
+
+    const profileData = JSON.parse(localStorage.getItem(`profile_${currentUserEmail}`)) || {};
+    const profilePicUrl = profileData.profilePicture || '/images/profile_pic.png';
+
+    // Replace desktop Sign In button with profile image
+    const signInBtn = document.querySelector('.navbar .btn-outline-dark');
+    if (signInBtn) {
+      signInBtn.outerHTML = `
+        <a href="/account/profile">
+          <img src="${profilePicUrl}" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px;">
+        </a>
+      `;
+    }
+
+    // Replace mobile nav Sign In with Profile link
+    const mobileLinks = document.querySelectorAll('.navbar-nav.d-lg-none .nav-item');
+    mobileLinks.forEach(link => {
+      if (link.textContent.includes("Sign In")) {
+        link.innerHTML = `<a class="nav-link nav-custom" href="/account/profile">Profile</a>`;
+      }
+    });
+  });
+</script>
