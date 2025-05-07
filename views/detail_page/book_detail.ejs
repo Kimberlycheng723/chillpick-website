@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width; initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <title>Book</title>
+        <title>Book Detail | ChillPick</title>
         <!--The icon in the webiste (beside the title)-->
         <link rel="icon" type="image/x-icon" src="Image/logo.jpg" style="float: left; font-weight: 70; height: 70;">
         <!--Bootsrap 5 CSS-->
@@ -18,6 +18,7 @@
 </head>  
 
 <body>
+  <%- include('../partials/header') %>
    <!--Main Body-->
     <main class="container my-5">
 
@@ -32,11 +33,11 @@
                 
                 <!--Synopsis-->
                 <div class="col-md-8">
-                    <h1 class="display-5 fw-bload mb-3">The-Great-Gatsby</h1>
+                    <h1 class="display-5 fw-bold mb-3">The Great Gatsby</h1>
 
                     <div class="mb-4">
                         <span class="badge bg-secondary me-2"><i class="bi bi-person-heart"></i>F. Scott Fitzgerald</span>
-                        <span class="badge bg-secondary me-2"></b><i class="bi bi-book"></i>180 pages</span>
+                        <span class="badge bg-secondary me-2"><i class="bi bi-book"></i>180 pages</span>
                         <span class="badge bg-secondary me-2"><i class="bi bi-tags-fill"></i> Fiction, Classic</span>
                         <span class="badge bg-secondary me-2"><i class="bi bi-calendar-heart"></i> 1925</span>
                         <span class="badge bg-secondary me-2"><i class="bi bi-upc"></i> 9780743273565</span>
@@ -313,6 +314,8 @@
 
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
      <script src="../../js/detail_page/book_detail.js"></script>
+     </main>
+     <%- include('../partials/footer') %>
     </body>
     
 

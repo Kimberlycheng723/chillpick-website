@@ -90,7 +90,7 @@
   
       const first = movies[0];
       hero.style.backgroundImage = `url('${first.image}')`;
-      info.innerHTML = `<h1>${first.title}</h1><p>${first.overview}</p><button class="btn btn-outline-light">Details</button>`;
+      info.innerHTML = `<h1>${first.title}</h1><p>${first.overview}</p><a href="/movie_detail" class="btn btn-outline-light">Details</a>`;
   
       movies.forEach((m, i) => {
         const card = document.createElement("div");
@@ -99,7 +99,7 @@
         card.innerHTML = `<img src="${m.thumb}" alt="${m.title}">`;
         card.onclick = () => {
           hero.style.backgroundImage = `url('${m.image}')`;
-          info.innerHTML = `<h1>${m.title}</h1><p>${m.overview}</p><button class="btn btn-outline-light">Details</button>`;
+          info.innerHTML = `<h1>${m.title}</h1><p>${m.overview}</p><a href="/movie_detail" class="btn btn-outline-light">Details</a>`;
           document.querySelectorAll('.nezha-card').forEach(c => c.classList.remove('active'));
           document.querySelectorAll('.nezha-dot').forEach(d => d.classList.remove('active'));
           card.classList.add('active');
@@ -196,7 +196,7 @@
       hero.style.backgroundPosition = 'center';
       hero.style.backgroundRepeat = 'no-repeat';
   
-      info.innerHTML = `<h1>${first.title}</h1><p>${first.description}</p><button class="btn btn-outline-light">Details</button>`;
+      info.innerHTML = `<h1>${first.title}</h1><p>${first.description}</p><a href="/book_detail" class="btn btn-outline-light">Details</a>`;
   
       books.forEach((b, i) => {
         const card = document.createElement("div");
@@ -208,7 +208,7 @@
             linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)),
             url('${b.book_image}')
           `;
-          info.innerHTML = `<h1>${b.title}</h1><p>${b.description}</p><button class="btn btn-outline-light">Details</button>`;
+          info.innerHTML = `<h1>${b.title}</h1><p>${b.description}</p><a href="/book_detail" class="btn btn-outline-light">Details</a>`;
           document.querySelectorAll('#bookCarousel .nezha-card').forEach(c => c.classList.remove('active'));
           document.querySelectorAll('#bookDots .nezha-dot').forEach(d => d.classList.remove('active'));
           card.classList.add('active');

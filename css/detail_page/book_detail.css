@@ -238,3 +238,26 @@ align-items: flex-start;
 }
 }
 
+/* Footer Styles */
+footer {
+  background-color: #A89C89;
+  color: white;
+  padding: 30px 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+footer a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+footer .footer-links {
+  margin-bottom: 10px;
+}
+

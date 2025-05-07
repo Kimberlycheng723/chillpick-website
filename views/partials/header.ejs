@@ -1,3 +1,4 @@
+<% console.log("currentUser:", currentUser); %>
 <header class="custom-navbar navbar navbar-expand-lg px-4 py-3" style="background-color: #EBE8D5;">
   <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap position-relative">
 
@@ -9,45 +10,46 @@
     <!-- Center Navigation -->
     <div class="collapse navbar-collapse position-absolute top-50 start-50 translate-middle" id="navbarNav">
       <ul class="navbar-nav mb-2 mb-lg-0 d-flex justify-content-center">
-        <li class="nav-item">
-          <a class="nav-link nav-custom" href="/dashboard">Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link nav-custom" href="/discover">Discover</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link nav-custom" href="/watchlist">Watchlist</a>
-        </li>
-        <% if (currentUser && currentUser.profilePicture) { %>
-          <li class="nav-item d-lg-none">
-            <a class="nav-link nav-custom" href="/profile">Profile</a>
+        <% if (currentUser) { %>
+          <li class="nav-item">
+            <a class="nav-link nav-custom" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-custom" href="/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-custom" href="/discover">Discover</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-custom" href="/watchlist">Watchlist</a>
           </li>
         <% } else { %>
-          <li class="nav-item d-lg-none">
-            <a class="nav-link nav-custom" href="/login">Sign In</a>
+          <li class="nav-item">
+            <a class="nav-link nav-custom" href="/"></a>
           </li>
+       
         <% } %>
       </ul>
     </div>
 
     <!-- Desktop (large screen) -->
     <div class="d-none d-lg-block">
-      <% if (currentUser && currentUser.profilePicture) { %>
+      <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.profilePicture) { %>
         <a href="/profile">
           <img src="<%= currentUser.profilePicture %>" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px;">
         </a>
-      <% } else { %>
-        <a href="/login" class="btn btn-outline-dark rounded-pill px-3">Sign In</a>
+      <% } else if (typeof currentUser === 'undefined' || !currentUser) { %>
+        <a href="/login" class="btn btn-signin rounded-pill px-3">Sign In</a>
       <% } %>
     </div>
 
     <!-- Collapsed Navbar (mobile) -->
     <ul class="navbar-nav d-lg-none">
-      <% if (currentUser && currentUser.profilePicture) { %>
+      <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.profilePicture) { %>
         <li class="nav-item">
           <a class="nav-link nav-custom" href="/profile">Profile</a>
         </li>
-      <% } else { %>
+      <% } else if (typeof currentUser === 'undefined' || !currentUser) { %>
         <li class="nav-item">
           <a class="nav-link nav-custom" href="/login">Sign In</a>
         </li>
@@ -81,6 +83,20 @@
 
 .nav-custom:hover {
   color: #000 !important;
+}
+.btn-signin {
+  background-color: transparent;
+  color: #6B4F3D;
+  border: 1px solid #6B4F3D;
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-signin:hover {
+  background-color: #6B4F3D;
+  color: white;
 }
 </style>
 
