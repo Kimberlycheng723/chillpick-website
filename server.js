@@ -16,6 +16,8 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const discoverRoutes = require('./routes/discover');
+app.use('/api/discover', discoverRoutes);
 
 app.use((req, res, next) => {
   // Dev-only: Toggle login state with URL query
