@@ -131,7 +131,7 @@
   
     function renderBookChart(books) {
       const options = {
-        chart: { type: 'bar', height: 400, toolbar: { show: false } },
+        chart: { type: 'bar', height: 400, toolbar: { show: true } },
         series: [{
           name: "Rank",
           data: books.map(book => 11 - book.rank)
