@@ -74,7 +74,7 @@ style>
     }
     
     h2 {
-      color: #2c3e50;
+      color: #6B4F3D;
       font-weight: 600;
       margin-bottom: 1.5rem;
     }
@@ -84,7 +84,7 @@ style>
     }
     
     p {
-      color: #666;
+      color: #524E4E;
       margin-bottom: 1.2rem;
     }
     
@@ -108,14 +108,11 @@ style>
     
     .member-name {
       font-weight: 600;
-      color: #2c3e50;
+      color: #524E4E;
       margin-bottom: 0.5rem;
     }
     
-    .member-role {
-      color: #666;
-      font-size: 0.95rem;
-    }
+    
     .member-image {
       width: 120px;
       height: 120px;

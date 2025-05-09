@@ -1,5 +1,5 @@
 body {
-    background-color: #f3f3e656; 
+    background-color: #f3f3e6; 
     font-family: 'Poppins', sans-serif;
     color: #333;
   }
@@ -67,7 +67,7 @@ body {
   }
   
   h1 {
-    color: #2c3e50;
+    color: #6B4F3D;
     margin-bottom: 1.5rem;
     font-weight: 600;
   }
@@ -106,7 +106,7 @@ body {
 
 .share-btn {
   background:none;
-  color: black;
+  color: #3c3c3c;
   border: 1px solid #ddd;
   padding: 8px 16px;
   border-radius: 15px;
