@@ -1,5 +1,5 @@
 body {
-  background-color: #f3f3e656; 
+  background-color: #f3f3e6; 
   font-family: 'Poppins', sans-serif;
   color: #333;
 }
@@ -67,7 +67,7 @@ body {
 }
 
 h1 {
-  color: #2c3e50;
+  color: #6b4f3d;
   margin-bottom: 1.5rem;
   font-weight: 600;
 }
@@ -105,7 +105,7 @@ h1 {
   background-color: #E8E1D1;
 }
 .history-btn {
-  color: black;
+  color: #3c3c3c;
   background: none;
   border: 1px solid #ddd;
   padding: 8px 16px;
@@ -168,7 +168,7 @@ h1 {
 
 .share-btn {
   background:none;
-  color: black;
+  color: #3c3c3c;
   border: 1px solid #ddd;
   padding: 8px 16px;
   border-radius: 15px;
@@ -232,7 +232,7 @@ h1 {
   border-color: #ccc;
 }
 .remove-btn {
-  background-color: #C00F0C;
+  background-color: #b00e0c;
   color: white;
   border: none;
   padding: 4px 6px;
@@ -245,7 +245,7 @@ h1 {
 }
 
 .remove-btn:hover {
-  background-color: #e74d3cd5;
+  background-color: #df4736;
   border-color: #ccc;
 }
 
