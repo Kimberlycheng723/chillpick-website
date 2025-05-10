@@ -1,4 +1,3 @@
-<!-- history.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>History</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/watchlist/history.css">
+    <link rel="stylesheet" href="../../css/watchlist/history.css">
 </head>
 <body>
     <%- include('../partials/header') %>
@@ -16,10 +15,9 @@
 
         <section class="history-filters">
             <div class="filter-options">
-                <button class="filter-btn ">All</button>
+                <button class="filter-btn active">All</button>
                 <button class="filter-btn">Movies</button>
                 <button class="filter-btn">Books</button>
-                
             </div>
 
             <div class="action-buttons">
@@ -29,46 +27,63 @@
 
         <hr>
 
-        <section class="history-item">
-            <img src="https://via.placeholder.com/120x160" alt="Movie poster" class="item-image">
+        <!-- Movies -->
+        <section class="history-item" data-type="movie">
+            <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_.jpg" alt="Titanic" class="item-image">
             <div class="item-content">
-                <h3>Movie Title</h3>
-                <p>This is the synopsis of the movie...</p>
+                <h3>Titanic (1997)</h3>
+                <p>A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.</p>
                 <button class="more-btn">More</button>
             </div>
-            <h6>Completed</h6>
+            <h6>Completed on June 15, 2023</h6>
         </section>
 
         <hr>
 
-        <section class="history-item">
-            <img src="https://via.placeholder.com/120x160" alt="Music poster" class="item-image">
+        <section class="history-item" data-type="movie">
+            <img src="https://m.media-amazon.com/images/M/MV5BMDFkYTc0MGEtZmNhMC00ZDIzLWFmNTEtODM1ZmRlYWMwMWFmXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg" alt="The Shawshank Redemption" class="item-image">
             <div class="item-content">
-                <h3>Music Title</h3>
-                <p>This is the details of the music...</p>
+                <h3>The Shawshank Redemption (1994)</h3>
+                <p>Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.</p>
                 <button class="more-btn">More</button>
             </div>
-            <h6>Completed</h6>
-
+            <h6>Completed on May 2, 2023</h6>
         </section>
 
         <hr>
 
-        <section class="history-item">
-            <img src="https://via.placeholder.com/120x160" alt="Book poster" class="item-image">
+        <!-- Books -->
+        
+        <section class="history-item" data-type="book">
+            <img src="https://m.media-amazon.com/images/I/71FxgtFKcQL._AC_UF1000,1000_QL80_.jpg" alt="To Kill a Mockingbird" class="item-image">
             <div class="item-content">
-                <h3>Book Title</h3>
-                <p>This is the synopsis of the book...</p>
+                <h3>To Kill a Mockingbird by Harper Lee</h3>
+                <p>The story of a young girl and her family living in a small town during the Great Depression, and her father's defense of a black man falsely accused of rape.</p>
                 <button class="more-btn">More</button>
             </div>
-            <h6>Completed</h6>
-
+            <h6>Completed on March 22, 2023</h6>
         </section>
+
+        <!-- Pagination -->
+        <nav aria-label="History pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                </li>
+            </ul>
+        </nav>
     </main>
 
     <%- include('../partials/footer') %>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-   <script src="../../js/share.js"></script>
+    <script src="../../js/share.js"></script>
+    
 </body>
 </html>

@@ -6,7 +6,6 @@
     <title>My Watchlist</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../css/watchlist/watchlist.css">
-   
     
 </head>
 <body>
@@ -19,7 +18,6 @@
                 <button class="filter-btn active">All</button>
                 <button class="filter-btn">Movies</button>
                 <button class="filter-btn">Books</button>
-                
             </div>
             
             <div class="action-buttons">
@@ -28,11 +26,12 @@
             </div>
         </section>
 
-        <section class="watchlist-item">
-            <img src="https://via.placeholder.com/120x160" alt="Movie poster" class="item-image">
+        <!-- Movie Items -->
+        <section class="watchlist-item" data-type="movie">
+            <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_FMjpg_UX1000_.jpg" alt="Titanic poster" class="item-image">
             <div class="item-content">
-                <h2>Movie Title</h2>
-                <p>This is the synopsis of the movie...</p>
+                <h2>Titanic (1997)</h2>
+                <p>A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.</p>
                 <button class="more-btn">More</button>
             </div>
             <div class="item-actions">
@@ -43,11 +42,11 @@
             </div>
         </section>
 
-        <section class="watchlist-item">
-            <img src="https://via.placeholder.com/120x160" alt="Music cover" class="item-image">
+        <section class="watchlist-item" data-type="movie">
+            <img src="https://m.media-amazon.com/images/M/MV5BMDFkYTc0MGEtZmNhMC00ZDIzLWFmNTEtODM1ZmRlYWMwMWFmXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg" alt="The Shawshank Redemption poster" class="item-image">
             <div class="item-content">
-                <h2>Music Title</h2>
-                <p>This is the details of the music... </p>
+                <h2>The Shawshank Redemption (1994)</h2>
+                <p>Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.</p>
                 <button class="more-btn">More</button>
             </div>
             <div class="item-actions">
@@ -58,11 +57,11 @@
             </div>
         </section>
 
-        <section class="watchlist-item">
-            <img src="https://via.placeholder.com/120x160" alt="Book cover" class="item-image">
+        <section class="watchlist-item" data-type="movie">
+            <img src="https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg" alt="The Godfather poster" class="item-image">
             <div class="item-content">
-                <h2>Book Title</h2>
-                <p>This is the synopsis of the book... </p>
+                <h2>The Godfather (1972)</h2>
+                <p>The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.</p>
                 <button class="more-btn">More</button>
             </div>
             <div class="item-actions">
@@ -72,11 +71,57 @@
                 </ul>
             </div>
         </section>
+
+        <!-- Book Items -->
+        <section class="watchlist-item" data-type="book">
+            <img src="https://m.media-amazon.com/images/I/71kxa1-0mfL._AC_UF1000,1000_QL80_.jpg" alt="1984 book cover" class="item-image">
+            <div class="item-content">
+                <h2>1984 by George Orwell</h2>
+                <p>A dystopian novel set in Airstrip One, a province of the superstate Oceania in a world of perpetual war, omnipresent government surveillance, and public manipulation.</p>
+                <button class="more-btn">More</button>
+            </div>
+            <div class="item-actions">
+                <ul class="action-list">
+                    <li><button class="mark-btn">Mark as completed</button></li>
+                    <li><button class="remove-btn">Remove</button></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="watchlist-item" data-type="book">
+            <img src="https://m.media-amazon.com/images/I/71FxgtFKcQL._AC_UF1000,1000_QL80_.jpg" alt="To Kill a Mockingbird book cover" alt="To Kill a Mockingbird book cover" class="item-image">
+            <div class="item-content">
+                <h2>To Kill a Mockingbird by Harper Lee</h2>
+                <p>The story of a young girl and her family living in a small town during the Great Depression, and her father's defense of a black man falsely accused of rape.</p>
+                <button class="more-btn">More</button>
+            </div>
+            <div class="item-actions">
+                <ul class="action-list">
+                    <li><button class="mark-btn">Mark as completed</button></li>
+                    <li><button class="remove-btn">Remove</button></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Pagination -->
+        <nav aria-label="Watchlist pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                </li>
+            </ul>
+        </nav>
     </main>
 
     <%- include('../partials/footer') %>
 
-<!--  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../js/share.js"></script>
     
 </body>

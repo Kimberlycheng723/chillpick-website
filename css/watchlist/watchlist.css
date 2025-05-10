@@ -256,6 +256,40 @@ h1 {
   border-top: 1px solid #dee2e6;
 }
 
+.pagination {
+  margin-top: 2rem;
+  justify-content: center;
+}
+
+.page-item .page-link {
+  color: #6b4f3d; /* Earthy brown matching your h1 color */
+  background-color: #EBE8D5; /* Light beige matching your navbar */
+  border: 1px solid #d4d0c0;
+  padding: 0.5rem 0.9rem;
+  margin: 0 3px;
+  border-radius: 4px !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.page-item .page-link:hover {
+  background-color: #d4d0c0; /* Slightly darker beige on hover */
+  color: #5a4232;
+  border-color: #c4c0b0;
+}
+
+.page-item.active .page-link {
+  background-color: #A89884; /* Warm taupe matching your footer */
+  border-color: #A89884;
+  color: white;
+}
+
+.page-item.disabled .page-link {
+  color: #b8b4a4;
+  background-color: #f3f3e6; /* Matching body background */
+  border-color: #e0dcd0;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .action-buttons {
@@ -290,4 +324,13 @@ h1 {
       gap: 6px;
       justify-content: flex-end;
   }
+  .page-item .page-link {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.9rem;
+}
+
+.pagination {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
 }
