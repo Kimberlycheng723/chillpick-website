@@ -6,12 +6,14 @@
       <img src="../../images/logo_final.png" alt="ChillPick Logo" style="height: 60px;">
     </a>
 
-    <!-- Toggler for mobile -->
-    <button class="navbar-toggler border-2 rounded-3 px-2" type="button" data-bs-toggle="collapse"
-      data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
 
+    <!-- Toggler for mobile (only show when logged in) -->
+<div id="mobileMenuToggle" class="d-lg-none d-none">
+  <button class="navbar-toggler border-2 rounded-3 px-2" type="button" data-bs-toggle="collapse"
+    data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+</div>
     <!-- Centered Nav Links -->
     <div class="collapse navbar-collapse justify-content-center desktop-center" id="navbarNav">
       <div id="authNav">
@@ -107,6 +109,11 @@
 
 /* ✅ Mobile only adjustments */
 @media (max-width: 991.98px) {
+  #mobileMenuToggle {
+    margin-left: auto; /* Push to right */
+    display: flex;
+    align-items: center;
+  }
   .navbar-toggler {
     margin-left: auto;
   }
@@ -130,7 +137,13 @@
     const authNav = document.getElementById("authNav");
 
     const userTextLink = document.getElementById("userTextLink");
+    const mobileMenuToggle = document.getElementById("mobileMenuToggle");
 
+if (isLoggedIn) {
+  if (mobileMenuToggle) mobileMenuToggle.classList.remove("d-none");
+} else {
+  if (mobileMenuToggle) mobileMenuToggle.classList.add("d-none");
+}
 if (isLoggedIn) {
   if (userIcon) userIcon.classList.remove("d-none");
   if (userTextLink) userTextLink.classList.remove("d-none");
