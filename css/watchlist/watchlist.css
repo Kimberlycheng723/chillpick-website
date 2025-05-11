@@ -84,26 +84,36 @@ h1 {
   gap: 10px;
 }
 
-.filter-options {
+.filter-section {
+  padding-bottom: 0.5rem;
+  margin-bottom: -10px;
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
 }
 
-.filter-btn {
-  background: none;
+.filter-line {
+  height: 2px;
+  background-color: #d9d9d9;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.filter-buttons .btn {
+  background: transparent;
+  font-weight: 600;
+  color: #3c3c3c;
   border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-weight: 500;
-  margin-left: auto;
-  color: #555;
+  padding: 0.5rem 1rem;
 }
-.filter-btn:hover {
-  background-color: #E8E1D1;
+
+.filter-buttons .btn.active {
+  color: #2c1d0e;
+  border-bottom: 3px solid #2c1d0e;
+  border-radius: 0;
 }
+
+
 .history-btn {
   color: #3c3c3c;
   background: none;
@@ -158,14 +168,12 @@ h1 {
   margin-bottom: 1rem;
   flex-grow: 1;
 }
-
-/* Action Buttons */
 .action-buttons {
   display: flex;
   gap: 10px;
   margin-left: auto;
+  margin-top: 14px; /* slight push down to align naturally with filter buttons */
 }
-
 .share-btn {
   background:none;
   color: #3c3c3c;
@@ -215,7 +223,7 @@ h1 {
 }
 
 .mark-btn {
-  background-color: #3498db;
+  background-color:rgb(128, 184, 221);
   color: white;
   border: none;
   padding: 4px 8px;
@@ -254,75 +262,106 @@ h1 {
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid #dee2e6;
+  
 }
 
-.pagination {
-  margin-top: 2rem;
-  justify-content: center;
-}
-
-.page-item .page-link {
-  color: #6b4f3d; /* Earthy brown matching your h1 color */
-  background-color: #EBE8D5; /* Light beige matching your navbar */
-  border: 1px solid #d4d0c0;
-  padding: 0.5rem 0.9rem;
-  margin: 0 3px;
-  border-radius: 4px !important;
+/* Pagination */
+.pagination .page-link {
+  border-radius: 10px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  border: 1px solid #ddd;
+  color: #555;
 }
 
-.page-item .page-link:hover {
-  background-color: #d4d0c0; /* Slightly darker beige on hover */
-  color: #5a4232;
-  border-color: #c4c0b0;
+.pagination .page-item.active .page-link {
+  background-color: #f1dd93;
+  border-color: #f1dd93;
+  color: #2c1d0e;
 }
 
-.page-item.active .page-link {
-  background-color: #A89884; /* Warm taupe matching your footer */
-  border-color: #A89884;
-  color: white;
+.pagination .page-item:first-child .page-link {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
-.page-item.disabled .page-link {
-  color: #b8b4a4;
-  background-color: #f3f3e6; /* Matching body background */
-  border-color: #e0dcd0;
+.pagination .page-item:last-child .page-link {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
+
+.pagination .page-item:not(:first-child):not(:last-child) .page-link {
+  border-radius: 0;
+}
+
+
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .action-buttons {
-    margin-left: 0;
-    margin-top: 10px;
-    width: 100%;
-    justify-content: flex-end;
+
+  .history-btn,
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: inherit;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    background-color: transparent;
+    color: #3c3c3c;
+    text-decoration: none;
+    line-height: 1;
+    box-sizing: border-box;
   }
 
+.action-buttons {
+  display: flex;
+  margin-left: 0;
+  margin-top: -50px; /* previously 10px */
+  
+  width: 100%;
+  justify-content: flex-end;
+}
   .watchlist-item {
       flex-direction: column;
   }
   
+
   .item-image {
       width: 100%;
       height: auto;
       max-height: 200px;
   }
   
-  .filter-options {
-      justify-content: center;
+ 
+  .filter-wrapper {
+    margin-bottom: 1.5rem;
   }
   
   
+  .filter-line {
+    height: 2px;
+    background-color: #d9d9d9;
+    width: 100%;
+  }
   .history-btn {
       margin-left: 0;
-      margin-top: 10px;
+      
   }
   
   .action-list {
       margin-top: 6px;
       gap: 6px;
       justify-content: flex-end;
+      margin-bottom: 50px;
+      
   }
   .page-item .page-link {
     padding: 0.4rem 0.7rem;
@@ -333,4 +372,15 @@ h1 {
     flex-wrap: wrap;
     row-gap: 8px;
 }
+
+
 }
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  position: relative;
+  top: -12px; /* move buttons up */
+}
+

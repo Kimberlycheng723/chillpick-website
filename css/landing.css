@@ -143,28 +143,3 @@ body {
     font-weight: 200;
   }
 
-  footer {
-    background-color: #ece8d9;
-    color: #4e4e4e;
-    padding: 30px 0;
-    font-size: 1rem;
-    text-align: center;
-  }
-
-  .footer-links {
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      flex-wrap: wrap;
-  }
-
-  .footer-links a {
-      color: #4e4e4e;
-      text-decoration: none;
-      font-weight: 600;
-  }
-  
-  .footer-links a:hover {
-    text-decoration: underline;
-  }

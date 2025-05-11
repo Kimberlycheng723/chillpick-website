@@ -28,10 +28,14 @@
   }
   .section-title {
     font-weight: 600;
-    margin-bottom: 20px;
-    color: #333;
+    margin-bottom: 0; /* Prevent margin below the text itself */
+    padding-bottom: 8px; /* Space between text and orange line */
     border-bottom: 2px solid var(--orange);
-    padding-bottom: 8px;
+    color: #333;
+  }
+  
+  .section-title + .row {
+    margin-top: 30px;
   }
   .btn-orange {
     background-color: var(--orange);
@@ -226,3 +230,11 @@
   border-top: 4px solid #ffc107;
 }
 
+@media (max-width: 767.98px) {
+  .profile-sidebar,
+  .profile-content {
+    padding: 20px;
+    margin-bottom: 20px;
+    height: auto !important; /* Remove fixed height on mobile */
+  }
+}

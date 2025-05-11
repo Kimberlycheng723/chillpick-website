@@ -99,6 +99,13 @@ body {
     font-weight: 500;
     color: #555;
 }
+
+.filter-buttons .btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+}
 .action-buttons {
   display: flex;
   gap: 10px;
@@ -171,8 +178,9 @@ body {
 }
 
 .more-btn {
-    background-color: #3498db;
-    color: white;
+    background-color:rgb(211, 210, 210);
+    color:black;
+  border-color: rgb(211, 210, 210);
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
@@ -182,41 +190,81 @@ body {
 }
 
 .more-btn:hover {
-    background-color: #2980b9;
+    background-color:rgb(161, 161, 161);
 }
 
-.pagination {
-  margin-top: 2rem;
-  justify-content: center;
-}
 
-.page-item .page-link {
-  color: #6b4f3d; /* Earthy brown matching your h1 color */
-  background-color: #EBE8D5; /* Light beige matching your navbar */
-  border: 1px solid #d4d0c0;
-  padding: 0.5rem 0.9rem;
-  margin: 0 3px;
-  border-radius: 4px !important;
+/* Pagination */
+.pagination .page-link {
+  border-radius: 10px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  border: 1px solid #ddd;
+  color: #555;
 }
 
-.page-item .page-link:hover {
-  background-color: #d4d0c0; /* Slightly darker beige on hover */
-  color: #5a4232;
-  border-color: #c4c0b0;
+.pagination .page-item.active .page-link {
+  background-color: #f1dd93;
+  border-color: #f1dd93;
+  color: #2c1d0e;
 }
 
-.page-item.active .page-link {
-  background-color: #A89884; /* Warm taupe matching your footer */
-  border-color: #A89884;
-  color: white;
+.pagination .page-item:first-child .page-link {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
-.page-item.disabled .page-link {
-  color: #b8b4a4;
-  background-color: #f3f3e6; /* Matching body background */
-  border-color: #e0dcd0;
+.pagination .page-item:last-child .page-link {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.pagination .page-item:not(:first-child):not(:last-child) .page-link {
+  border-radius: 0;
+}
+
+.filter-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.filter-section {
+  padding-bottom: 0.5rem;
+  margin-bottom: -10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.filter-line {
+  height: 2px;
+  background-color: #d9d9d9;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.filter-buttons .btn {
+  background: transparent;
+  font-weight: 600;
+  color: #3c3c3c;
+  border: none;
+  padding: 0.5rem 1rem;
+}
+
+.filter-buttons .btn.active {
+  color: #2c1d0e;
+  border-bottom: 3px solid #2c1d0e;
+  border-radius: 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  position: relative;
+  top: -12px; /* lift it up slightly */
 }
 
 /* Responsive Design */
@@ -226,12 +274,15 @@ body {
     align-items: flex-start;
   }
 
+
   .action-buttons {
+    display: flex;
+    margin-left: 0;
+    margin-top: -50px; /* previously 10px */
+    
     width: 100%;
     justify-content: flex-end;
-    margin-top: 10px;
   }
-  
     .history-item {
         flex-direction: column;
         gap: 15px;
