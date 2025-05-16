@@ -1,3 +1,4 @@
+// DOM Elements
 const emailInput = document.getElementById("email");
 const usernameInput = document.getElementById("username");
 const phoneInput = document.getElementById("phone");
@@ -9,6 +10,17 @@ const emailMessage = document.getElementById("emailMessage");
 const passwordMessage = document.getElementById("passwordMessage");
 const usernameMessage = document.getElementById("usernameMessage");
 
+let lastRegisteredEmail = null; // To store the last registered email
+
+// On page load: retrieve last registered email from localStorage
+document.addEventListener("DOMContentLoaded", () => {
+  const storedEmail = localStorage.getItem("lastRegisteredEmail");
+  if (storedEmail) {
+    lastRegisteredEmail = storedEmail;
+  }
+});
+
+// Validators
 function validateEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
@@ -31,47 +43,65 @@ togglePassword.addEventListener("click", () => {
 });
 
 // Real-time username validation
-usernameInput.addEventListener("input", function() {
-  const username = this.value.trim();
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  
+usernameInput.addEventListener("input", checkUsernameAvailability);
+
+async function checkUsernameAvailability() {
+  const username = usernameInput.value.trim();
   if (!validateUsername(username)) {
     usernameMessage.textContent = "Username must be 3-20 characters (letters, numbers, underscores)";
     return;
   }
-  
-  if (users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
-    usernameMessage.textContent = "Username already taken";
-  } else {
-    usernameMessage.textContent = "";
+
+  try {
+    const res = await fetch("/account/check-username", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username }),
+    });
+
+    const data = await res.json();
+    usernameMessage.textContent = data.exists ? "Username already taken." : "";
+  } catch (err) {
+    console.error("Username check failed:", err);
   }
-});
+}
 
 // Real-time email validation
-emailInput.addEventListener("input", () => {
-  const email = emailInput.value.trim().toLowerCase();
-  const users = JSON.parse(localStorage.getItem("users")) || [];
+emailInput.addEventListener("input", checkEmailAvailability);
 
+async function checkEmailAvailability() {
+  const email = emailInput.value.trim().toLowerCase();
   if (!validateEmail(email)) {
     emailMessage.textContent = "Please enter a valid email address.";
-  } else if (users.some(user => user.email.toLowerCase() === email)) {
-    emailMessage.textContent = "Email already registered. Please use another.";
-  } else {
-    emailMessage.textContent = "";
+    return;
   }
-});
+
+  try {
+    const res = await fetch("/account/check-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+    emailMessage.textContent = data.exists ? "Email is already registered." : "";
+  } catch (err) {
+    console.error("Email check failed:", err);
+  }
+}
 
 // Real-time password validation
 passwordInput.addEventListener("input", () => {
   if (!validatePassword(passwordInput.value)) {
-    passwordMessage.textContent = "Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.";
+    passwordMessage.textContent =
+      "Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.";
   } else {
     passwordMessage.textContent = "";
   }
 });
 
 // Form submission
-document.getElementById("registerForm").addEventListener("submit", function(e) {
+document.getElementById("registerForm").addEventListener("submit", async function (e) {
   e.preventDefault();
 
   const username = usernameInput.value.trim();
@@ -79,42 +109,85 @@ document.getElementById("registerForm").addEventListener("submit", function(e) {
   const phone = phoneInput.value.trim();
   const password = passwordInput.value;
 
-  const users = JSON.parse(localStorage.getItem("users")) || [];
+  let valid = true;
 
   if (!validateUsername(username)) {
     usernameMessage.textContent = "Username must be 3-20 characters (letters, numbers, underscores)";
-    return;
-  }
-
-  if (users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
-    usernameMessage.textContent = "Username already taken";
-    return;
+    valid = false;
   }
 
   if (!validateEmail(email)) {
     emailMessage.textContent = "Please enter a valid email address.";
-    return;
-  }
-
-  if (users.some(user => user.email.toLowerCase() === email)) {
-    emailMessage.textContent = "Email already registered. Please use another.";
-    return;
+    valid = false;
   }
 
   if (!validatePassword(password)) {
-    passwordMessage.textContent = "Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.";
+    passwordMessage.textContent =
+      "Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.";
+    valid = false;
+  }
+
+  if (!valid) return;
+
+  try {
+    const response = await fetch("/account/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, phone, password }),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      lastRegisteredEmail = email;
+      localStorage.setItem("lastRegisteredEmail", email);
+      userEmailDisplay.textContent = email;
+
+      const popup = new bootstrap.Modal(document.getElementById("emailModal"));
+      popup.show();
+
+      document.getElementById("registerForm").reset();
+    } else {
+      if (result.message === "Username already exists.") {
+        usernameMessage.textContent = result.message;
+      } else if (result.message === "Email already exists.") {
+        emailMessage.textContent = result.message;
+      } else {
+        alert("Registration failed: " + result.message);
+      }
+    }
+  } catch (error) {
+    console.error("Registration error:", error);
+    alert("Something went wrong. Please try again later.");
+  }
+});
+
+// Resend verification email
+document.getElementById("resendEmailBtn").addEventListener("click", async () => {
+  console.log("Resend button clicked");
+
+  if (!lastRegisteredEmail) {
+    alert("Missing email for resend.");
     return;
   }
 
-  // Save new user
-  const newUser = { username, email, phone, password };
-  users.push(newUser);
-  localStorage.setItem("users", JSON.stringify(users));
+  try {
+    console.log("Sending resend request for:", lastRegisteredEmail);
+    const response = await fetch("/account/resend-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: lastRegisteredEmail }),
+    });
 
-  userEmailDisplay.textContent = email;
-  const popup = new bootstrap.Modal(document.getElementById("emailModal"));
-  popup.show();
+    const result = await response.json();
 
-  // Optional: clear form after registration
-  document.getElementById("registerForm").reset();
+    if (response.ok) {
+      alert("Verification email resent!");
+    } else {
+      alert("Resend failed: " + result.message);
+    }
+  } catch (error) {
+    console.error("Resend error:", error);
+    alert("Error while resending email.");
+  }
 });

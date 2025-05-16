@@ -49,7 +49,6 @@
 </body>
 </html>
 
-
 <style>
   .custom-navbar {
     background-color: #f4f2e6;
@@ -126,59 +125,60 @@
     color: white;
   }
 }
-
 </style>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
+<script>
+  document.addEventListener("DOMContentLoaded", async function () {
     const userIcon = document.getElementById("userIcon");
     const loginLink = document.getElementById("loginLink");
     const authNav = document.getElementById("authNav");
-
     const userTextLink = document.getElementById("userTextLink");
     const mobileMenuToggle = document.getElementById("mobileMenuToggle");
 
-if (isLoggedIn) {
-  if (mobileMenuToggle) mobileMenuToggle.classList.remove("d-none");
-} else {
-  if (mobileMenuToggle) mobileMenuToggle.classList.add("d-none");
-}
-if (isLoggedIn) {
-  if (userIcon) userIcon.classList.remove("d-none");
-  if (userTextLink) userTextLink.classList.remove("d-none");
-  if (loginLink) loginLink.classList.add("d-none");
-} else {
-  if (userIcon) userIcon.classList.add("d-none");
-  if (userTextLink) userTextLink.classList.add("d-none");
-  if (loginLink) loginLink.classList.remove("d-none");
-}
-    if (isLoggedIn) {
-      // ✅ Show profile icon
-      if (userIcon) userIcon.classList.remove("d-none");
-      // ❌ Hide Sign In button
-      if (loginLink) loginLink.classList.add("d-none");
-      // ✅ Show nav
-      if (authNav) authNav.style.display = "block";
+    try {
+      const response = await fetch("/account/profile-data", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      });
 
-      // 🔁 Load custom profile picture if exists
-      const currentUserEmail = localStorage.getItem("currentUser");
-      if (currentUserEmail) {
-        const profileData = JSON.parse(localStorage.getItem(`profile_${currentUserEmail}`)) || {};
-        const profilePicUrl = profileData.profilePicture;
-        const img = userIcon?.querySelector("img");
-        if (profilePicUrl && img) img.src = profilePicUrl;
+      if (!response.ok) throw new Error("Failed to fetch user data");
+
+      const currentUser = await response.json();
+
+      if (currentUser) {
+        // Show items for logged-in users
+        mobileMenuToggle?.classList.remove("d-none");
+        userIcon?.classList.remove("d-none");
+        userTextLink?.classList.remove("d-none");
+        loginLink?.classList.add("d-none");
+        authNav?.style.setProperty("display", "block");
+
+        // Load profile picture if available
+        const headerImg = userIcon.querySelector("img");
+        if (headerImg) {
+          headerImg.src = currentUser.profilePicture || "/images/profile_pic.png";
+        }
+      } else {
+        // Treat as not logged in
+        mobileMenuToggle?.classList.add("d-none");
+        userIcon?.classList.add("d-none");
+        userTextLink?.classList.add("d-none");
+        loginLink?.classList.remove("d-none");
+        authNav?.style.setProperty("display", "none");
       }
-    } else {
-      // ❌ Hide profile icon
-      if (userIcon) userIcon.classList.add("d-none");
-      // ✅ Show Sign In button
-      if (loginLink) loginLink.classList.remove("d-none");
-      // ❌ Hide nav
-      if (authNav) authNav.style.display = "none";
+
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      // Default to logged-out view on error
+      mobileMenuToggle?.classList.add("d-none");
+      userIcon?.classList.add("d-none");
+      userTextLink?.classList.add("d-none");
+      loginLink?.classList.remove("d-none");
+      authNav?.style.setProperty("display", "none");
     }
 
-    // 📱 Collapse mobile menu on link click
+    // Close mobile menu when a nav link is clicked
     document.querySelectorAll(".navbar-nav .nav-link").forEach(link => {
       link.addEventListener("click", () => {
         const toggler = document.querySelector(".navbar-toggler");
@@ -190,6 +190,3 @@ if (isLoggedIn) {
     });
   });
 </script>
-
-<!-- Bootstrap JavaScript Bundle with Popper -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->

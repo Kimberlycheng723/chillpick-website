@@ -158,3 +158,45 @@ body {
 .popup.active {
   display: block;
 }
+
+.password-req li {
+      font-size: 0.85rem;
+    }
+    .position-relative .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+
+    .reset-container {
+      background: #fff;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 450px;
+      margin: 5% 0;
+      align-self: center;
+/* margin-left: 130px;     */
+}
+    /* Make input group position relative for toggle icon */
+    .position-relative {
+      position: relative;
+    }
+    /* Position toggle icon nicely inside input */
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      width: 24px;
+      color: #888;
+      user-select: none;
+    }
+    /* Change icon color on hover */
+    .toggle-password:hover {
+      color: #EB8826;
+    }
