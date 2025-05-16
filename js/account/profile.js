@@ -435,6 +435,11 @@ if (document.getElementById('confirmDeleteCheckbox').checked) {
           localStorage.setItem(`profile_${currentUserEmail}`, JSON.stringify(profileData));
         }
 
+        const headerImg = document.querySelector("#userIcon img"); // Adjust if your header uses a different ID
+        if (headerImg) {
+          headerImg.src = e.target.result;
+        }
+
         uploadPicModal.hide();
         showSuccessModal();
       }

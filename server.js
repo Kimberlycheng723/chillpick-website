@@ -16,7 +16,9 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+const discoverRoutes = require('./routes/discover');
+app.use('/api/discover', discoverRoutes);
+app.use('/', discoverRoutes);        
 app.use((req, res, next) => {
   // Dev-only: Toggle login state with URL query
   if (req.query.login === 'true') {
@@ -54,21 +56,16 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (req, res) => res.render('landing')); // 
+app.get('/', (req, res) => res.render('landing')); // ✅
 app.get('/dashboard', (req, res) => res.render('dashboard'));
 app.get('/discover', (req, res) => res.render('discover'));
 app.get('/watchlist', (req, res) => res.render('watchlist/watchlist'));
 app.get('/history', (req, res) => res.render('watchlist/history'));
 
-app.get('/login', (req, res) => res.send('Login route is working.'));
+app.get('/login', (req, res) => res.send('✅ Login route is working.'));
 app.get('/register', (req, res) => res.render('account/register'));
 app.get('/forgotPassword', (req, res) => res.render('account/forgotPassword'));
-app.get('/movie_detail', (req, res) => {
-  res.render('detail_page/movie_detail');
-});
-app.get('/book_detail', (req, res) => {
-  res.render('detail_page/book_detail');
-});
+
 
 app.get('/profile', (req, res) => {
   if (res.locals.currentUser) {
