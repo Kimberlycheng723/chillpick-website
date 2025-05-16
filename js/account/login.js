@@ -1,74 +1,80 @@
-  const passwordInput = document.getElementById("password");
-  const usernameInput = document.getElementById("username");
-  const togglePassword = document.getElementById("togglePassword");
-  const passwordIcon = document.getElementById("passwordIcon");
-  const activeSessionModal = new bootstrap.Modal(document.getElementById('activeSessionModal'));
-  const continueBtn = document.getElementById('continueBtn');
+const passwordInput = document.getElementById("password");
+const usernameInput = document.getElementById("username");
+const togglePassword = document.getElementById("togglePassword");
+const passwordIcon = document.getElementById("passwordIcon");
+const usernameError = document.getElementById("usernameError");
+const passwordError = document.getElementById("passwordError");
 
-  let matchedUser = null;
+// Toggle password visibility
+togglePassword.addEventListener("click", () => {
+  passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+  passwordIcon.classList.toggle("bi-eye");
+  passwordIcon.classList.toggle("bi-eye-slash");
+});
 
-  // Toggle password visibility
-  togglePassword.addEventListener("click", () => {
-    passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-    passwordIcon.classList.toggle("bi-eye");
-    passwordIcon.classList.toggle("bi-eye-slash");
-  });
+// Form submission
+document.getElementById("loginForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-  // Form submission
-  document.getElementById("loginForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+  usernameError.textContent = "";
+  passwordError.textContent = "";
 
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value;
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value;
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    matchedUser = users.find(user => user.username === username && user.password === password);
+  try {
+    const response = await fetch("/account/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+      credentials: "include"
+    });
 
-    if (matchedUser) {
-      const activeSessions = JSON.parse(localStorage.getItem("activeSessions")) || {};
-      const currentSession = activeSessions[matchedUser.email];
+    const result = await response.json();
 
-      if (currentSession) {
-        // Show the modal if session exists
-        activeSessionModal.show();
+    // If another session is detected
+    if (response.status === 409 && result.activeSessionDetected) {
+      const modal = new bootstrap.Modal(document.getElementById('activeSessionModal'));
+      modal.show();
+
+      document.getElementById("continueBtn").onclick = async () => {
+        modal.hide();
+
+        const loginRes = await fetch("/account/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, force: true }),
+          credentials: "include"
+        });
+
+        const loginResult = await loginRes.json();
+        if (loginRes.ok) {
+          window.location.href = "/account/profile";
+        } else {
+          alert(loginResult.message || "❌ Failed to login after force logout.");
+        }
+      };
+
+      return;
+    }
+
+    // Error handling
+    if (!response.ok) {
+      if (result.type === "username") {
+        usernameError.textContent = result.message;
+      } else if (result.type === "password") {
+        passwordError.textContent = result.message;
       } else {
-        completeLogin(matchedUser);
+        alert(result.message || "Login failed");
       }
-    } else {
-      alert('Invalid username or password.');
+      return;
     }
-  });
 
-  // Continue button to override active session
-  continueBtn.addEventListener("click", () => {
-    if (matchedUser) {
-      completeLogin(matchedUser);
-      activeSessionModal.hide();
-    } else {
-      alert("User session expired. Please log in again.");
-    }
-  });
-
-  function completeLogin(user) {
-    const sessionId = 'session_' + Date.now() + Math.random().toString(36).substr(2, 9);
-    const sessionData = {
-      sessionId: sessionId,
-      loginTime: new Date().toISOString(),
-      lastActivity: Date.now()
-    };
-
-    const activeSessions = JSON.parse(localStorage.getItem("activeSessions")) || {};
-    activeSessions[user.email] = sessionData;
-    localStorage.setItem("activeSessions", JSON.stringify(activeSessions));
-
-    localStorage.setItem("currentUser", user.email);
-    localStorage.setItem("currentSession", sessionId);
-
-    localStorage.setItem("isLoggedIn", "true");
-
-    // Debug
-    console.log("✅ Login complete. Redirecting to /account/profile");
-
-    // Redirect
+    // Success
     window.location.href = "/account/profile";
+
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("Something went wrong. Please try again.");
   }
+});

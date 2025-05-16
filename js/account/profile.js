@@ -1,581 +1,596 @@
-document.addEventListener('DOMContentLoaded', function () {
-  // Get current user from localStorage
-  const currentUserEmail = localStorage.getItem('currentUser');
-  const users = JSON.parse(localStorage.getItem('users')) || [];
-  const currentUser = users.find(user => user.email === currentUserEmail);
-
-  if (!currentUser) {
-    alert('Please login first');
-    window.location.href = '/account/login';
+document.addEventListener("DOMContentLoaded", async function () {
+  // --- Fetch Profile Data ---
+  const welcomeMessageElement = document.getElementById("welcomeMessage");
+  if (!welcomeMessageElement) {
+    console.error("Element with id 'welcomeMessage' not found.");
     return;
   }
 
-  // Load user data
-  document.getElementById('welcomeMessage').textContent = `Welcome back, ${currentUser.username}`;
-  document.getElementById('profileName').textContent = currentUser.username;
-  document.getElementById('profileEmail').textContent = currentUser.email;
-  document.getElementById('usernameField').value = currentUser.username;
-  document.getElementById('emailField').value = currentUser.email;
-  document.getElementById('phoneField').value = currentUser.phone || '';
+  // fetch("/account/check-session", { credentials: "include" })
+  // .then(res => {
+  //   if (res.status === 401) {
+  //     window.location.href = "/login?reason=session-expired";
+  //   }
+  // });
 
 
-  // And add this profile data loading section
-  const profileData = JSON.parse(localStorage.getItem(`profile_${currentUser.email}`)) || {};
-  if (profileData.gender) {
-    document.getElementById('genderField').value = profileData.gender;
-  }
-  if (profileData.bio) {
-    document.getElementById('bioText').textContent = profileData.bio;
-    document.getElementById('bioText').classList.remove('bio-placeholder');
-  }
-  if (profileData.phone) {
-    document.getElementById('phoneField').value = profileData.phone;
-  }
-
-  // Modal functionality
-  const successModal = document.getElementById('successModal');
-  const closeModalBtn = document.getElementById('closeModalBtn');
-
-  function showSuccessModal() {
-    successModal.classList.add('show');
-  }
-
-  function hideSuccessModal() {
-    successModal.classList.remove('show');
-  }
-
-  closeModalBtn.addEventListener('click', hideSuccessModal);
-  successModal.addEventListener('click', function (e) {
-    if (e.target === successModal) hideSuccessModal();
-  });
-
-  // Bio Editor
-  const bioDisplay = document.getElementById('bioDisplay');
-  const bioEdit = document.getElementById('bioEdit');
-  const bioText = document.getElementById('bioText');
-  const bioInput = document.getElementById('bioInput');
-
-  document.getElementById('editBioBtn').addEventListener('click', function () {
-    bioDisplay.classList.add('d-none');
-    bioEdit.classList.remove('d-none');
-    bioInput.value = bioText.classList.contains('bio-placeholder') ? '' : bioText.textContent;
-    bioInput.focus();
-  });
-
-  document.getElementById('saveBioBtn').addEventListener('click', function () {
-    const newBio = bioInput.value.trim();
-    if (newBio) {
-      bioText.textContent = newBio;
-      bioText.classList.remove('bio-placeholder');
-    } else {
-      bioText.textContent = 'Add your bio...';
-      bioText.classList.add('bio-placeholder');
-    }
-
-    // Save to profile data
-    const profileData = JSON.parse(localStorage.getItem(`profile_${currentUser.email}`)) || {};
-    profileData.bio = newBio || null;
-    localStorage.setItem(`profile_${currentUser.email}`, JSON.stringify(profileData));
-
-    bioDisplay.classList.remove('d-none');
-    bioEdit.classList.add('d-none');
-    showSuccessModal();
-  });
-
-  document.getElementById('cancelBioBtn').addEventListener('click', function () {
-    bioDisplay.classList.remove('d-none');
-    bioEdit.classList.add('d-none');
-  });
-
-  // Edit/Save toggle
-  const editBtn = document.getElementById('editBtn');
-  editBtn.addEventListener('click', function () {
-    const isEditMode = this.textContent === 'Edit';
-
-    document.querySelectorAll('.form-control').forEach(input => {
-      if (input.id !== 'emailField' && input.id !== 'usernameField') {
-        input.readOnly = !isEditMode;
-      }
+  try {
+    const response = await fetch("/account/profile-data", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
     });
 
-    document.getElementById('genderField').disabled = !isEditMode;
+    if (!response.ok) throw new Error("Failed to load profile");
 
-    if (isEditMode) {
-      this.textContent = 'Save';
-      this.classList.remove('btn-outline-orange');
-      this.classList.add('btn-orange');
-    } else {
-      this.textContent = 'Edit';
-      this.classList.add('btn-outline-orange');
-      this.classList.remove('btn-orange');
-
-      // Save profile data
-      const profileData = JSON.parse(localStorage.getItem(`profile_${currentUser.email}`)) || {};
-      profileData.phone = document.getElementById('phoneField').value.trim();
-      profileData.gender = document.getElementById('genderField').value;
-      localStorage.setItem(`profile_${currentUser.email}`, JSON.stringify(profileData));
-
-      showSuccessModal();
+    const currentUser = await response.json();
+    welcomeMessageElement.textContent = `Welcome back, ${currentUser.username || "User"}`;
+    document.getElementById("profileName").textContent = currentUser.username;
+    document.getElementById("profileEmail").textContent = currentUser.email;
+    document.getElementById("usernameField").value = currentUser.username;
+    document.getElementById("emailField").value = currentUser.email;
+    document.getElementById("phoneField").value = currentUser.phone || "";
+    document.getElementById("genderField").value = currentUser.gender || "";
+    document.getElementById("bioText").textContent = currentUser.bio || "Add your bio...";
+    document.getElementById("bioText").classList.toggle("bio-placeholder", !currentUser.bio);
+    if (currentUser.profilePicture) {
+      document.getElementById("profilePicture").src = currentUser.profilePicture;
     }
-  });
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Failed to load profile. Please log in again.");
+    window.location.href = "/account/login";
+  }
 
-  // Change Password Functionality
-  const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
-  const changePasswordForm = document.getElementById('changePasswordForm');
-  const currentPasswordInput = document.getElementById('currentPassword');
-  const newPasswordInput = document.getElementById('newPassword');
-  const confirmPasswordInput = document.getElementById('confirmPassword');
 
-  // Toggle password visibility
-  document.querySelectorAll('.toggle-password').forEach(button => {
-    button.addEventListener('click', function () {
-      const targetId = this.getAttribute('data-target');
-      const input = document.getElementById(targetId);
-      const icon = this.querySelector('i');
+  // --- Session Expiration Warning ---
+ let inactivityTimer;
+let warningTimer;
+let countdownInterval;
+let isWarningActive = false; // NEW FLAG
 
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
+function resetInactivityTimer() {
+  if (isWarningActive) return; // 🛑 Prevent reset during modal
+
+  clearTimeout(inactivityTimer);
+  clearTimeout(warningTimer);
+  clearInterval(countdownInterval);
+  hideSessionModal();
+
+  inactivityTimer = setTimeout(() => {
+    startSessionWarningTimer(); // Trigger modal after inactivity
+  }, 2 * 60 * 1000);
+}
+
+function startSessionWarningTimer() {
+  isWarningActive = true; // 🟡 Set flag
+  const sessionExpiringModal = new bootstrap.Modal(document.getElementById("sessionExpiringModal"));
+    const sessionExpiredModal = new bootstrap.Modal(document.getElementById("sessionExpiredModal"));
+
+
+  const countdownElement = document.getElementById("countdown");
+  let countdown = 60;
+
+  sessionExpiringModal.show();
+  countdownElement.textContent = "1:00";
+
+  countdownInterval = setInterval(() => {
+    countdown -= 1;
+    const minutes = Math.floor(countdown / 60);
+    const seconds = countdown % 60;
+    countdownElement.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+    if (countdown <= 0) {
+      clearInterval(countdownInterval);
+      isWarningActive = false;
+
+      fetch("/account/force-logout", {
+        method: "POST",
+        credentials: "include"
+      }).then(() => {
+        window.location.href = "/";
+      }).catch(() => {
+        window.location.href = "/";
+      });
+    }
+  }, 1000);
+
+  document.getElementById("stayLoggedInBtn").onclick = () => {
+    clearInterval(countdownInterval);
+    sessionExpiringModal.hide();
+    isWarningActive = false;
+
+    fetch("/account/extend-session", {
+      method: "POST",
+      credentials: "include",
+    }).then((res) => {
+      if (res.ok) {
+        resetInactivityTimer();
       } else {
-        input.type = 'password';
-        icon.classList.remove('bi-eye');
-        icon.classList.add('bi-eye-slash');
+        alert("Failed to extend session.");
+        window.location.href = "/";
       }
+    }).catch(() => {
+      window.location.href = "/";
     });
+  };
+
+document.getElementById("logoutNowBtn").onclick = () => {
+  isWarningActive = false;
+
+  fetch("/account/logout-now", {
+    method: "POST",
+    credentials: "include"
+  })
+  .then(res => {
+    if (res.ok) {
+      alert("✅ Logout successful!");
+      window.location.href = "/";
+    } else {
+      return res.json().then(data => {
+        alert(`❌ Logout failed: ${data.message || "Unknown error"}`);
+      });
+    }
+  })
+  .catch(() => {
+    alert("❌ Network error during logout.");
   });
-
-  document.getElementById('changePasswordBtn').addEventListener('click', function () {
-    changePasswordModal.show();
-    changePasswordForm.reset();
-
-    // Reset all fields and validation states
-    [currentPasswordInput, newPasswordInput, confirmPasswordInput].forEach(input => {
-      input.type = 'password';
-      input.classList.remove('is-invalid');
-      const icon = document.querySelector(`.toggle-password[data-target="${input.id}"] i`);
-      if (icon) {
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
-      }
-    });
-
-    // Clear any error messages
-    document.querySelectorAll('.invalid-feedback').forEach(el => {
-      el.textContent = '';
-    });
-  });
-
-  document.getElementById('savePasswordBtn').addEventListener('click', function () {
-    // Reset validation states
-    [currentPasswordInput, newPasswordInput, confirmPasswordInput].forEach(input => {
-      input.classList.remove('is-invalid');
-      const feedback = document.getElementById(`${input.id}Feedback`);
-      if (feedback) feedback.style.display = 'none';
-    });
-
-    // Get values
-    const currentPassword = currentPasswordInput.value.trim();
-    const newPassword = newPasswordInput.value.trim();
-    const confirmPassword = confirmPasswordInput.value.trim();
-
-    let isValid = true;
-
-    // Validate current password
-    if (!currentPassword) {
-      currentPasswordInput.classList.add('is-invalid');
-      document.getElementById('currentPasswordFeedback').style.display = 'block';
-      document.getElementById('currentPasswordFeedback').textContent = 'Current password is required';
-      isValid = false;
-    } else if (currentUser.password !== currentPassword) {
-      currentPasswordInput.classList.add('is-invalid');
-      document.getElementById('currentPasswordFeedback').style.display = 'block';
-      document.getElementById('currentPasswordFeedback').textContent = 'Current password is incorrect';
-      isValid = false;
-    }
-
-    // Validate new password
-    if (!newPassword) {
-      newPasswordInput.classList.add('is-invalid');
-      document.getElementById('newPasswordFeedback').style.display = 'block';
-      document.getElementById('newPasswordFeedback').textContent = 'New password is required';
-      isValid = false;
-    } else if (newPassword.length < 8) {
-      newPasswordInput.classList.add('is-invalid');
-      document.getElementById('newPasswordFeedback').style.display = 'block';
-      document.getElementById('newPasswordFeedback').textContent = 'Password must be at least 8 characters';
-      isValid = false;
-    } else if (!/[A-Z]/.test(newPassword)) {
-      newPasswordInput.classList.add('is-invalid');
-      document.getElementById('newPasswordFeedback').style.display = 'block';
-      document.getElementById('newPasswordFeedback').textContent = 'Password must contain at least 1 uppercase letter';
-      isValid = false;
-    } else if (!/[a-z]/.test(newPassword)) {
-      newPasswordInput.classList.add('is-invalid');
-      document.getElementById('newPasswordFeedback').style.display = 'block';
-      document.getElementById('newPasswordFeedback').textContent = 'Password must contain at least 1 lowercase letter';
-      isValid = false;
-    } else if (!/[0-9]/.test(newPassword)) {
-      newPasswordInput.classList.add('is-invalid');
-      document.getElementById('newPasswordFeedback').style.display = 'block';
-      document.getElementById('newPasswordFeedback').textContent = 'Password must contain at least 1 digit';
-      isValid = false;
-    } else if (newPassword === currentPassword) {
-      newPasswordInput.classList.add('is-invalid');
-      document.getElementById('newPasswordFeedback').style.display = 'block';
-      document.getElementById('newPasswordFeedback').textContent = 'New password must be different from current password';
-      isValid = false;
-    }
-
-    // Validate confirm password
-    if (!confirmPassword) {
-      confirmPasswordInput.classList.add('is-invalid');
-      document.getElementById('confirmPasswordFeedback').style.display = 'block';
-      document.getElementById('confirmPasswordFeedback').textContent = 'Please confirm your new password';
-      isValid = false;
-    } else if (confirmPassword !== newPassword) {
-      confirmPasswordInput.classList.add('is-invalid');
-      document.getElementById('confirmPasswordFeedback').style.display = 'block';
-      document.getElementById('confirmPasswordFeedback').textContent = 'Passwords do not match';
-      isValid = false;
-    }
-
-    if (isValid) {
-      // Update password in users array
-      const users = JSON.parse(localStorage.getItem('users')) || [];
-      const userIndex = users.findIndex(user => user.email === currentUser.email);
-
-      if (userIndex !== -1) {
-        users[userIndex].password = newPassword;
-        localStorage.setItem('users', JSON.stringify(users));
-
-        // Update currentUser in memory
-        currentUser.password = newPassword;
-
-        // Show success message and close modal
-        changePasswordModal.hide();
-        showSuccessModal();
-      }
-    }
-
-  });
-
-  // Logout
-  document.getElementById('logoutBtn').addEventListener('click', function () {
-    if (confirm('Are you sure you want to log out?')) {
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('currentSession');
-      localStorage.removeItem('activeSessions');
-      window.location.href = '/account/login';
-    }
-  });
-
-
-});
+};
 
 
 
-document.addEventListener('DOMContentLoaded', function () {
-// Get current user from localStorage
-const currentUserEmail = localStorage.getItem('currentUser');
-const users = JSON.parse(localStorage.getItem('users')) || [];
-const currentUser = users.find(user => user.email === currentUserEmail);
 
-// Modal elements
-const deleteAccountModal = document.getElementById('deleteAccountModal');
-const verifyPasswordModal = new bootstrap.Modal(document.getElementById('verifyPasswordModal'));
-const verifyPasswordError = document.getElementById('verifyPasswordError');
 
-// Show verify password modal when delete button is clicked
-document.getElementById('deleteAccountBtn').addEventListener('click', function () {
-// Reset the modal state
-document.getElementById('verifyPassword').value = '';
-document.getElementById('verifyPassword').classList.remove('is-invalid');
-document.getElementById('verifyPasswordFeedback').textContent = '';
-verifyPasswordError.style.display = 'none';
 
-verifyPasswordModal.show();
-});
-
-// Handle password verification
-document.getElementById('verifyPasswordBtn').addEventListener('click', function () {
-const passwordInput = document.getElementById('verifyPassword');
-const password = passwordInput.value.trim();
-const feedback = document.getElementById('verifyPasswordFeedback');
-
-// Reset validation state
-passwordInput.classList.remove('is-invalid');
-feedback.textContent = '';
-verifyPasswordError.style.display = 'none';
-
-// Validate password
-if (!password) {
-  passwordInput.classList.add('is-invalid');
-  feedback.textContent = 'Password is required';
-  verifyPasswordError.textContent = 'Password is required.';
-  verifyPasswordError.style.display = 'block';
-  passwordInput.focus();
-  return;
 }
 
-// Check if password matches
-if (password !== currentUser.password) {
-  verifyPasswordError.textContent = 'Incorrect password. Please try again.';
-  verifyPasswordError.style.display = 'block';
-  passwordInput.classList.add('is-invalid');
-  passwordInput.value = '';
-  passwordInput.focus();
-  return;
+function hideSessionModal() {
+  const modalEl = document.getElementById("sessionExpiringModal");
+  if (modalEl) {
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+  }
 }
 
-// Password is correct, proceed to delete confirmation
-verifyPasswordModal.hide();
-
-// Reset and show delete confirmation modal
-document.getElementById('confirmDeleteCheckbox').checked = false;
-document.getElementById('deleteAccountModalBtn').disabled = true;
-deleteAccountModal.classList.add('show'); // This line shows the delete confirmation modal
+// Only reset timer if not in warning phase
+["click", "mousemove", "keydown", "scroll", "touchstart"].forEach((event) => {
+  window.addEventListener(event, resetInactivityTimer);
 });
 
-// Make sure delete confirmation modal is hidden when verify modal is closed via cancel
-verifyPasswordModal._element.addEventListener('hidden.bs.modal', function() {
-// Only hide delete modal if it was shown after verification
-if (!document.getElementById('verifyPassword').value) {
-  deleteAccountModal.classList.remove('show');
-}
-});
-
-// Enable/disable delete button based on checkbox
-document.getElementById('confirmDeleteCheckbox').addEventListener('change', function () {
-document.getElementById('deleteAccountModalBtn').disabled = !this.checked;
-});
-
-// Close modal when clicking No
-document.getElementById('noDeleteAccountModalBtn').addEventListener('click', function () {
-deleteAccountModal.classList.remove('show');
-});
-
-// Close modal when clicking outside
-deleteAccountModal.addEventListener('click', function (e) {
-if (e.target === deleteAccountModal) {
-  deleteAccountModal.classList.remove('show');
-}
-});
-
-// Handle account deletion
-document.getElementById('deleteAccountModalBtn').addEventListener('click', function () {
-if (document.getElementById('confirmDeleteCheckbox').checked) {
-  // Remove user from users array
-  const updatedUsers = users.filter(user => user.email !== currentUser.email);
-  localStorage.setItem('users', JSON.stringify(updatedUsers));
-
-  // Remove all user-related data
-  localStorage.removeItem('currentUser');
-  localStorage.removeItem(`profile_${currentUser.email}`);
-  localStorage.removeItem('currentSession');
-  localStorage.removeItem('activeSessions');
-
-  // Close modal and redirect
-  deleteAccountModal.classList.remove('show');
-  window.location.href = '/account/register';
-}
-});
+// Start when page loads
+resetInactivityTimer();
 
 
-
-
-
-  // Profile Picture Upload Functionality
+  // --- Profile Picture Upload ---
   const uploadPicModal = new bootstrap.Modal(document.getElementById('uploadPicModal'));
   const profileImageInput = document.getElementById('profileImageInput');
   const imagePreview = document.getElementById('imagePreview');
   const profilePicture = document.getElementById('profilePicture');
+  const saveBtn = document.getElementById('saveProfilePicBtn');
 
-  // Open upload modal
   document.getElementById('uploadPicBtn').addEventListener('click', function () {
-    // Reset the input and preview
     profileImageInput.value = '';
     imagePreview.src = profilePicture.src;
     uploadPicModal.show();
   });
 
-  // Preview image when file is selected
   profileImageInput.addEventListener('change', function () {
     const file = this.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB limit
-        alert('File size should be less than 2MB');
-        this.value = '';
-        return;
-      }
-
+    if (file && file.size <= 2 * 1024 * 1024) {
       const reader = new FileReader();
       reader.onload = function (e) {
         imagePreview.src = e.target.result;
-      }
-      reader.readAsDataURL(file);
-    }
-  });
-
-  // Save profile picture
-  document.getElementById('saveProfilePicBtn').addEventListener('click', function () {
-    const file = profileImageInput.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        // Update profile picture
-        profilePicture.src = e.target.result;
-        imagePreview.src = e.target.result;
-
-        // Save to localStorage
-        const currentUserEmail = localStorage.getItem('currentUser');
-        if (currentUserEmail) {
-          const profileData = JSON.parse(localStorage.getItem(`profile_${currentUserEmail}`)) || {};
-          profileData.profilePicture = e.target.result;
-          localStorage.setItem(`profile_${currentUserEmail}`, JSON.stringify(profileData));
-        }
-
-        const headerImg = document.querySelector("#userIcon img"); // Adjust if your header uses a different ID
-        if (headerImg) {
-          headerImg.src = e.target.result;
-        }
-
-        uploadPicModal.hide();
-        showSuccessModal();
-      }
+      };
       reader.readAsDataURL(file);
     } else {
-      alert('Please select an image first');
+      alert("File must be under 2MB.");
+      this.value = '';
     }
   });
 
-  // Load saved profile picture if exists
-  if (currentUserEmail) {
-    const profileData = JSON.parse(localStorage.getItem(`profile_${currentUserEmail}`)) || {};
-    if (profileData.profilePicture) {
-      profilePicture.src = profileData.profilePicture;
+  saveBtn.addEventListener('click', async function () {
+    const file = profileImageInput.files[0];
+    if (!file) return alert('Please select an image first');
+
+    const formData = new FormData();
+    formData.append('profileImage', file);
+
+    try {
+      const res = await fetch('/account/upload-profile-picture', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        profilePicture.src = data.imagePath;
+        imagePreview.src = data.imagePath;
+        uploadPicModal.hide();
+        alert('Profile picture updated successfully!');
+      } else {
+        const errorText = await res.text();
+        alert('Upload failed: ' + errorText);
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Error uploading file.');
     }
+  });
+
+  // --- Success Modal ---
+  function showSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (!modal) {
+      console.error('Success modal not found.');
+      return;
+    }
+
+    modal.style.display = 'flex';
+
+    const closeBtn = document.getElementById('closeModalBtn');
+    const hide = () => {
+      modal.style.display = 'none';
+      closeBtn.removeEventListener('click', hide);
+    };
+
+    closeBtn.addEventListener('click', hide);
+    setTimeout(hide, 2000);
+  }
+
+  // --- Edit Bio ---
+  const editBioBtn = document.getElementById('editBioBtn');
+  const bioDisplay = document.getElementById('bioDisplay');
+  const bioEdit = document.getElementById('bioEdit');
+  const bioText = document.getElementById('bioText');
+  const bioInput = document.getElementById('bioInput');
+  const cancelBioBtn = document.getElementById('cancelBioBtn');
+  const saveBioBtn = document.getElementById('saveBioBtn');
+
+  editBioBtn.addEventListener('click', () => {
+    bioInput.value = bioText.textContent.trim() === 'Add your bio...' ? '' : bioText.textContent.trim();
+    bioDisplay.classList.add('d-none');
+    bioEdit.classList.remove('d-none');
+  });
+
+  cancelBioBtn.addEventListener('click', () => {
+    bioDisplay.classList.remove('d-none');
+    bioEdit.classList.add('d-none');
+  });
+
+  saveBioBtn.addEventListener('click', async () => {
+    const newBio = bioInput.value.trim();
+    if (!newBio) return alert("Bio cannot be empty!");
+
+    try {
+      const response = await fetch('/account/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bio: newBio })
+      });
+
+      if (response.ok) {
+        bioText.textContent = newBio || 'Add your bio...';
+        bioText.classList.toggle('bio-placeholder', !newBio);
+        bioDisplay.classList.remove('d-none');
+        bioEdit.classList.add('d-none');
+        showSuccessModal();
+      } else {
+        const errorData = await response.json();
+        console.error("Error:", errorData.message);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  });
+
+  // --- Edit Profile (Phone & Gender) ---
+  const editBtn = document.getElementById('editBtn');
+  const phoneInput = document.getElementById('phoneField');
+  const genderInput = document.getElementById('genderField');
+
+  editBtn.addEventListener('click', async function () {
+    const isEditMode = this.textContent === 'Edit';
+
+    if (isEditMode) {
+      phoneInput.readOnly = false;
+      genderInput.disabled = false;
+      this.textContent = 'Save';
+      this.classList.remove('btn-outline-warning');
+      this.classList.add('btn-warning');
+    } else {
+      const updatedData = {
+        phone: phoneInput.value.trim(),
+        gender: genderInput.value
+      };
+
+      try {
+        const res = await fetch('/account/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedData)
+        });
+
+        if (res.ok) {
+          showSuccessModal();
+        } else {
+          const errText = await res.text();
+          alert("Failed to update profile: " + errText);
+        }
+      } catch (err) {
+        console.error("Error updating profile:", err);
+        alert("An error occurred while updating your profile.");
+      }
+
+      phoneInput.readOnly = true;
+      genderInput.disabled = true;
+      this.textContent = 'Edit';
+      this.classList.add('btn-outline-warning');
+      this.classList.remove('btn-warning');
+    }
+  });
+
+  // --- Change Password ---
+  const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+const changePasswordForm = document.getElementById('changePasswordForm');
+const currentPasswordInput = document.getElementById('currentPassword');
+const newPasswordInput = document.getElementById('newPassword');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+
+// Toggle password visibility
+document.querySelectorAll('.toggle-password').forEach(button => {
+  button.addEventListener('click', function () {
+    const targetId = this.getAttribute('data-target');
+    const input = document.getElementById(targetId);
+    const icon = this.querySelector('i');
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('bi-eye-slash');
+      icon.classList.add('bi-eye');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('bi-eye');
+      icon.classList.add('bi-eye-slash');
+    }
+  });
+});
+
+// Real-time current password validation (server-side with debounce)
+let currentPasswordTimeout;
+currentPasswordInput.addEventListener('input', () => {
+  const feedbackEl = document.getElementById('currentPasswordFeedback');
+  currentPasswordInput.classList.remove('is-invalid');
+  feedbackEl.textContent = '';
+  feedbackEl.style.display = 'none';
+
+  clearTimeout(currentPasswordTimeout);
+  const password = currentPasswordInput.value.trim();
+  if (!password) return;
+
+  currentPasswordTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch('/account/check-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: password })
+      });
+
+      const result = await res.json();
+      if (!res.ok) {
+        currentPasswordInput.classList.add('is-invalid');
+        feedbackEl.textContent = result.message || 'Current password is incorrect.';
+        feedbackEl.style.display = 'block';
+      }
+    } catch (err) {
+      console.error('Error checking password:', err);
+    }
+  }, 600);
+});
+
+// Real-time validation for new password (client-side)
+newPasswordInput.addEventListener('input', () => {
+  const password = newPasswordInput.value;
+  const current = currentPasswordInput.value;
+  const feedback = [];
+
+  if (password.length < 8) feedback.push('At least 8 characters');
+  if (!/[A-Z]/.test(password)) feedback.push('1 uppercase letter');
+  if (!/[a-z]/.test(password)) feedback.push('1 lowercase letter');
+  if (!/[0-9]/.test(password)) feedback.push('1 digit');
+  if (password === current && password !== '') feedback.push('Must differ from current password');
+
+  const feedbackEl = document.getElementById('newPasswordFeedback');
+  if (feedback.length) {
+    feedbackEl.innerHTML = feedback.join(', ');
+    feedbackEl.style.display = 'block';
+    newPasswordInput.classList.add('is-invalid');
+  } else {
+    feedbackEl.innerHTML = '';
+    feedbackEl.style.display = 'none';
+    newPasswordInput.classList.remove('is-invalid');
   }
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-  // Timeout settings (in milliseconds)
-  const TOTAL_SESSION_TIME = 3 * 60 * 1000; // 3 minutes total session
-  const WARNING_TIME = 2 * 60 * 1000; // Show warning at 2 minutes (1 minute left)
-  const COUNTDOWN_INTERVAL = 1000; // Update every second
-  const EXPIRE_DISPLAY_TIME = 10 * 1000; // Show expired message for 10 seconds
+// Confirm password validation
+confirmPasswordInput.addEventListener('input', () => {
+  const confirm = confirmPasswordInput.value;
+  const newPass = newPasswordInput.value;
+  const feedbackEl = document.getElementById('confirmPasswordFeedback');
 
-  let sessionTimer;
-  let warningTimer;
-  let countdownInterval;
-  let expireTimer;
+  if (confirm !== newPass) {
+    feedbackEl.textContent = 'Passwords do not match.';
+    feedbackEl.style.display = 'block';
+    confirmPasswordInput.classList.add('is-invalid');
+  } else {
+    feedbackEl.textContent = '';
+    feedbackEl.style.display = 'none';
+    confirmPasswordInput.classList.remove('is-invalid');
+  }
+});
 
-  // Initialize modals
-  const expiringModal = new bootstrap.Modal(document.getElementById('sessionExpiringModal'), {
-    backdrop: 'static',
-    keyboard: false
-  });
+// Save Changes button handler
+document.getElementById('savePasswordBtn').addEventListener('click', async () => {
+  const currentPassword = currentPasswordInput.value.trim();
+  const newPassword = newPasswordInput.value.trim();
+  const confirmPassword = confirmPasswordInput.value.trim();
 
-  const expiredModal = new bootstrap.Modal(document.getElementById('sessionExpiredModal'), {
-    backdrop: 'static',
-    keyboard: false
-  });
+  // Clear previous validation
+  document.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+  document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-  // Start fresh session
-  startSession();
-
-  function startSession() {
-    // Clear any existing timers
-    resetTimers();
-
-    // Set new timers
-    warningTimer = setTimeout(showExpiringWarning, WARNING_TIME);
-    sessionTimer = setTimeout(expireSession, TOTAL_SESSION_TIME);
-
-    // Mark session as active in localStorage
-    localStorage.setItem('sessionActive', 'true');
+  if (newPassword !== confirmPassword) {
+    const feedbackEl = document.getElementById('confirmPasswordFeedback');
+    feedbackEl.textContent = 'Passwords do not match.';
+    feedbackEl.style.display = 'block';
+    confirmPasswordInput.classList.add('is-invalid');
+    return;
   }
 
-  function showExpiringWarning() {
-    expiringModal.show();
+  try {
+    const response = await fetch('/account/change-password', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
 
-    // Start 1 minute countdown (60 seconds)
-    let secondsLeft = (TOTAL_SESSION_TIME - WARNING_TIME) / 1000;
-    updateCountdownDisplay(secondsLeft);
+    const result = await response.json();
 
-    countdownInterval = setInterval(() => {
-      secondsLeft--;
-      updateCountdownDisplay(secondsLeft);
-
-      if (secondsLeft <= 0) {
-        clearInterval(countdownInterval);
+    if (!response.ok) {
+      if (result.message.includes('Current')) {
+        currentPasswordInput.classList.add('is-invalid');
+        const feedbackEl = document.getElementById('currentPasswordFeedback');
+        feedbackEl.textContent = result.message;
+        feedbackEl.style.display = 'block';
+      } else {
+        newPasswordInput.classList.add('is-invalid');
+        const feedbackEl = document.getElementById('newPasswordFeedback');
+        feedbackEl.textContent = result.message;
+        feedbackEl.style.display = 'block';
       }
-    }, COUNTDOWN_INTERVAL);
+      return;
+    }
+
+    alert(result.message); // Success
+    changePasswordForm.reset();
+    const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+    modal.hide();
+  } catch (err) {
+    console.error(err);
+    alert('Something went wrong. Please try again.');
   }
 
-  function updateCountdownDisplay(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    document.getElementById('countdown').textContent =
-      `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+});
+
+// DELETE ACCOUNT LOGIC
+
+const verifyPasswordModal = new bootstrap.Modal(document.getElementById('verifyPasswordModal'));
+const deleteModalInstance = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+
+// Elements
+const verifyPasswordError = document.getElementById('verifyPasswordError');
+const verifyPasswordBtn = document.getElementById('verifyPasswordBtn');
+const deleteAccountModalBtn = document.getElementById('deleteAccountModalBtn');
+const noDeleteAccountModalBtn = document.getElementById('noDeleteAccountModalBtn');
+const confirmDeleteCheckbox = document.getElementById('confirmDeleteCheckbox');
+
+// Show verify password modal on "Delete Account" button click
+document.getElementById('deleteAccountBtn').addEventListener('click', function () {
+  document.getElementById('verifyPassword').value = '';
+  document.getElementById('verifyPassword').classList.remove('is-invalid');
+  document.getElementById('verifyPasswordFeedback').textContent = '';
+  verifyPasswordError.style.display = 'none';
+
+  verifyPasswordModal.show();
+});
+
+// Verify Password Button Click
+verifyPasswordBtn.addEventListener('click', async function () {
+  const passwordInput = document.getElementById('verifyPassword');
+  const password = passwordInput.value.trim();
+  const feedback = document.getElementById('verifyPasswordFeedback');
+
+  // Reset validation state
+  passwordInput.classList.remove('is-invalid');
+  feedback.textContent = '';
+  verifyPasswordError.style.display = 'none';
+
+  if (!password) {
+    passwordInput.classList.add('is-invalid');
+    feedback.textContent = 'Password is required';
+    verifyPasswordError.textContent = 'Password is required.';
+    verifyPasswordError.style.display = 'block';
+    passwordInput.focus();
+    return;
   }
 
-  function expireSession() {
-    // Hide warning modal if shown
-    expiringModal.hide();
-    clearInterval(countdownInterval);
+  try {
+    // Verify the password with the backend
+    const response = await fetch('/account/verify-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
 
-    clearSession();
+    const result = await response.json();
 
-    // Show expired modal
-    expiredModal.show();
+    if (!response.ok) {
+      // Show error if password is incorrect
+      passwordInput.classList.add('is-invalid');
+      feedback.textContent = result.error || 'Incorrect password.';
+      verifyPasswordError.textContent = result.error || 'Incorrect password.';
+      verifyPasswordError.style.display = 'block';
+      return;
+    }
 
-    // Auto-redirect after display time
-    expireTimer = setTimeout(() => {
-      window.location.href = '/acocunt/login';
-    }, EXPIRE_DISPLAY_TIME);
+    // If password is correct, show the delete confirmation modal
+    verifyPasswordModal.hide();
+    confirmDeleteCheckbox.checked = false;
+    deleteAccountModalBtn.disabled = true;
+    deleteModalInstance.show();
+
+    // Store the password temporarily for the final deletion step
+    sessionStorage.setItem('tempDeletePassword', password);
+  } catch (err) {
+    console.error('Error verifying password:', err);
+    alert('An error occurred while verifying your password. Please try again.');
   }
+});
 
-  function forceLogout() {
-    // Immediate logout without showing expired message
-    clearSession();
-    expiringModal.hide();
-    window.location.href = '/acocunt/login';
+// Enable/disable confirm button based on checkbox
+confirmDeleteCheckbox.addEventListener('change', function () {
+  deleteAccountModalBtn.disabled = !this.checked;
+});
+
+// Cancel deletion ("No" button)
+noDeleteAccountModalBtn.addEventListener('click', () => {
+  deleteModalInstance.hide();
+});
+
+// Final Delete Account Button Click
+deleteAccountModalBtn.addEventListener('click', async function () {
+  const password = sessionStorage.getItem('tempDeletePassword');
+  if (!password) return;
+
+  try {
+    const response = await fetch('/account/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      alert(result.error || "Error deleting account");
+      return;
+    }
+
+    alert(result.message);
+    window.location.href = '/account/register'; // Redirect to register page after deletion
+  } catch (err) {
+    console.error("Delete error:", err);
+    alert("Something went wrong while deleting your account.");
   }
-
-  function clearSession() {
-    // Remove all session-related data
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('currentSession');
-    localStorage.removeItem('activeSessions');
-    resetTimers();
-  }
+});
 
 
-
-  function resetTimers() {
-    clearTimeout(sessionTimer);
-    clearTimeout(warningTimer);
-    clearInterval(countdownInterval);
-    clearTimeout(expireTimer);
-  }
-
-  // Activity detection - reset on any user activity
-  const activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
-  activityEvents.forEach(event => {
-    window.addEventListener(event, startSession, { passive: true });
-  });
-
-  // Button handlers
-  document.getElementById('stayLoggedInBtn').addEventListener('click', function () {
-    startSession();
-    expiringModal.hide();
-  });
-
-  document.getElementById('logoutNowBtn').addEventListener('click', forceLogout);
-
-  document.getElementById('loginAgainBtn').addEventListener('click', function () {
-    clearSession();
-    window.location.href = '/account/login';
-  });
 });
