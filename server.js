@@ -8,6 +8,7 @@ const cors = require('cors');
 const MongoStore = require('connect-mongo');
 const SessionModel = require('./models/Session');
 const app = express();
+const Contact = require('./models/Contact');
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
@@ -106,9 +107,39 @@ app.get('/account/profile', (req, res) => {
 });
 
 app.get('/aboutus', (req, res) => res.render('utility/AboutUs'));
-app.get('/contactus', (req, res) => res.render('utility/ContactUs'));
+app.get('/contactus', (req, res) => res.render('utility/ContactUs', {
+  success: req.query.success,
+  error: req.query.error
+}));
 app.get('/faq', (req, res) => res.render('utility/FAQ'));
 app.get('/privacypolicy', (req, res) => res.render('utility/PrivacyPolicy'));
+
+app.post('/contactus', async (req, res) => {
+  console.log('POST /contactus received with body:', req.body);
+  
+  try {
+    const { name, email, message } = req.body;
+    
+    if (!name || !email || !message) {
+      console.log('Validation failed - missing fields');
+      return res.redirect('/contactus?error=missing_fields');
+    }
+
+    const newContact = new Contact({ 
+      name: name.trim(),
+      email: email.trim(),
+      message: message.trim()
+    });
+    
+    await newContact.save();
+    console.log('Contact saved successfully:', newContact);
+    
+    res.redirect('/contactus?success=true');
+  } catch (error) {
+    console.error('Error saving contact:', error);
+    res.redirect('/contactus?error=server_error');
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
