@@ -25,80 +25,90 @@
         <div class="section-card">
           <div class="section-header">
             <h2 class="section-title">Recommended For You</h2>
-          
           </div>
 
-          <div class="row p-2">
-            <!-- Dune: Part Two -->
-            <div class="col-md-3 mb-3">
-              <div class="card media-card">
-                <img src="../images/Detail/Image/Dune2.png" alt="Dune: Part Two Poster" class="media-image">
-                <div class="card-body">
-                  <h5 class="card-title">Dune: Part Two</h5>
-                  <div class="card-description">Movie • Sci-Fi • 2024</div>
+        <div class="row p-2">
+          <!-- without filtering the book and movie -->
+          <!-- <% if (recommendations && recommendations.length > 0) { %>
+            <% recommendations.forEach(item => { %>
+              <div class="col-md-3 mb-3">
+                <div class="card media-card">
+                  <img src="<%= item.posterPath %>" alt="<%= item.title %> Poster" class="media-image">
+                  <div class="card-body p-2">
+                    <h5 class="card-title"><%= item.title %></h5>
+                    <div class="card-description">
+                      <% if (item.type === 'Book') { %>
+                        <%= item.type %> · <%= item.author || 'Unknown Author' %> · <%= item.year %>
+                      <% } else { %>
+                        <%= item.type %> · <%= Array.isArray(item.genre) ? item.genre.join('-') : item.genre %> · <%= item.year %>
+                      <% } %>
+                      
+                    </div>
+                  </div>
                 </div>
               </div>
+            <% }); %>
+          <% } else { %>
+            <div class="col-12">
+              <p>No recommendations available right now. Check back soon!</p>
             </div>
+          <% } %> -->
 
-            <!-- The Three-Body Problem -->
-            <div class="col-md-3 mb-3">
-              <div class="card media-card">
-                <img src="../images/Detail/Image/The Three-Body Problem.png" alt="The Three-Body Problem" class="media-image">
-                <div class="card-body p-2">
-                  <h5 class="card-title">The Three-Body Problem</h5>
-                  <div class="card-description">Book • Liu Cixin • 2008</div>
-                </div>
-              </div>
-            </div>
+          <% if (recommendations && recommendations.length > 0) { %>
 
-            <!-- A Minecraft Movie -->
-            <div class="col-md-3 mb-3">
-              <div class="card media-card">
-                <img src="../images/Detail/Image/A_Minecraft_Movie_poster.jpg" alt="A Minecraft Movie Poster" class="media-image">
-                <div class="card-body p-2">
-                  <h5 class="card-title">A Minecraft Movie</h5>
-                  <div class="card-description">Movie • Adv-Com • 2025</div>
-                </div>
-              </div>
-            </div>
+              <% const movies = recommendations.filter(item => item.type === 'Movie'); %>
+              <% const books = recommendations.filter(item => item.type === 'Book'); %>
 
-            <!-- Inside Out 2 -->
-            <div class="col-md-3 mb-3">
-              <div class="card media-card">
-                <img src="../images/Detail/Image/Inside Out 2.png" alt="Inside Out 2" class="media-image">
-                <div class="card-body p-2">
-                  <h5 class="card-title">Inside Out 2</h5>
-                  <div class="card-description">Movie• Com-Fi • 2024</div>
+              <% if (movies.length > 0) { %>
+                <h3 class="section-label">Movies</h3>
+                <div class="row">
+                  <% movies.forEach(item => { %>
+                    <div class="col-md-3 mb-3">
+                      <div class="card media-card">
+                        <img src="<%= item.posterPath %>" alt="<%= item.title %> Poster" class="media-image">
+                        <div class="card-body p-2">
+                          <h5 class="card-title"><%= item.title %></h5>
+                          <div class="card-description">
+                            <%= item.type %> · 
+                            <%= Array.isArray(item.genre) ? item.genre.join('-') : item.genre %> · 
+                            <%= item.year %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% }) %>
                 </div>
-              </div>
-            </div>
-          </div>
+              <% } %>
 
-          <div class="row">
-            <!-- Atomic Habits -->
-            <div class="col-md-3 mb-3">
-              <div class="card media-card">
-                <img src="../images/Detail/Image/Atomic Habits.png" alt="Atomic Habits Book Cover" class="media-image">
-                <div class="card-body p-2">
-                  <h5 class="card-title">Atomic Habits</h5>
-                  <div class="card-description">Book • James Clear • 2018</div>
+              <% if (books.length > 0) { %>
+                <h3 class="section-label">Books</h3>
+                <div class="row">
+                  <% books.forEach(item => { %>
+                    <div class="col-md-3 mb-3">
+                      <div class="card media-card">
+                        <img src="<%= item.posterPath %>" alt="<%= item.title %> Poster" class="media-image">
+                        <div class="card-body p-2">
+                          <h5 class="card-title"><%= item.title %></h5>
+                          <div class="card-description">
+                            <%= item.type %> · 
+                            <%= item.author || 'Unknown Author' %> · 
+                            <%= item.year %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% }) %>
                 </div>
-              </div>
-            </div>
+              <% } %>
 
-            <!-- The Creative Act: A Way of Being -->
-            <div class="col-md-3 mb-3">
-              <div class="card media-card">
-                <img src="../images/Detail/Image/The Creative Act.png" alt="The Creative Act" class="media-image">
-                <div class="card-body p-2">
-                  <h5 class="card-title">The Creative Act: A Way of Being</h5>
-                  <div class="card-description">Book • Rick Rubin • 2023</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            <% } else { %>
+              <p>No recommendations available.</p>
+            <% } %>
+
+
+  </div>
+  </div>
+  </div>
 
       <!-- Right Column - Top 3 Recently Added & Activity -->
       <div class="col-lg-4">

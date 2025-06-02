@@ -6,11 +6,17 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const cors = require('cors');
 const MongoStore = require('connect-mongo');
-const SessionModel = require('./models/Session');
-const app = express();
-const Contact = require('./models/Contact');
 
-// Set EJS as the view engine
+const app = express();
+const UserInteraction = require('./models/savedsearch');
+
+// Models and services
+const SessionModel = require('./models/Session');
+const Contact = require('./models/Contact');
+const User = require('./models/User');
+const recommendationService = require('./services/recommendationService');
+
+// Set EJS as view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -44,13 +50,13 @@ app.use(session({
 
 // Connect to MongoDB
 mongoose.connect(uri)
-  .then(() => console.log("Successfully connected to MongoDB!"))
+  .then(() => console.log("✅ Successfully connected to MongoDB"))
   .catch((err) => {
-    console.error("MongoDB connection error:", err.message);
+    console.error("❌ MongoDB connection error:", err.message);
     process.exit(1);
   });
 
-// Session-based middleware for navbar visibility
+// Session-based navbar visibility
 app.use((req, res, next) => {
   const isLoggedIn = req.session?.user;
   res.locals.currentUser = isLoggedIn ? req.session.user : null;
@@ -65,13 +71,36 @@ app.use((req, res, next) => {
 // Routes
 const accountRoutes = require('./routes/account');
 const discoverRoutes = require('./routes/discover');
+const saveSearchRoutes = require('./routes/save-search');
+const recommendationRoutes = require('./routes/recommendations');
 
 app.use('/account', accountRoutes);
 app.use('/api/discover', discoverRoutes);
+app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/interactions', saveSearchRoutes);
 app.use('/', discoverRoutes);
 
+// Views
 app.get('/', (req, res) => res.render('landing'));
-app.get('/dashboard', (req, res) => res.render('dashboard'));
+app.get('/dashboard', async (req, res) => {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) {
+      return res.redirect('/account/login');
+    }
+
+    const recommendations = await recommendationService.getRecommendations(userId);
+    res.render('dashboard', {
+      recommendations,
+      recentlyAdded: [],
+      recentActivity: [],
+      currentUser: req.session.user
+    });
+  } catch (error) {
+    console.error('Error loading dashboard:', error);
+    res.status(500).send('Error loading dashboard');
+  }
+});
 app.get('/discover', (req, res) => res.render('discover'));
 app.get('/watchlist', (req, res) => res.render('watchlist/watchlist'));
 app.get('/history', (req, res) => res.render('watchlist/history'));
@@ -79,6 +108,11 @@ app.get('/history', (req, res) => res.render('watchlist/history'));
 app.get('/login', (req, res) => res.send('✅ Login route is working.'));
 app.get('/register', (req, res) => res.render('account/register'));
 app.get('/forgotPassword', (req, res) => res.render('account/forgotPassword'));
+
+app.get('/test/db', async (req, res) => {
+  const results = await UserInteraction.find().sort({ timestamp: -1 }).limit(5);
+  res.json(results);
+});
 
 app.get('/profile', (req, res) => {
   if (res.locals.currentUser) {
@@ -106,6 +140,7 @@ app.get('/account/profile', (req, res) => {
   res.render('account/profile');
 });
 
+// Utilities
 app.get('/aboutus', (req, res) => res.render('utility/AboutUs'));
 app.get('/contactus', (req, res) => res.render('utility/ContactUs', {
   success: req.query.success,
@@ -115,25 +150,15 @@ app.get('/faq', (req, res) => res.render('utility/FAQ'));
 app.get('/privacypolicy', (req, res) => res.render('utility/PrivacyPolicy'));
 
 app.post('/contactus', async (req, res) => {
-  console.log('POST /contactus received with body:', req.body);
-  
   try {
     const { name, email, message } = req.body;
-    
     if (!name || !email || !message) {
-      console.log('Validation failed - missing fields');
       return res.redirect('/contactus?error=missing_fields');
     }
 
-    const newContact = new Contact({ 
-      name: name.trim(),
-      email: email.trim(),
-      message: message.trim()
-    });
-    
+    const newContact = new Contact({ name, email, message });
     await newContact.save();
-    console.log('Contact saved successfully:', newContact);
-    
+
     res.redirect('/contactus?success=true');
   } catch (error) {
     console.error('Error saving contact:', error);
@@ -141,5 +166,63 @@ app.post('/contactus', async (req, res) => {
   }
 });
 
+// Debug/Utility Routes (keep for testing)
+app.post('/api/recommendations/refresh', async (req, res) => {
+  try {
+    const userId = req.session?.userId;
+    const result = await recommendationService.refreshRecommendations();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/debug/googlebooks', async (req, res) => {
+  try {
+    const googleBooksService = require('./services/googleBooksService');
+    const books = await googleBooksService.getPopularBooks(3);
+    res.json({ books });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/debug/all', async (req, res) => {
+  try {
+    const tmdbService = require('./services/tmdbService');
+    const googleBooksService = require('./services/googleBooksService');
+
+    const [movies, books] = await Promise.all([
+      tmdbService.getTrendingMovies(3),
+      googleBooksService.getPopularBooks(3),
+    ]);
+
+    res.json({ movies, books });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/recommendations/clear', async (req, res) => {
+  try {
+    const Recommendation = require('./models/Recommendation');
+    await Recommendation.deleteMany({});
+    res.json({ success: true, message: 'All recommendations cleared' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/debug/tmdb', async (req, res) => {
+  try {
+    const tmdbService = require('./services/tmdbService');
+    const movies = await tmdbService.getTrendingMovies(3);
+    res.json({ movies });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));

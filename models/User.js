@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
     profilePicture: { type: String, default: "/images/profile_pic.png" },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
-    sessionId: { type: String, default: null, },
+    sessionId: { type: String, default: null },
     verificationToken: { type: String },
     verificationTokenExpires: { type: Date }
   },
@@ -40,5 +40,4 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 const User = mongoose.model("User", userSchema);
-
 module.exports = User;

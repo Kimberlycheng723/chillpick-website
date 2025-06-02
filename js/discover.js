@@ -6,6 +6,24 @@ let allBooks = [];
 let filteredData = [];
 let searchResults = [];
 
+async function getCurrentUserId() {
+  try {
+    const response = await fetch('/account/profile-data', {
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      console.error('Failed to fetch current user:', response.status);
+      return null;
+    }
+    const data = await response.json();
+    console.log('🚀 getCurrentUserId() returned:', data);
+    return data._id;
+  } catch (error) {
+    console.error('Error fetching current user:', error);
+    return null;
+  }
+}
+
 async function fetchData() {
   try {
     const movieRes = await fetch('/api/discover/movies');
@@ -46,6 +64,20 @@ function shuffleArray(arr) {
   }
 }
 
+function findItemById(itemId) {
+  console.log('🔍 Looking for item with ID:', itemId, 'Type:', typeof itemId);
+  let foundItem = combined.find(item => item.id === itemId);
+  if (!foundItem) {
+    foundItem = combined.find(item => String(item.id) === String(itemId));
+  }
+  if (foundItem) {
+    console.log('✅ Found item:', foundItem.title, 'Genres:', foundItem.genres);
+  } else {
+    console.log('❌ Item not found. Available IDs:', combined.slice(0, 5).map(item => ({id: item.id, type: typeof item.id, title: item.title})));
+  }
+  return foundItem;
+}
+
 function renderCards(page) {
   const container = document.getElementById('mediaContainer');
   const startIndex = (page - 1) * itemsPerPage;
@@ -60,8 +92,8 @@ function renderCards(page) {
       const isMovie = item.type === 'movie';
       html += `
         <div class="col">
-          <a href="${isMovie ? `/movie_detail/${item.id}` : `/book_detail/${item.id}`}" class="text-decoration-none text-dark">
-            <div class="card card-custom h-100">
+          <a href="${isMovie ? `/movie_detail/${item.id}` : `/book_detail/${item.id}`}" class="text-decoration-none text-dark" onclick="event.preventDefault(); trackItemClickAndNavigate('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.type}', this)">
+            <div class="card card-custom h-100" data-item-id="${item.id}">
               <img src="${item.image}" class="card-img-top" alt="${item.title}">
               <div class="card-body">
                 <h6 class="fw-bold">${item.title}</h6>
@@ -81,6 +113,23 @@ function renderCards(page) {
   }
 
   container.innerHTML = html;
+}
+
+async function trackItemClickAndNavigate(itemId, itemTitle, itemType, linkElement) {
+  await trackItemClick(itemId, itemTitle, itemType);
+  window.location.href = linkElement.href;
+}
+
+async function trackItemClick(itemId, itemTitle, itemType) {
+  const itemData = findItemById(itemId);
+  const clickedItem = {
+    id: itemId,
+    title: itemTitle,
+    type: itemType,
+    genres: itemData?.genres || []
+  };
+  console.log('👆 Item clicked:', clickedItem);
+  await saveUserInteraction('item clicked', { clickedItem });
 }
 
 function renderPagination(totalPages) {
@@ -170,17 +219,39 @@ function updateRatingFilter() {
     ratingSelect.innerHTML += `<option>${r}+ Stars</option>`;
   });
 }
-function toggleWatchlist(button, event) {
-  event.stopPropagation(); // Prevent navigating to detail page
-  event.preventDefault();  // Prevent anchor behavior
 
-  // Toggle state (simple example: toggle text and icon)
+function toggleWatchlist(button, event) {
+  event.stopPropagation();
+  event.preventDefault();
+
+  const card = button.closest('.card');
+  const itemId = card.dataset.itemId;
+  const title = card.querySelector('h6').textContent;
+  const rating = card.querySelector('.fw-semibold').textContent.split(' ')[0];
+  const image = card.querySelector('img').src;
+  const isMovie = card.querySelector('.bi-film') !== null;
+  const detailURL = button.closest('a').href;
+
+  const itemData = findItemById(itemId);
+
+  const itemDetails = {
+    id: itemId,
+    title,
+    rating,
+    type: isMovie ? 'movie' : 'book',
+    detailURL,
+    genres: itemData?.genres || []
+  };
+
+  console.log('🎬 Adding to watchlist:', itemDetails);
+
   if (button.classList.contains('added')) {
     button.classList.remove('added');
     button.innerHTML = `<i class="bi bi-plus-circle me-1"></i> Watchlist`;
   } else {
     button.classList.add('added');
     button.innerHTML = `<i class="bi bi-check-circle me-1"></i> Added`;
+    saveUserInteraction('add to watchlist', { itemDetails });
   }
 }
 
@@ -191,18 +262,63 @@ document.getElementById('searchBtn').addEventListener('click', () => {
     : combined.filter(item => item.title.toLowerCase().includes(query));
   currentPage = 1;
   applyFilters();
+  if (query !== '') {
+    console.log('💾 Saving search interaction:', query);
+    saveUserInteraction('search', { query });
+  }
 });
 
 document.getElementById('genreSelect').addEventListener('change', () => {
+  const selectedGenre = document.getElementById('genreSelect').value;
   currentPage = 1;
   applyFilters();
+  if (selectedGenre !== 'All Genres') {
+    saveUserInteraction('filter genre', { genre: selectedGenre });
+  }
 });
 
 document.getElementById('ratingSelect').addEventListener('change', () => {
+  const selectedRating = document.getElementById('ratingSelect').value;
   currentPage = 1;
   applyFilters();
+  if (selectedRating !== 'Any Rating') {
+    saveUserInteraction('filter rating', { rating: selectedRating });
+  }
 });
 
 window.onload = () => {
   fetchData();
 };
+
+async function saveUserInteraction(interactionType, payload = {}) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    console.warn('⚠️ Cannot save interaction: No user ID available');
+    return;
+  }
+  const data = {
+    userId,
+    interactionType,
+    timestamp: new Date().toISOString(),
+    ...payload
+  };
+  console.log('📤 Sending interaction data:', data);
+  try {
+    const response = await fetch('/api/interactions/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Server responded with error:', response.status, errorText);
+      throw new Error(`Server error: ${response.status}`);
+    }
+    const result = await response.json();
+    console.log('✅ Interaction saved successfully:', result);
+  } catch (err) {
+    console.error('⚠️ Failed to save interaction:', err.message);
+  }
+}
