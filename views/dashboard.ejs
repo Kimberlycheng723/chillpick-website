@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ChillPick | Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <main class="container py-5">
+
+
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <h1>Welcome back!</h1>
+      <p>Here's what we picked for you today</p>
+    </div>
+
+    <div class="row">
+      <!-- Left Column - Recommendations -->
+      <div class="col-lg-8">
+        <div class="section-card">
+          <div class="section-header">
+            <h2 class="section-title">Recommended For You</h2>
+          </div>
+
+        <div class="row p-2">
+          <!-- without filtering the book and movie -->
+          <!-- <% if (recommendations && recommendations.length > 0) { %>
+            <% recommendations.forEach(item => { %>
+              <div class="col-md-3 mb-3">
+                <div class="card media-card">
+                  <img src="<%= item.posterPath %>" alt="<%= item.title %> Poster" class="media-image">
+                  <div class="card-body p-2">
+                    <h5 class="card-title"><%= item.title %></h5>
+                    <div class="card-description">
+                      <% if (item.type === 'Book') { %>
+                        <%= item.type %> · <%= item.author || 'Unknown Author' %> · <%= item.year %>
+                      <% } else { %>
+                        <%= item.type %> · <%= Array.isArray(item.genre) ? item.genre.join('-') : item.genre %> · <%= item.year %>
+                      <% } %>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="col-12">
+              <p>No recommendations available right now. Check back soon!</p>
+            </div>
+          <% } %> -->
+
+          <% if (recommendations && recommendations.length > 0) { %>
+
+              <% const movies = recommendations.filter(item => item.type === 'Movie'); %>
+              <% const books = recommendations.filter(item => item.type === 'Book'); %>
+
+              <% if (movies.length > 0) { %>
+                <h3 class="section-label">Movies</h3>
+                <div class="row">
+                  <% movies.forEach(item => { %>
+                    <div class="col-md-3 mb-3">
+                      <div class="card media-card">
+                        <img src="<%= item.posterPath %>" alt="<%= item.title %> Poster" class="media-image">
+                        <div class="card-body p-2">
+                          <h5 class="card-title"><%= item.title %></h5>
+                          <div class="card-description">
+                            <%= item.type %> · 
+                            <%= Array.isArray(item.genre) ? item.genre.join('-') : item.genre %> · 
+                            <%= item.year %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } %>
+
+              <% if (books.length > 0) { %>
+                <h3 class="section-label">Books</h3>
+                <div class="row">
+                  <% books.forEach(item => { %>
+                    <div class="col-md-3 mb-3">
+                      <div class="card media-card">
+                        <img src="<%= item.posterPath %>" alt="<%= item.title %> Poster" class="media-image">
+                        <div class="card-body p-2">
+                          <h5 class="card-title"><%= item.title %></h5>
+                          <div class="card-description">
+                            <%= item.type %> · 
+                            <%= item.author || 'Unknown Author' %> · 
+                            <%= item.year %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } %>
+
+            <% } else { %>
+              <p>No recommendations available.</p>
+            <% } %>
+
+
+  </div>
+  </div>
+  </div>
+
+      <!-- Right Column - Top 3 Recently Added & Activity -->
+      <div class="col-lg-4">
+        <!-- Recently Added Section -->
+        <div class="section-card">
+          <div class="section-header">
+            <h2 class="section-title">Recently Added</h2>
+            <a href="#" class="see-all">View all</a>
+          </div>
+
+          <!-- Ne Zha -->
+          <div class="small-media-card">
+            <img src="../images/Detail/Image/哪吒.jpg" alt="Ne Zha Movie Poster" class="small-media-image">
+            <div class="small-media-info">
+              <h5 class="added-title">哪吒之魔童降世 Ne Zha</h5>
+              <div class="added-description">Movie</div>
+              <div class="plan-to-watch">Plan to watch</div>
+            </div>
+          </div>
+          <hr class="divider">
+
+          <!-- Your Name -->
+          <div class="small-media-card">
+            <img src="../images/Detail/Image/你的名字.jpeg" alt="Your Name Movie Poster" class="small-media-image">
+            <div class="small-media-info">
+              <h5 class="added-title">Your Name</h5>
+              <div class="added-description">Movie</div>
+              <div class="in-progress">In progress</div>
+            </div>
+          </div>
+          <hr class="divider">
+
+          <!-- Totoro -->
+          <div class="small-media-card">
+            <img src="../images/Detail/Image/龙猫.jpg" alt="Totoro Movie Poster" class="small-media-image">
+            <div class="small-media-info">
+              <h5 class="added-title">Totoro</h5>
+              <div class="added-description">Movie</div>
+              <div class="plan-to-watch">Plan to watch</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top 3 Recent Activity Section -->
+        <div class="section-card">
+          <div class="section-header">
+            <h2 class="section-title">Recent Activity</h2>
+            
+          </div>
+
+          <!-- Activity 1 -->
+          <div class="activity-card">
+            <div class="row">
+              <div class="col-2">
+                <img src="../images/profile_pic.png" alt="profile_pic" class="profile_pic-image">
+              </div>
+              <div class="col-10">
+                <div class="activity-description">Mike rated Dune: Part Two 5 stars</div>
+                <div class="activity-time">2 hours ago</div>
+              </div>
+            </div>
+          </div>
+          <hr class="divider">
+
+          <!-- Activity 2 -->
+          <div class="activity-card">
+            <div class="row">
+              <div class="col-2">
+                <img src="../images/profile_pic.png" alt="profile_pic" class="profile_pic-image">
+              </div>
+              <div class="col-10">
+                <div class="activity-description">Emma added adolescence to their watchlist</div>
+                <div class="activity-time">5 hours ago</div>
+              </div>
+            </div>
+          </div>
+          <hr class="divider">
+
+          <!-- Activity 3 -->
+          <div class="activity-card">
+            <div class="row">
+              <div class="col-2">
+                <img src="../images/profile_pic.png" alt="profile_pic" class="profile_pic-image">
+              </div>
+              <div class="col-10">
+                <div class="activity-description">You reviewed The Three-Body Problem</div>
+                <div class="activity-time">1 day ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+  <%- include('partials/footer') %>
+</body>
+
+</html>
