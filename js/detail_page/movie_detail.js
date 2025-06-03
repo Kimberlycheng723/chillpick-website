@@ -1,15 +1,14 @@
-addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     const movieId = document.body.dataset.movieId;
     let currentPage = 1;
     let selectedRating = 0;
     let isLoading = false;
+    let isAllReviewsLoaded = false;
 
-    console.log('🎬 Page loaded for movie ID:', movieId);
+    const loadMoreBtn = document.querySelector('.load-more-reviews-btn');
 
-    // FIXED: Enhanced authentication check with better session handling
     const checkAuthStatus = async () => {
         try {
-            // Check multiple endpoints to ensure we get the right session data
             const endpoints = [
                 '/movie_detail/check-session',
                 '/debug/session',
@@ -18,7 +17,6 @@ addEventListener('DOMContentLoaded', () => {
 
             for (const endpoint of endpoints) {
                 try {
-                    console.log(`🔐 Checking auth via: ${endpoint}`);
                     const response = await fetch(endpoint, {
                         method: 'GET',
                         credentials: 'include',
@@ -27,51 +25,30 @@ addEventListener('DOMContentLoaded', () => {
                             'Cache-Control': 'no-cache'
                         }
                     });
-                    
+
                     if (response.ok) {
                         const data = await response.json();
-                        console.log(`🔐 Auth response from ${endpoint}:`, data);
-                        
-                        // Check different response formats
-                        const isLoggedIn = data.isLoggedIn || 
-                                         !!(data.user?.id || data.user?.userId) ||
-                                         !!(data._id) || // Direct user object
-                                         (data.success !== false && data.message !== 'Not authenticated');
-                        
-                        if (isLoggedIn) {
-                            console.log('✅ User is authenticated via', endpoint);
-                            return true;
-                        }
-                    } else if (response.status === 401) {
-                        console.log(`❌ Not authenticated via ${endpoint}`);
-                        continue;
+                        const isLoggedIn = data.isLoggedIn ||
+                            !!(data.user?.id || data.user?.userId) ||
+                            !!(data._id) ||
+                            (data.success !== false && data.message !== 'Not authenticated');
+
+                        if (isLoggedIn) return true;
                     }
-                } catch (err) {
-                    console.warn(`⚠️ Error checking ${endpoint}:`, err);
-                    continue;
-                }
+                } catch {}
             }
-            
-            // Final fallback: check if isLoggedIn cookie exists
+
             const isLoggedInCookie = document.cookie
                 .split('; ')
                 .find(row => row.startsWith('isLoggedIn='))
                 ?.split('=')[1];
-            
-            if (isLoggedInCookie === 'true') {
-                console.log('🍪 Found isLoggedIn cookie, assuming user is authenticated');
-                return true;
-            }
-            
-            console.log('❌ User is not authenticated');
-            return false;
-        } catch (error) {
-            console.error('❌ Error checking auth status:', error);
+
+            return isLoggedInCookie === 'true';
+        } catch {
             return false;
         }
     };
 
-    // FIXED: Enhanced review form setup with better error handling
     const setupReviewForm = () => {
         const reviewForm = document.getElementById('reviewForm');
         const writeReviewBtn = document.getElementById('writeReviewBtn');
@@ -79,58 +56,35 @@ addEventListener('DOMContentLoaded', () => {
         const textarea = reviewForm?.querySelector('textarea');
         const submitButton = reviewForm?.querySelector('button[type="submit"]');
         const spoilerCheckbox = document.getElementById('confirmRatingCheck');
-       
 
-        console.log('📝 Setting up review form...');
+        if (!reviewForm || !writeReviewBtn || !ratingStars || !textarea || !submitButton) return;
 
-        if (!reviewForm || !writeReviewBtn || !ratingStars || !textarea || !submitButton) {
-            console.warn('⚠️ Review form elements not found');
-            return;
-        }
-
-        console.log('📝 Review form elements found successfully');
-
-        // FIXED: Better toggle with authentication check
         writeReviewBtn.addEventListener('click', async () => {
-            console.log('📝 Write review button clicked');
-            
-            // Show loading state
-            const originalText = writeReviewBtn.textContent;
             writeReviewBtn.textContent = 'Checking...';
             writeReviewBtn.disabled = true;
-            
+
             try {
                 const isAuthenticated = await checkAuthStatus();
-                console.log('🔐 Authentication status:', isAuthenticated);
-                
                 if (!isAuthenticated) {
-                    const shouldLogin = confirm('You need to be logged in to write a review. Go to login page?');
-                    if (shouldLogin) {
-                        // Force page refresh to login to ensure clean session
+                    if (confirm('You need to be logged in to write a review. Go to login page?')) {
                         window.location.href = '/account/login?redirect=' + encodeURIComponent(window.location.pathname);
                     }
                     return;
                 }
-                
-                // User is authenticated, show the form
+
                 reviewForm.classList.toggle('d-none');
-                console.log('📝 Review form toggled');
-                
-            } catch (error) {
-                console.error('❌ Error in write review click:', error);
-                alert('Something went wrong. Please refresh the page and try again.');
+            } catch {
+                alert('Something went wrong. Please refresh the page.');
             } finally {
-                writeReviewBtn.textContent = originalText;
+                writeReviewBtn.textContent = 'Write a Review';
                 writeReviewBtn.disabled = false;
             }
         });
 
-        // Star rating functionality (unchanged)
         ratingStars.forEach((star, index) => {
             star.addEventListener('click', () => {
                 selectedRating = index + 1;
                 updateStarDisplay();
-                console.log('⭐ Rating selected:', selectedRating);
             });
 
             star.addEventListener('mouseenter', () => {
@@ -142,193 +96,90 @@ addEventListener('DOMContentLoaded', () => {
             updateStarDisplay();
         });
 
-        // FIXED: Enhanced review submission with multiple endpoint fallbacks
         submitButton.addEventListener('click', async (e) => {
             e.preventDefault();
-            
-            // Validation
-            if (selectedRating === 0) {
-                alert('Please select a rating');
-                return;
-            }
-            if (!textarea.value.trim()) {
-                alert('Please write your review');
-                return;
-            }
-            if (!movieId) {
-                alert('Movie ID is missing');
-                return;
-            }
+
+            if (selectedRating === 0) return alert('Please select a rating');
+            if (!textarea.value.trim()) return alert('Please write your review');
+            if (!movieId) return alert('Movie ID is missing');
 
             try {
                 submitButton.disabled = true;
                 submitButton.textContent = 'Submitting...';
 
-                // Triple-check authentication before submitting
                 const isAuthenticated = await checkAuthStatus();
                 if (!isAuthenticated) {
-                    alert('Your session has expired. Please log in again to submit your review.');
+                    alert('Your session has expired. Please log in again.');
                     window.location.href = '/account/login?redirect=' + encodeURIComponent(window.location.pathname);
                     return;
                 }
 
                 const reviewData = {
-                    movieId: movieId,
+                    movieId,
                     rating: selectedRating,
                     comment: textarea.value.trim(),
-                    spoiler: spoilerCheckbox ? spoilerCheckbox.checked : false
+                    spoiler: spoilerCheckbox?.checked || false
                 };
 
-                console.log('📝 Submitting review:', reviewData);
+                const response = await fetch('/movie_detail/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(reviewData)
+                });
 
-                // FIXED: Try endpoints in the correct order with better error handling
-                const endpoints = [
-                    '/movie_detail/reviews',
-                    //'/movie_detail/submit-review',
-                
-                ];
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    alert('Review submitted successfully!');
+                    reviewForm.classList.add('d-none');
+                    textarea.value = '';
+                    selectedRating = 0;
+                    if (spoilerCheckbox) spoilerCheckbox.checked = false;
+                    updateStarDisplay();
 
-                let success = false;
-                let lastError = null;
+                    const container = document.getElementById('reviewsContainer');
+                    container.innerHTML = '';
 
-                for (const endpoint of endpoints) {
-                    try {
-                        console.log(`📝 Trying endpoint: ${endpoint}`);
-                        
-                        const response = await fetch(endpoint, {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            credentials: 'include',
-                            body: JSON.stringify(reviewData)
-                        });
-
-                        console.log(`📝 Response from ${endpoint}:`, response.status, response.statusText);
-
-                        if (response.ok) {
-                            const result = await response.json();
-                            console.log('✅ Review submitted successfully:', result);
-                            
-                            if (result.success) {
-                                alert('Review submitted successfully!');
-                                
-                                // Reset form
-                                reviewForm.classList.add('d-none');
-                                textarea.value = '';
-                                selectedRating = 0;
-                                updateStarDisplay();
-                                if (spoilerCheckbox) spoilerCheckbox.checked = false;
-                                
-                                // Refresh reviews
-                                loadReviews(1);
-                                success = true;
-                                break;
+                    if (isAllReviewsLoaded) {
+                        let page = 1;
+                        while (true) {
+                            const res = await fetch(`/movie_detail/reviews/${movieId}?page=${page}`, {
+                                credentials: 'include'
+                            });
+                            const data = await res.json();
+                            if (data.success && data.reviews.length > 0) {
+                                displayReviews(data.reviews);
+                                page++;
+                                if (!data.hasMore) break;
                             } else {
-                                throw new Error(result.message || 'Submission failed');
+                                break;
                             }
-                        } else if (response.status === 401) {
-                            // Authentication error
-                            console.log('❌ Authentication error on', endpoint);
-                            const errorData = await response.json().catch(() => ({}));
-                            alert('Your session has expired. Please log in again.');
-                            window.location.href = '/account/login?redirect=' + encodeURIComponent(window.location.pathname);
-                            return;
-                        } else {
-                            // Try next endpoint
-                            const errorText = await response.text().catch(() => 'Unknown error');
-                            lastError = `${endpoint}: ${response.status} - ${errorText}`;
-                            console.warn(`❌ Failed with ${endpoint}:`, lastError);
-                            continue;
                         }
-                    } catch (err) {
-                        lastError = `${endpoint}: ${err.message}`;
-                        console.warn(`❌ Network error with ${endpoint}:`, err);
-                        continue;
+                    } else {
+                        loadReviews(1, true);
                     }
+                } else {
+                    throw new Error(result.message || 'Submission failed');
                 }
-
-                if (!success) {
-                    throw new Error(lastError || 'All endpoints failed. Please try again.');
-                }
-
             } catch (error) {
-                console.error('❌ Review submission error:', error);
-                alert(error.message || 'An error occurred while submitting your review. Please try again.');
+                alert(error.message || 'Error submitting review');
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = 'Submit Review';
             }
         });
-       
-        function highlightStars(rating) {
+
+        const highlightStars = (rating) => {
             ratingStars.forEach((star, index) => {
                 star.style.color = index < rating ? '#ffc107' : '#ddd';
             });
-        }
+        };
 
-        function updateStarDisplay() {
+        const updateStarDisplay = () => {
             highlightStars(selectedRating);
-        }
+        };
 
         updateStarDisplay();
-    };
-
-    // Load and display reviews (unchanged but with better error handling)
-    const loadReviews = async (page = 1) => {
-        if (isLoading) return;
-        isLoading = true;
-
-        console.log(`📝 Loading reviews for page ${page}`);
-
-        try {
-            const endpoint = `/movie_detail/reviews/${movieId}?page=${page}`;
-            
-            console.log(`📝 Fetching reviews from: ${endpoint}`);
-            const response = await fetch(endpoint, {
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                console.warn(`⚠️ Reviews endpoint failed: ${response.status} ${response.statusText}`);
-                displayNoReviews();
-                return;
-            }
-
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                console.error('❌ Server returned non-JSON response for reviews');
-                displayNoReviews();
-                return;
-            }
-
-            const result = await response.json();
-            console.log(`📝 Reviews loaded:`, result);
-
-            if (result && result.success) {
-                if (result.reviews && result.reviews.length === 0 && page === 1) {
-                    displayNoReviews();
-                    return;
-                }
-
-                if (result.reviews && result.reviews.length > 0) {
-                    displayReviews(result.reviews);
-                    currentPage = page;
-                    console.log(`📝 Displayed ${result.reviews.length} reviews`);
-                } else {
-                    displayNoReviews();
-                }
-            } else {
-                console.warn('⚠️ Invalid reviews response format:', result);
-                displayNoReviews();
-            }
-        } catch (error) {
-            console.error('❌ Error loading reviews:', error);
-            displayNoReviews();
-        } finally {
-            isLoading = false;
-        }
     };
 
     const displayNoReviews = () => {
@@ -346,30 +197,18 @@ addEventListener('DOMContentLoaded', () => {
 
     const displayReviews = (reviews) => {
         const container = document.getElementById('reviewsContainer');
-        if (!container) {
-            console.warn('⚠️ Reviews container not found');
-            return;
-        }
-        
-        if (currentPage === 1) {
-            container.innerHTML = '';
-        }
-
+        if (!container) return;
         reviews.forEach(review => {
             container.insertAdjacentHTML('beforeend', createReviewHTML(review));
         });
-
         setupReviewInteractions();
     };
 
     const createReviewHTML = (review) => {
         const reviewDate = new Date(review.createdAt).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
+            year: 'numeric', month: 'short', day: 'numeric'
         });
-
-        const username = review.username || review.user?.username || review.user || 'Anonymous';
+        const username = review.username || review.user?.username || 'Anonymous';
 
         return `
             <div class="card mb-3 review-card">
@@ -386,11 +225,7 @@ addEventListener('DOMContentLoaded', () => {
                     <div class="${review.spoiler ? 'blurred-box' : ''}">
                         <p class="card-text">${review.comment}</p>
                     </div>
-                    ${review.spoiler ? `
-                    <button class="btn btn-sm btn-outline-secondary toggle-blur-btn mt-2">
-                        Show Spoiler
-                    </button>
-                    ` : ''}
+                    ${review.spoiler ? `<button class="btn btn-sm btn-outline-secondary toggle-blur-btn mt-2">Show Spoiler</button>` : ''}
                 </div>
             </div>
         `;
@@ -398,107 +233,81 @@ addEventListener('DOMContentLoaded', () => {
 
     const setupReviewInteractions = () => {
         document.querySelectorAll('.toggle-blur-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const contentBox = this.closest('.card-body').querySelector('.blurred-box');
                 if (contentBox) {
                     contentBox.classList.toggle('show-content');
-                    this.textContent = contentBox.classList.contains('show-content') 
-                        ? 'Hide Spoiler' 
-                        : 'Show Spoiler';
+                    this.textContent = contentBox.classList.contains('show-content') ? 'Hide Spoiler' : 'Show Spoiler';
                 }
             });
         });
     };
 
-    // Load more reviews
-    const loadMoreBtn = document.querySelector('.load-more-reviews-btn');
+    const updateLoadMoreButton = (hasMore) => {
+        if (!loadMoreBtn) return;
+        loadMoreBtn.style.display = hasMore ? 'inline-block' : 'none';
+    };
+
+    const loadReviews = async (page = 1, clear = false) => {
+        if (isLoading) return;
+        isLoading = true;
+
+        const container = document.getElementById('reviewsContainer');
+        if (clear && container) container.innerHTML = '';
+
+        try {
+            const response = await fetch(`/movie_detail/reviews/${movieId}?page=${page}`, {
+                credentials: 'include'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                if (result.reviews.length > 0) {
+                    displayReviews(result.reviews);
+                    currentPage = result.page;
+                    updateLoadMoreButton(result.hasMore);
+                } else if (page === 1) {
+                    displayNoReviews();
+                } else {
+                    updateLoadMoreButton(false);
+                }
+            } else {
+                displayNoReviews();
+            }
+        } catch {
+            displayNoReviews();
+        } finally {
+            isLoading = false;
+        }
+    };
+
     if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', () => {
-            console.log('📝 Load more reviews clicked');
-            loadReviews(currentPage + 1);
+        loadMoreBtn.addEventListener('click', async () => {
+            let hasMore = true;
+            let nextPage = currentPage + 1;
+
+            while (hasMore) {
+                const response = await fetch(`/movie_detail/reviews/${movieId}?page=${nextPage}`, {
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+                hasMore = result.hasMore;
+
+                if (result.success && result.reviews.length > 0) {
+                    displayReviews(result.reviews);
+                    currentPage = result.page;
+                    nextPage++;
+                } else {
+                    hasMore = false;
+                }
+            }
+
+            isAllReviewsLoaded = true;
+            updateLoadMoreButton(false);
         });
     }
 
-    // Initialize
     setupReviewForm();
     loadReviews();
-
-    // Recommendations functionality (unchanged)
-    let filteredData = [];
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    async function loadMoviesAndRender() {
-        try {
-            console.log('🎬 Loading movie recommendations...');
-            const response = await fetch('/api/discover/movies');
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Server returned non-JSON response for recommendations');
-            }
-            
-            const data = await response.json();
-
-            shuffleArray(data);
-            filteredData = data;
-            renderCards(1);
-            console.log(`🎬 Loaded ${data.length} recommendations`);
-        } catch (error) {
-            console.error('❌ Failed to load movies:', error);
-            const container = document.getElementById('Recommendation');
-            if (container) {
-                container.innerHTML = `
-                    <div class="text-center w-100 py-5">
-                        <h5 class="text-muted">Unable to load recommendations</h5>
-                        <p class="text-muted">Please try refreshing the page</p>
-                    </div>
-                `;
-            }
-        }
-    }
-
-    function renderCards(page) {
-        const container = document.getElementById('Recommendation');
-        if (!container) {
-            console.warn('⚠️ Recommendation container not found');
-            return;
-        }
-        
-        const itemsPerPage = 4;
-        const startIndex = (page - 1) * itemsPerPage;
-        const endIndex = Math.min(page * itemsPerPage, filteredData.length);
-        const itemsToDisplay = filteredData.slice(startIndex, endIndex);
-
-        let html = '';
-        if (itemsToDisplay.length === 0) {
-            html = `<div class="text-center w-100 py-5"><h5 class="text-muted">No movies found.</h5></div>`;
-        } else {
-            itemsToDisplay.forEach(item => {
-                html += `
-                <div class="col-md-3 col-6">
-                    <div class="card h-100 text-center">
-                        <a href="/movie_detail/${item.id}" class="text-decoration-none text-dark">
-                            <img src="${item.image}" class="card-img-top" alt="${item.title}">
-                            <h6 class="card-title" id="RecommendationCard-title">${item.title || item.name}</h6>
-                            <div class="mb-4">${item.genres}<br></div>
-                        </a>
-                    </div>
-                </div>
-                `;
-            });
-        }
-        container.innerHTML = html;
-        console.log(`🎬 Rendered ${itemsToDisplay.length} recommendation cards`);
-    }
-
-    loadMoviesAndRender();
 });
