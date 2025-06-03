@@ -14,178 +14,233 @@
         <link rel="stylesheet" href="../../css/detail_page/book_detail.css">
 
 
+
+
+
+
+
+
      
 </head>  
+
+
+
 
 <body>
   <%- include('../partials/header') %>
    <!--Main Body-->
     <main class="container my-5">
 
+
+
+
         <!--Media Detail Section-->
         <section class="mb-5">
             <div class="row">
                 <!--Poster-->
                 <div class="col-md-4 text center">
-                    <img src="../../images/Detail/Image/The-Great-Gatsby (book).jpg" alt="The-Great-Gatsby" class="media-poster img-fluid">
+                  <img src="<%= book.volumeInfo.imageLinks?.thumbnail || '/images/default-book.jpg' %>" alt="<%= book.volumeInfo.title %>" class="img-fluid mb-3" style="width: 1000px; height: auto;">
+
+
+
 
                 </div>
-                
+               
                 <!--Synopsis-->
                 <div class="col-md-8">
-                    <h1 class="display-5 fw-bold mb-3">The Great Gatsby</h1>
-
-                    <div class="mb-4">
-                        <span class="badge bg-secondary me-2"><i class="bi bi-person-heart"></i>F. Scott Fitzgerald</span>
-                        <span class="badge bg-secondary me-2"><i class="bi bi-book"></i>180 pages</span>
-                        <span class="badge bg-secondary me-2"><i class="bi bi-tags-fill"></i> Fiction, Classic</span>
-                        <span class="badge bg-secondary me-2"><i class="bi bi-calendar-heart"></i> 1925</span>
-                        <span class="badge bg-secondary me-2"><i class="bi bi-upc"></i> 9780743273565</span>
-    
-                    </div>
-
-                    <!--Rate-->
-                    <div class="mb-4">
-                        <h5 class="d-inline me-2">Rate:</h5>
-                        <div class="d-inline-block rating-stars">
-                          <i class="bi bi-star-fill" data-rating="1"></i>
-                          <i class="bi bi-star-fill" data-rating="2"></i>
-                          <i class="bi bi-star-fill" data-rating="3"></i>
-                          <i class="bi bi-star-fill" data-rating="4"></i>
-                          <span class="bi bi-star-half"> 4.5/5</span>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <h5 class="d-inline me-2">Genres:</h5>
-                        <span class="badge genre-badge bg-secondary">Literary Fiction</span>
-                        <span class="badge genre-badge bg-secondary">Classic</span>
-                        <span class="badge genre-badge bg-secondary">Must Read</span>
-                    </div>
-                    
+                    <h3 class="display-5 fw-bold mb-3"><%= book.volumeInfo.title %></h3>
 
 
-                    <div class="mb-4">
-                        <h5>Synopsis</h5>
-                        <p class="lead" style="font-size: 15px;"> The Great Gatsby, F. Scott Fitzgerald's third book, stands as the supreme achievement of his career. This exemplary novel of the Jazz Age has been acclaimed by generations of readers. The story of the fabulously wealthy Jay Gatsby and his love for the beautiful Daisy Buchanan, of lavish parties on Long Island at a time when The New York Times noted "gin was the national drink and sex the national obsession," it is an exquisitely crafted tale of America in the 1920s.</p>
-                    </div>
 
-                    
+
+                   <div class="mb-4">
+                      <span class="badge bg-secondary"><i class="bi bi-book"></i> Book</span>
+                        <% if (book.volumeInfo.publishedDate) { %>
+                      <span class="badge bg-secondary ms-1"><i class="bi bi-calendar3"></i> Published: <%= book.volumeInfo.publishedDate %></span>
+                     <% } %>
+                  </div>
+
+
+
+
+                  <% if (book.volumeInfo.authors) { %>
+                  <div class="mb-4">
+                     <h6 class="d-inline me-2">Author(s):</h6>
+                     <% book.volumeInfo.authors.forEach(author => { %>
+                     <span class="badge text-dark ms-1"><%= author %></span>
+                     <% }); %>
+                  </div>
+                  <% } %>
+
+
+
+
+                 <!--Genres-->
+                  <% if (book.volumeInfo.categories) { %>
+                   <div class="mb-4">
+                   <h6 class="d-inline me-2">Genres:</h6>
+                   <% book.volumeInfo.categories.forEach(category => { %>
+                   <span class="badge text-dark ms-1"><%= category %></span>
+                   <% }); %>
+                   </div>
+                   <% } %>
+
+
+
+
+                <!--Synopsis-->
+                <div class="mb-4">
+                  <h6>Synopsis</h6>
+                  <p class="lead" style="font-size: 15px;" id="synopsis">
+                  <%= book.volumeInfo.description || 'No description available.' %>
+                  </p>
+                </div>
+
+
+
+
+                <script>
+                   document.addEventListener('DOMContentLoaded', function() {
+                   const synopsisElement = document.getElementById('synopsis');
+                   if (synopsisElement) {
+                    // Step 1: Create a temporary element to decode HTML entities
+                    const temp = document.createElement('div');
+                    temp.innerHTML = synopsisElement.innerHTML;
+           
+                    // Step 2: Get decoded text and strip HTML tags
+                    const decodedText = temp.textContent || temp.innerText;
+                    const cleanText = decodedText.replace(/<[^>]*>/g, ''); // Remove any remaining tags
+           
+                    // Step 3 (Optional): Replace multiple spaces/newlines
+                    const finalText = cleanText.replace(/\s+/g, ' ').trim();
+           
+                    synopsisElement.textContent = finalText;
+                    }
+                    });
+                    </script>
+
+
+
+
+                   <!--Rating-->
+                   <% if (book.volumeInfo.averageRating) { %>
+                   <div class="mb-4">
+                    <h5 class="d-inline me-2" style="font-size: 15px;">Rating: <%= book.volumeInfo.averageRating.toFixed(1) %> / 5</h5>
+                   </div>
+                   <% } %>
+
+
+
+
+                   
                      <!--button for Booklist & mark view-->
                      <div class="row mt-4">
                         <div class="col-lg-3">
                         <button class="btn" id="btnBooklist"><i class="bi bi-plus-lg"></i> Add to Watchlist</button>
                         </div>
                         <div class="col-lg-4">
-                        <button class="btn" id="btnRead"><i class="bi bi-book-half"></i> Read</button>
+                        <button class="btn" id="btnRead" data-title="<%= book.volumeInfo.title %>">Read Now</button>
+                        <script>
+                          function buildGoogleSearchUrl(title) {
+                          const query = title.trim().replace(/\s+/g, '+');
+                          return 'https://www.google.com/search?udm=36&q=' + query;
+                          }
+
+
+                          const movieTitle = '<%= book.volumeInfo.title %>'; // Get movie title from EJS
+                          const url = buildGoogleSearchUrl(movieTitle);
+
+
+                          document.getElementById('btnRead').addEventListener('click', function () {
+                          window.open(url, '_blank');
+                          });
+                        </script>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
+
+
 
         <!--Book Detail-->
         <section class="content-section animated delay-1">
-            <h2 class="section-title mb-4" id="BookDetailSectionTitle">Book Details</h2>
-            <div class="container">
-                <div class="row g-4">
-                    <!-- Author -->
-                    <div class="col-md-6">
-                        <div class="detail-item">
-                            <div class="detail-label fw-bold"><i class="bi bi-person-fill me-2"></i>Author</div>
-                            <div>F. Scott Fitzgerald</div>
-                        </div>
-                    </div>
-        
-                    <!-- Published -->
-                    <div class="col-md-6">
-                        <div class="detail-item">
-                            <div class="detail-label fw-bold"><i class="bi bi-calendar-heart me-2"></i>Published</div>
-                            <div>April 10, 1925</div>
-                        </div>
-                    </div>
-        
-                    <!-- Pages -->
-                    <div class="col-md-6">
-                        <div class="detail-item">
-                            <div class="detail-label fw-bold"><i class="bi bi-book me-2"></i>Pages</div>
-                            <div>180</div>
-                        </div>
-                    </div>
-        
-                    <!-- Language -->
-                    <div class="col-md-6">
-                        <div class="detail-item">
-                            <div class="detail-label fw-bold"><i class="bi bi-translate me-2"></i>Language</div>
-                            <div>English</div>
-                        </div>
-                    </div>
-                    </div>
+        <h2 class="section-title mb-4" id="BookDetailSectionTitle">Book Details</h2>
+          <div class="container">
+            <div class="row g-4">
+     
+            <!-- Author -->
+            <% if (book.volumeInfo.authors) { %>
+            <div class="col-md-6">
+                <div class="detail-item">
+                   <div class="detail-label fw-bold"><i class="bi bi-person-fill me-2"></i>Author</div>
+                      <div><%= book.volumeInfo.authors.join(', ') %></div>
                 </div>
             </div>
-        </section>
+            <% } %>
 
-      <!-- Author Section -->
-      <section style="background-color: white; padding: 40px 0; border-radius: 15px;">
-         <h3 class="section-title text-center mb-4">About the Author</h3>
-           <div class="container">
-             <div class="author-card-custom d-flex align-items-center">
-               
-               <!-- Author Info -->
-              <div class="author-info">
-                <h4>F. Scott Fitzgerald</h4>
-                <p class="author-bio">Francis Scott Key Fitzgerald (1896–1940) was an American novelist, essayist, and short story writer. He is best known for his novels depicting the flamboyance and excess of the Jazz Age—a term he popularized.</p>
+
+
+
+            <!-- Published -->
+            <% if (book.volumeInfo.publishedDate) { %>
+            <div class="col-md-6">
+               <div class="detail-item">
+                  <div class="detail-label fw-bold"><i class="bi bi-calendar-heart me-2"></i>Published</div>
+                     <div><%= book.volumeInfo.publishedDate %></div>
               </div>
-             </div>
-          </div>
-      </section>
+            </div>
+            <% } %>
+
+
+
+
+            <!-- Pages -->
+            <% if (book.volumeInfo.pageCount) { %>
+              <div class="col-md-6">
+                 <div class="detail-item">
+                    <div class="detail-label fw-bold"><i class="bi bi-book me-2"></i>Pages</div>
+                      <div><%= book.volumeInfo.pageCount %></div>
+                 </div>
+              </div>
+            <% } %>
+
+
+
+
+            <!-- Language -->
+            <% if (book.volumeInfo.language) { %>
+            <div class="col-md-6">
+            <div class="detail-item">
+            <div class="detail-label fw-bold"><i class="bi bi-translate me-2"></i>Language</div>
+              <div><%= book.volumeInfo.language.toUpperCase() %></div>
+            </div>
+            </div>
+            <% } %>
+
+
+
+
+        </div>
+       </div>
+    </section>
+
+
+
 
        <!--Recommendations-->
-       <section class="mb-5">
-        <h3 class="mb-4 mt-5">You May Also Like</h3>
-        <div class="row g-4">
-            <!-- Recommendation Card -->
-            <div class="col-md-3 col-6">
-                <div class="card h-100 text-center">
-                    <a href=""><img src="../../images/Detail/Image/The-Little-Prince (book).jpg" class="card-img-top img-fixed" alt="Spirited Away"></a>
-                    <div class="card-body" id="RecommendationCard-body">
-                        <h6 class="card-title" id="RecommendationCard-title">The Little Prince</h6>
-                        <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Book • Fantasy • 1943</p>
-                    </div>
+            <section class="mb-5">
+              <h3 class="mb-4">You May Also Like</h3>
+                <div class="row g-4">
+                   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="RecommendationBook">
+                   <!-- Cards will be injected here by renderCards() -->
+                   </div>
                 </div>
-            </div>
-    
-            <div class="col-md-3 col-6">
-                <div class="card h-100 text-center">
-                    <a href=""><img src="../../images/Detail/Image/Sleeping-Beauty (book).jpg" class="card-img-top img-fixed" alt="Your Name"></a>
-                    <div class="card-body" id="RecommendationCard-body">
-                        <h6 class="card-title mb-1" id="RecommendationCard-title">Sleeping Beauty</h6>
-                        <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Book • Fairy Tale • 1697</p>
-                    </div>
-                </div>
-            </div>
-    
-            <div class="col-md-3 col-6">
-                <div class="card h-100 text-center">
-                    <a href=""><img src="../../images/Detail/Image/Jack-And-Beanstalk (book).jpg" class="card-img-top img-fixed" alt="Weathering with You"></a>
-                    <div class="card-body" id="RecommendationCard-body">
-                        <h6 class="card-title" id="RecommendationCard-title">Jack and Beanstalk</h6>
-                        <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Book • Adventure • 1734</p>
-                    </div>
-                </div>
-            </div>
-    
-            <div class="col-md-3 col-6">
-                <div class="card h-100 text-center">
-                    <a href=""><img src="../../images/Detail/Image/Charlotte's-Web (book).jpg" class="card-img-top img-fixed" alt="Totoro"></a>
-                    <div class="card-body" id="RecommendationCard-body">
-                        <h6 class="card-title" id="RecommendationCard-title">Charlotte's Web</h6>
-                        <p class="card-subtitle" style="color: #5C4033; font-size: 14px; margin: 0;">Book • Fantasy • 1952</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+            </section>
+
+
+
 
      <!-- Review Section -->
      <section class="details-section" style="background-color: white; border-radius: 15px; height:900px">
@@ -193,6 +248,7 @@
            <h3><i class="bi bi-chat-left-dots me-2"></i> User Reviews</h3>
            <button class="btn" id="writeReviewBtn">Write a Review</button>
         </div>
+
 
         <!-- Write Review Form (hidden by default) -->
        <div id="reviewForm" class="card mb-4 my-3 p-3 border shadow-sm d-none">
@@ -215,6 +271,7 @@
          </div>
          <button class="btn" style="background-color: #FFC107;">Submit</button>
        </div>
+
 
       <!-- Review Card 1 -->
       <div class="card mb-3 mt-5 my-5 border-0 shadow-sm review-card">
@@ -239,11 +296,13 @@
                  
             </div>
 
+
              <!-- Blurred content -->
              <div class="blurred-box position-relative">
              <h5 class="card-title fw-bold">Creative but exhausting</h5>
              <div class="comment-text card-text text-secondary">While the writing is beautiful, I found the characters largely unlikable and the plot somewhat thin. It's an important historical document of the Jazz Age, but as a novel, it hasn't aged as well as some of its contemporaries.</div>
              </div>
+
 
             <div class="d-flex justify-content-end">
                <button class="btn btn-sm btn-outline-secondary me-2 like-btn">
@@ -252,6 +311,7 @@
                <button class="btn btn-sm btn-outline-secondary reply-btn"><i class="bi bi-chat-square-dots"></i> Reply</button>
             </div>
 
+
             <!-- Reply Form (hidden by default) -->
             <div class="reply-form mt-3 d-none">
                <textarea class="form-control mb-2" rows="2" placeholder="Write your reply..."></textarea>
@@ -259,6 +319,8 @@
            </div>
           </div>
         </div>
+
+
 
 
       <!-- Review Card 2 -->
@@ -283,11 +345,13 @@
            </div>
           </div>
 
+
           <!-- Blurred content -->
           <div class="blurred-box position-relative">
           <h5 class="card-title fw-bold">That was amazing!</h5>
           <div class="comment-text card-text text-secondary">The Great Gatsby is a masterpiece of American literature. Fitzgerald's prose is breathtaking, and his portrayal of the American Dream's corruption is as relevant today as it was in the 1920s. The characters are complex and unforgettable.</div>
           </div>
+
 
           <div class="d-flex justify-content-end">
            <button class="btn btn-sm btn-outline-secondary me-2 like-btn">
@@ -295,6 +359,7 @@
            </button>                  
            <button class="btn btn-sm btn-outline-secondary reply-btn"><i class="bi bi-chat-square-dots"></i> Reply</button>
           </div>
+
 
           <!-- Reply Form (hidden by default) -->
           <div class="reply-form mt-3 d-none">
@@ -304,20 +369,25 @@
         </div>
       </div>
 
+
        <!-- Load More -->
        <div class="text-center mt-4 mb-10">
            <button class="btn" style="background-color: #FFC107;">Load More Reviews</button>
       </div>
    </section>
 
+
    
+
 
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
      <script src="../../js/detail_page/book_detail.js"></script>
      </main>
      <%- include('../partials/footer') %>
     </body>
-    
+   
+
 
 </html>
+
 

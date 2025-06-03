@@ -16,11 +16,10 @@ const Contact = require('./models/Contact');
 const User = require('./models/User');
 const recommendationService = require('./services/recommendationService');
 
-// Set EJS as view engine
+// Middleware
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Serve static files
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -44,11 +43,12 @@ app.use(session({
   cookie: {
     secure: false,
     httpOnly: true,
+    sameSite: 'lax',
     maxAge: 15 * 60 * 1000,
   },
 }));
 
-// Connect to MongoDB
+// MongoDB connection
 mongoose.connect(uri)
   .then(() => console.log("✅ Successfully connected to MongoDB"))
   .catch((err) => {
@@ -68,7 +68,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+// ✅ Movie detail routes must come AFTER session middleware
+const movieDetailRoutes = require('./routes/movie_detail');
+app.use('/movie_detail', movieDetailRoutes);
+
+// Other routes
 const accountRoutes = require('./routes/account');
 const discoverRoutes = require('./routes/discover');
 const saveSearchRoutes = require('./routes/save-search');
@@ -85,10 +89,7 @@ app.get('/', (req, res) => res.render('landing'));
 app.get('/dashboard', async (req, res) => {
   try {
     const userId = req.session?.userId;
-    if (!userId) {
-      return res.redirect('/account/login');
-    }
-
+    if (!userId) return res.redirect('/account/login');
     const recommendations = await recommendationService.getRecommendations(userId);
     res.render('dashboard', {
       recommendations,
@@ -101,6 +102,7 @@ app.get('/dashboard', async (req, res) => {
     res.status(500).send('Error loading dashboard');
   }
 });
+
 app.get('/discover', (req, res) => res.render('discover'));
 app.get('/watchlist', (req, res) => res.render('watchlist/watchlist'));
 app.get('/history', (req, res) => res.render('watchlist/history'));
@@ -126,21 +128,24 @@ app.get('/account/login', (req, res) => res.render('account/login'));
 app.get('/account/register', (req, res) => res.render('account/register'));
 app.get('/account/forgotPassword', (req, res) => res.render('account/forgotPassword'));
 
-app.post('/account/login', (req, res) => {
+app.post('/account/login', async (req, res) => {
   const { email, password } = req.body;
   if (email === 'test@example.com' && password === '123456') {
-    res.cookie('isLoggedIn', 'true');
-    return res.redirect('/account/profile');
+    req.session.user = {
+      id: 'fake-user-id-123',
+      username: 'TestUser',
+      email
+    };
+    return req.session.save(() => {
+      res.redirect('/account/profile');
+    });
   } else {
     return res.send('❌ Invalid email or password');
   }
 });
+app.get('/account/profile', (req, res) => res.render('account/profile'));
 
-app.get('/account/profile', (req, res) => {
-  res.render('account/profile');
-});
-
-// Utilities
+// Utility pages
 app.get('/aboutus', (req, res) => res.render('utility/AboutUs'));
 app.get('/contactus', (req, res) => res.render('utility/ContactUs', {
   success: req.query.success,
@@ -155,10 +160,8 @@ app.post('/contactus', async (req, res) => {
     if (!name || !email || !message) {
       return res.redirect('/contactus?error=missing_fields');
     }
-
     const newContact = new Contact({ name, email, message });
     await newContact.save();
-
     res.redirect('/contactus?success=true');
   } catch (error) {
     console.error('Error saving contact:', error);
@@ -166,7 +169,7 @@ app.post('/contactus', async (req, res) => {
   }
 });
 
-// Debug/Utility Routes (keep for testing)
+// Debug endpoints
 app.post('/api/recommendations/refresh', async (req, res) => {
   try {
     const userId = req.session?.userId;
@@ -191,12 +194,10 @@ app.get('/api/debug/all', async (req, res) => {
   try {
     const tmdbService = require('./services/tmdbService');
     const googleBooksService = require('./services/googleBooksService');
-
     const [movies, books] = await Promise.all([
       tmdbService.getTrendingMovies(3),
       googleBooksService.getPopularBooks(3),
     ]);
-
     res.json({ movies, books });
   } catch (error) {
     res.status(500).json({ error: error.message });

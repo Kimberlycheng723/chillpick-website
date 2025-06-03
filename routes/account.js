@@ -250,8 +250,12 @@ router.post("/login", async (req, res) => {
         return res.status(500).json({ message: "Failed to regenerate session" });
       }
 
-      req.session.userId = user._id; // Set userId in session
-
+     req.session.userId = user._id;
+req.session.user = {
+  id: user._id,
+  username: user.username,
+  email: user.email
+};
       req.session.save(async (err) => {
         if (err) {
           console.error("❌ Failed to save new session:", err);
