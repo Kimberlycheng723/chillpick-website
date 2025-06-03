@@ -40,66 +40,37 @@
 
 
         <!-- Movie Items -->
-        <section class="watchlist-item" data-type="movie">
-            <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_FMjpg_UX1000_.jpg" alt="Titanic poster" class="item-image">
-            <div class="item-content">
-                <h2>Titanic (1997)</h2>
-                <p>A seventeen-year-old aristocrat falls in love with a kind but poor artist aboard the luxurious, ill-fated R.M.S. Titanic.</p>
-                <button class="more-btn">More</button>
-            </div>
-            <div class="item-actions">
-                <ul class="action-list">
+        <!-- Replace hardcoded movie/book sections with dynamic EJS -->
+        <% items.forEach(item => { %>
+            <section class="watchlist-item" data-type="<%= item.type %>">
+                <img src="<%= item.image %>" alt="<%= item.title %> poster" class="item-image">
+                
+                <div class="item-content">
+                    <h2><%= item.title %></h2>
+                    <% if (item.synopsis && item.synopsis.length > 0) { %>
+                    <p><%= item.synopsis %></p>
+                    <% } %>
+                    <% if (item.genres && item.genres.length > 0) { %>
+                    <p>Genres: <%= item.genres.join(', ') %></p>
+                    <% } %>
+                    <% if (item.rating) { %>
+                    <p>Rating: <%= item.rating %></p>
+                    <% } %>
+                    <button class="more-btn">More</button>
+                </div>
+                <div class="item-actions">
+                    <ul class="action-list">
                     <li><button class="mark-btn">Mark as completed</button></li>
                     <li><button class="remove-btn">Remove</button></li>
                 </ul>
-            </div>
-        </section>
+                </div>
+            </section>
+        <% }) %>
 
-        <section class="watchlist-item" data-type="movie">
-            <img src="https://m.media-amazon.com/images/M/MV5BMDFkYTc0MGEtZmNhMC00ZDIzLWFmNTEtODM1ZmRlYWMwMWFmXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg" alt="The Shawshank Redemption poster" class="item-image">
-            <div class="item-content">
-                <h2>The Shawshank Redemption (1994)</h2>
-                <p>Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.</p>
-                <button class="more-btn">More</button>
-            </div>
-            <div class="item-actions">
-                <ul class="action-list">
-                    <li><button class="mark-btn">Mark as completed</button></li>
-                    <li><button class="remove-btn">Remove</button></li>
-                </ul>
-            </div>
-        </section>
 
-        <section class="watchlist-item" data-type="movie">
-            <img src="https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg" alt="The Godfather poster" class="item-image">
-            <div class="item-content">
-                <h2>The Godfather (1972)</h2>
-                <p>The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.</p>
-                <button class="more-btn">More</button>
-            </div>
-            <div class="item-actions">
-                <ul class="action-list">
-                    <li><button class="mark-btn">Mark as completed</button></li>
-                    <li><button class="remove-btn">Remove</button></li>
-                </ul>
-            </div>
-        </section>
+        
 
-        <!-- Book Items -->
-        <section class="watchlist-item" data-type="book">
-            <img src="https://m.media-amazon.com/images/I/71kxa1-0mfL._AC_UF1000,1000_QL80_.jpg" alt="1984 book cover" class="item-image">
-            <div class="item-content">
-                <h2>1984 by George Orwell</h2>
-                <p>A dystopian novel set in Airstrip One, a province of the superstate Oceania in a world of perpetual war, omnipresent government surveillance, and public manipulation.</p>
-                <button class="more-btn">More</button>
-            </div>
-            <div class="item-actions">
-                <ul class="action-list">
-                    <li><button class="mark-btn">Mark as completed</button></li>
-                    <li><button class="remove-btn">Remove</button></li>
-                </ul>
-            </div>
-        </section>
+        <!-- Book Items --> 
 
         <section class="watchlist-item" data-type="book">
             <img src="https://m.media-amazon.com/images/I/71FxgtFKcQL._AC_UF1000,1000_QL80_.jpg" alt="To Kill a Mockingbird book cover" alt="To Kill a Mockingbird book cover" class="item-image">

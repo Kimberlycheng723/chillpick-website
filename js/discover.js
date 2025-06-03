@@ -8,18 +8,22 @@ let searchResults = [];
 
 async function getCurrentUserId() {
   try {
-    const response = await fetch('/account/profile-data', {
+    // Try to get user data from a simple endpoint that checks session
+    const response = await fetch('/account/profile', {
+      method: 'HEAD', // Just check if we can access the profile
       credentials: 'include'
     });
-    if (!response.ok) {
-      console.error('Failed to fetch current user:', response.status);
+    
+    if (response.ok) {
+      // If profile is accessible, user is logged in
+      // Return a simple user identifier (you can modify this based on your needs)
+      return 'logged-in-user';
+    } else {
+      console.error('User not authenticated:', response.status);
       return null;
     }
-    const data = await response.json();
-    console.log('🚀 getCurrentUserId() returned:', data);
-    return data._id;
   } catch (error) {
-    console.error('Error fetching current user:', error);
+    console.error('Error checking authentication:', error);
     return null;
   }
 }
@@ -101,7 +105,10 @@ function renderCards(page) {
                   <i class="bi ${isMovie ? 'bi-film' : 'bi-book'} me-1"></i> ${isMovie ? 'Movie' : 'Book'}
                   <span class="ms-auto text-dark fw-semibold">${item.rating} <i class="bi bi-star-fill rating-star"></i></span>
                 </div>
-                <button class="btn watchlist-btn mt-3 w-100" onclick="toggleWatchlist(this, event)">
+                <button class="btn watchlist-btn mt-3 w-100" 
+                        data-id="${item.id}" 
+                        data-type="${item.type}"
+                        onclick="handleWatchlistClick(event)">
                   <i class="bi bi-plus-circle me-1"></i> Watchlist
                 </button>
               </div>
@@ -220,40 +227,162 @@ function updateRatingFilter() {
   });
 }
 
-function toggleWatchlist(button, event) {
-  event.stopPropagation();
+let userWatchlist = []; // Global variable to track watchlist items
+
+// Fixed handleWatchlistClick function
+async function handleWatchlistClick(event) {
   event.preventDefault();
+  event.stopPropagation();
+  
+  const button = event.currentTarget;
+  const itemId = button.dataset.id;
+  const itemType = button.dataset.type;
+  const isAdded = button.classList.contains('added');
 
-  const card = button.closest('.card');
-  const itemId = card.dataset.itemId;
-  const title = card.querySelector('h6').textContent;
-  const rating = card.querySelector('.fw-semibold').textContent.split(' ')[0];
-  const image = card.querySelector('img').src;
-  const isMovie = card.querySelector('.bi-film') !== null;
-  const detailURL = button.closest('a').href;
+  // Show loading state
+  const originalHtml = button.innerHTML;
+  button.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
+  button.disabled = true;
 
-  const itemData = findItemById(itemId);
+  try {
+    // First check if user is logged in
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      alert('Please log in to add items to your watchlist');
+      window.location.href = `/account/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
 
-  const itemDetails = {
-    id: itemId,
-    title,
-    rating,
-    type: isMovie ? 'movie' : 'book',
-    detailURL,
-    genres: itemData?.genres || []
+    const itemData = findItemById(itemId);
+
+    const watchlistData = {
+    itemId, 
+    type: itemType,
+    title: itemData?.title || '',
+    image: itemData?.image || '',
+    rating: itemData?.rating || 0,
+    genres: itemData?.genres || [],
+    synopsis: itemData?.synopsis || itemData?.description || 'No synopsis available'
   };
 
-  console.log('🎬 Adding to watchlist:', itemDetails);
+    console.log('🎬 Watchlist request:', {
+      method: 'POST',
+      url: '/api/watchlist/add', // Fixed URL
+      data: watchlistData
+    });
 
-  if (button.classList.contains('added')) {
-    button.classList.remove('added');
-    button.innerHTML = `<i class="bi bi-plus-circle me-1"></i> Watchlist`;
-  } else {
-    button.classList.add('added');
-    button.innerHTML = `<i class="bi bi-check-circle me-1"></i> Added`;
-    saveUserInteraction('add to watchlist', { itemDetails });
+    // Always use POST to /api/watchlist/add (the backend handles add/remove logic)
+    const response = await fetch('/api/watchlist/add', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      credentials: 'include',
+      body: JSON.stringify(watchlistData)
+    });
+
+    console.log('🎬 Watchlist response:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url
+    });
+
+    if (response.status === 404) {
+      console.error('❌ Watchlist endpoint not found. Check if watchlist routes are properly configured.');
+      alert('Watchlist feature is currently unavailable. Please try again later.');
+      button.innerHTML = originalHtml;
+      return;
+    }
+
+    if (response.status === 401) {
+      alert('Please log in to add items to your watchlist');
+      window.location.href = `/account/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Watchlist error response:', errorText);
+      throw new Error(`Failed to update watchlist: ${response.status} - ${errorText}`);
+    }
+
+    // Get the response to check if item was added or removed
+    const result = await response.json();
+    console.log('🎬 Watchlist result:', result);
+
+    // Update UI based on the action returned from server
+    if (result.action === 'removed') {
+      userWatchlist = userWatchlist.filter(item => !(item.itemId === itemId && item.type === itemType));
+      button.classList.remove('added');
+      button.innerHTML = `<i class="bi bi-plus-circle me-1"></i> Watchlist`;
+      console.log('✅ Item removed from watchlist');
+      await saveUserInteraction('remove from watchlist', { 
+        itemDetails: { itemId, title: button.closest('.card').querySelector('h6').textContent, type: itemType } 
+      });
+    } else if (result.action === 'added') {
+      if (!userWatchlist.some(item => item.itemId === itemId && item.type === itemType)) {
+        userWatchlist.push(watchlistData);
+      }
+      button.classList.add('added');
+      button.innerHTML = `<i class="bi bi-check-circle me-1"></i> Added`;
+      console.log('✅ Item added to watchlist');
+      await saveUserInteraction('add to watchlist', { 
+        itemDetails: { itemId, title: button.closest('.card').querySelector('h6').textContent, type: itemType } 
+      });
+    }
+
+  } catch (err) {
+    console.error('Watchlist error:', err);
+    
+    // Check if it's an authentication error
+    if (err.message.includes('401') || err.message.includes('unauthorized')) {
+      alert('Please log in to use this feature');
+      window.location.href = `/account/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+    } else if (err.message.includes('404')) {
+      alert('Watchlist feature is currently unavailable. Please contact support.');
+    } else {
+      // Other errors
+      alert('Unable to update watchlist. Please try again.');
+    }
+    
+    button.innerHTML = originalHtml;
+  } finally {
+    button.disabled = false;
   }
 }
+
+async function initializeWatchlistButtons() {
+  try {
+    const response = await fetch('/api/watchlist', {
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      userWatchlist = await response.json();
+      document.querySelectorAll('.watchlist-btn').forEach(button => {
+        const itemId = button.dataset.id;
+        const itemType = button.dataset.type;
+        
+        if (userWatchlist.some(item => item.itemId === itemId && item.type === itemType)) {
+          button.classList.add('added');
+          button.innerHTML = `<i class="bi bi-check-circle me-1"></i> Added`;
+        }
+      });
+    } else if (response.status === 401) {
+      // User not logged in, but don't show error - just leave buttons in default state
+      console.log('User not logged in - watchlist buttons will show login prompt when clicked');
+    }
+  } catch (error) {
+    console.error('Error initializing watchlist buttons:', error);
+  }
+}
+
+document.getElementById('searchInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') {
+    document.getElementById('searchBtn').click();
+  }
+});
 
 document.getElementById('searchBtn').addEventListener('click', () => {
   const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -288,6 +417,7 @@ document.getElementById('ratingSelect').addEventListener('change', () => {
 
 window.onload = () => {
   fetchData();
+  initializeWatchlistButtons();
 };
 
 async function saveUserInteraction(interactionType, payload = {}) {
@@ -309,6 +439,7 @@ async function saveUserInteraction(interactionType, payload = {}) {
       headers: {
         'Content-Type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify(data)
     });
     if (!response.ok) {

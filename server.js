@@ -15,6 +15,8 @@ const SessionModel = require('./models/Session');
 const Contact = require('./models/Contact');
 const User = require('./models/User');
 const recommendationService = require('./services/recommendationService');
+const watchlistRoutes = require('./routes/watchlist');
+const Watchlist=require('./models/Watchlist')
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -24,7 +26,10 @@ app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://your-frontend.com',
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -83,6 +88,7 @@ app.use('/api/discover', discoverRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/interactions', saveSearchRoutes);
 app.use('/', discoverRoutes);
+app.use('/api/watchlist', watchlistRoutes);
 
 // Views
 app.get('/', (req, res) => res.render('landing'));
@@ -104,8 +110,25 @@ app.get('/dashboard', async (req, res) => {
 });
 
 app.get('/discover', (req, res) => res.render('discover'));
-app.get('/watchlist', (req, res) => res.render('watchlist/watchlist'));
 app.get('/history', (req, res) => res.render('watchlist/history'));
+app.get('/watchlist', async (req, res) => {
+  if (!req.session?.user?.id) {
+    return res.redirect('/account/login');
+  }
+
+  try {
+    const watchlist = await Watchlist.findOne({ userId: req.session.user.id });
+    const items = watchlist?.items || [];
+
+    res.render('watchlist/watchlist', {
+      items,
+      currentUser: req.session.user
+    });
+  } catch (error) {
+    console.error('Error fetching watchlist:', error);
+    res.status(500).send('Error loading watchlist');
+  }
+});
 
 app.get('/login', (req, res) => res.send('✅ Login route is working.'));
 app.get('/register', (req, res) => res.render('account/register'));
