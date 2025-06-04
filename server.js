@@ -17,6 +17,7 @@ const User = require('./models/User');
 const recommendationService = require('./services/recommendationService');
 const watchlistRoutes = require('./routes/watchlist');
 const Watchlist=require('./models/Watchlist')
+const History=require('./models/History')
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -110,7 +111,6 @@ app.get('/dashboard', async (req, res) => {
 });
 
 app.get('/discover', (req, res) => res.render('discover'));
-app.get('/history', (req, res) => res.render('watchlist/history'));
 app.get('/watchlist', async (req, res) => {
   if (!req.session?.user?.id) {
     return res.redirect('/account/login');
@@ -127,6 +127,25 @@ app.get('/watchlist', async (req, res) => {
   } catch (error) {
     console.error('Error fetching watchlist:', error);
     res.status(500).send('Error loading watchlist');
+  }
+});
+app.get('/history', async (req, res) => {
+  if (!req.session?.user?.id) {
+    return res.redirect('/account/login');
+  }
+
+  try {
+    const History = require('./models/History');
+    const history = await History.findOne({ userId: req.session.user.id });
+    const items = history?.items || [];
+
+    res.render('watchlist/history', {
+      items,
+      currentUser: req.session.user
+    });
+  } catch (error) {
+    console.error('Error fetching history:', error);
+    res.status(500).send('Error loading history');
   }
 });
 
@@ -244,6 +263,21 @@ app.get('/api/debug/tmdb', async (req, res) => {
     res.json({ movies });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/history', async (req, res) => {
+  if (!req.session?.user?.id) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const History = require('./models/History');
+    const history = await History.findOne({ userId: req.session.user.id });
+    res.json(history?.items || []);
+  } catch (error) {
+    console.error('Error fetching history:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

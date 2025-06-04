@@ -38,30 +38,40 @@
       
 
         <!-- Movies -->
-
-        <section class="history-item" data-type="movie">
-            <img src="https://m.media-amazon.com/images/M/MV5BMDFkYTc0MGEtZmNhMC00ZDIzLWFmNTEtODM1ZmRlYWMwMWFmXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg" alt="The Shawshank Redemption" class="item-image">
-            <div class="item-content">
-                <h3>The Shawshank Redemption (1994)</h3>
-                <p>Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.</p>
-                <button class="more-btn">More</button>
+        <% if (items && items.length > 0) { %>
+            <% items.forEach(item => { %>
+                <section class="history-item" data-type="<%= item.type %>">
+                    <img src="<%= item.image || '/images/placeholder.jpg' %>" 
+                         alt="<%= item.title %>" 
+                         class="item-image">
+                    
+                    <div class="item-content">
+                        <h3><%= item.title %> <% if (item.year) { %>(<%= item.year %>)<% } %></h3>
+                        <% if (item.synopsis) { %>
+                            <p><%= item.synopsis %></p>
+                        <% } %>
+                        <button class="more-btn">More</button>
+                    </div>
+                    
+                    <h6>Completed on <%= item.completedAt.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    }) %></h6>
+                </section>
+                
+                <hr>
+            <% }) %>
+        <% } else { %>
+            <div class="empty-state text-center mt-5">
+                <div class="empty-icon mb-3">
+                    <i class="bi bi-clock-history" style="font-size: 4rem; color: #6c757d;"></i>
+                </div>
+                <h3 class="text-muted">Your history is empty</h3>
+                <p class="text-muted">Completed items from your watchlist will appear here</p>
+                <a href="/discover" class="btn btn-primary">Discover Content</a>
             </div>
-            <h6>Completed on May 2, 2023</h6>
-        </section>
-
-        <hr>
-
-        <!-- Books -->
-        
-        <section class="history-item" data-type="book">
-            <img src="https://m.media-amazon.com/images/I/71FxgtFKcQL._AC_UF1000,1000_QL80_.jpg" alt="To Kill a Mockingbird" class="item-image">
-            <div class="item-content">
-                <h3>To Kill a Mockingbird by Harper Lee</h3>
-                <p>The story of a young girl and her family living in a small town during the Great Depression, and her father's defense of a black man falsely accused of rape.</p>
-                <button class="more-btn">More</button>
-            </div>
-            <h6>Completed on March 22, 2023</h6>
-        </section>
+        <% } %>
 
         <!-- Pagination -->
         <nav aria-label="History pagination" class="mt-4">
