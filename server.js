@@ -117,12 +117,37 @@ app.get('/watchlist', async (req, res) => {
   }
 
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // Items per page
+    const skip = (page - 1) * limit;
+
     const watchlist = await Watchlist.findOne({ userId: req.session.user.id });
-    const items = watchlist?.items || [];
+    const allItems = watchlist?.items || [];
+    
+    // Calculate pagination
+    const totalItems = allItems.length;
+    const totalPages = Math.ceil(totalItems / limit);
+    const items = allItems.slice(skip, skip + limit);
+    
+    // Calculate pagination info
+    const startItem = skip + 1;
+    const endItem = Math.min(skip + limit, totalItems);
 
     res.render('watchlist/watchlist', {
       items,
-      currentUser: req.session.user
+      currentUser: req.session.user,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        itemsPerPage: limit,
+        startItem,
+        endItem,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1
+      }
     });
   } catch (error) {
     console.error('Error fetching watchlist:', error);
@@ -133,15 +158,42 @@ app.get('/history', async (req, res) => {
   if (!req.session?.user?.id) {
     return res.redirect('/account/login');
   }
-
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // Items per page
+    const skip = (page - 1) * limit;
+
     const History = require('./models/History');
     const history = await History.findOne({ userId: req.session.user.id });
-    const items = history?.items || [];
+    const allItems = history?.items || [];
+    
+    // Sort by completedAt date (most recent first)
+    allItems.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+    
+    // Calculate pagination
+    const totalItems = allItems.length;
+    const totalPages = Math.ceil(totalItems / limit);
+    const items = allItems.slice(skip, skip + limit);
+    
+    // Calculate pagination info
+    const startItem = skip + 1;
+    const endItem = Math.min(skip + limit, totalItems);
 
     res.render('watchlist/history', {
       items,
-      currentUser: req.session.user
+      currentUser: req.session.user,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        itemsPerPage: limit,
+        startItem,
+        endItem,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1
+      }
     });
   } catch (error) {
     console.error('Error fetching history:', error);

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>History</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../../css/watchlist/history.css">
 </head>
@@ -13,7 +12,15 @@
     <%- include('../partials/header') %>
 
     <main class="container">
-        <h1>History</h1>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>History</h1>
+            <% if (pagination && pagination.totalItems > 0) { %>
+                <small class="text-muted">
+                    Showing <%= pagination.startItem %>-<%= pagination.endItem %> of <%= pagination.totalItems %> items
+                </small>
+            <% } %>
+        </div>
+        
         <div class="filter-wrapper">
             <div class="filter-section">
               <div class="filter-buttons d-flex gap-3">
@@ -34,8 +41,6 @@
             </div>
             <div class="filter-line"></div>
           </div>
-
-      
 
         <!-- Movies -->
         <% if (items && items.length > 0) { %>
@@ -74,19 +79,79 @@
         <% } %>
 
         <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
         <nav aria-label="History pagination" class="mt-4">
             <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                <!-- Previous button -->
+                <li class="page-item <%= !pagination.hasPrevPage ? 'disabled' : '' %>">
+                    <% if (pagination.hasPrevPage) { %>
+                        <a class="page-link" href="?page=<%= pagination.prevPage %>">Previous</a>
+                    <% } else { %>
+                        <span class="page-link" tabindex="-1" aria-disabled="true">Previous</span>
+                    <% } %>
                 </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">Next</a>
+
+                <!-- Page numbers -->
+                <% 
+                let startPage = Math.max(1, pagination.currentPage - 2);
+                let endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+                
+                // Adjust if we're near the beginning or end
+                if (endPage - startPage < 4) {
+                    if (startPage === 1) {
+                        endPage = Math.min(pagination.totalPages, startPage + 4);
+                    } else if (endPage === pagination.totalPages) {
+                        startPage = Math.max(1, endPage - 4);
+                    }
+                }
+                %>
+                
+                <!-- First page if not visible -->
+                <% if (startPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">1</a>
+                    </li>
+                    <% if (startPage > 2) { %>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <% } %>
+                <% } %>
+
+                <!-- Visible page numbers -->
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <li class="page-item <%= i === pagination.currentPage ? 'active' : '' %>">
+                        <% if (i === pagination.currentPage) { %>
+                            <span class="page-link"><%= i %></span>
+                        <% } else { %>
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        <% } %>
+                    </li>
+                <% } %>
+
+                <!-- Last page if not visible -->
+                <% if (endPage < pagination.totalPages) { %>
+                    <% if (endPage < pagination.totalPages - 1) { %>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <% } %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= pagination.totalPages %>"><%= pagination.totalPages %></a>
+                    </li>
+                <% } %>
+
+                <!-- Next button -->
+                <li class="page-item <%= !pagination.hasNextPage ? 'disabled' : '' %>">
+                    <% if (pagination.hasNextPage) { %>
+                        <a class="page-link" href="?page=<%= pagination.nextPage %>">Next</a>
+                    <% } else { %>
+                        <span class="page-link" tabindex="-1" aria-disabled="true">Next</span>
+                    <% } %>
                 </li>
             </ul>
         </nav>
+        <% } %>
     </main>
 
     <%- include('../partials/footer') %>

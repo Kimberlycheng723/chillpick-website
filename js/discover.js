@@ -229,7 +229,7 @@ function updateRatingFilter() {
 
 let userWatchlist = []; // Global variable to track watchlist items
 
-// Fixed handleWatchlistClick function
+
 async function handleWatchlistClick(event) {
   event.preventDefault();
   event.stopPropagation();
@@ -248,30 +248,39 @@ async function handleWatchlistClick(event) {
     // First check if user is logged in
     const userId = await getCurrentUserId();
     if (!userId) {
-      alert('Please log in to add items to your watchlist');
+      showAlert('Please log in to add items to your watchlist', 'warning');
       window.location.href = `/account/login?redirect=${encodeURIComponent(window.location.pathname)}`;
       return;
     }
 
+    // Check if item already exists in local watchlist array
+    const existsLocally = userWatchlist.some(item => 
+      item.itemId === itemId && item.type === itemType
+    );
+
     const itemData = findItemById(itemId);
+    if (!itemData) {
+      throw new Error('Item data not found');
+    }
 
     const watchlistData = {
-    itemId, 
-    type: itemType,
-    title: itemData?.title || '',
-    image: itemData?.image || '',
-    rating: itemData?.rating || 0,
-    genres: itemData?.genres || [],
-    synopsis: itemData?.synopsis || itemData?.description || 'No synopsis available'
-  };
+      itemId, 
+      type: itemType,
+      title: itemData.title || '',
+      image: itemData.image || '',
+      rating: itemData.rating || 0,
+      genres: itemData.genres || [],
+      synopsis: itemData.synopsis || itemData.description || 'No synopsis available'
+    };
 
     console.log('🎬 Watchlist request:', {
       method: 'POST',
-      url: '/api/watchlist/add', // Fixed URL
-      data: watchlistData
+      url: '/api/watchlist/add',
+      data: watchlistData,
+      existsLocally
     });
 
-    // Always use POST to /api/watchlist/add (the backend handles add/remove logic)
+    // Make API call
     const response = await fetch('/api/watchlist/add', {
       method: 'POST',
       headers: { 
@@ -288,78 +297,204 @@ async function handleWatchlistClick(event) {
       url: response.url
     });
 
+    // Handle different response statuses
     if (response.status === 404) {
-      console.error('❌ Watchlist endpoint not found. Check if watchlist routes are properly configured.');
-      alert('Watchlist feature is currently unavailable. Please try again later.');
-      button.innerHTML = originalHtml;
+      console.error('❌ Watchlist endpoint not found');
+      showAlert('Watchlist feature is currently unavailable. Please try again later.', 'error');
       return;
     }
 
     if (response.status === 401) {
-      alert('Please log in to add items to your watchlist');
+      showAlert('Your session has expired. Please log in again.', 'warning');
       window.location.href = `/account/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+
+    if (response.status === 409) {
+      // Item already exists - handle gracefully
+      showAlert(`"${itemData.title}" is already in your watchlist!`, 'info');
+      // Update UI to reflect current state
+      button.classList.add('added');
+      button.innerHTML = `<i class="bi bi-check-circle me-1"></i> Added`;
       return;
     }
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Watchlist error response:', errorText);
-      throw new Error(`Failed to update watchlist: ${response.status} - ${errorText}`);
+      
+      // Try to parse error message
+      let errorMessage = 'Failed to update watchlist';
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } catch (e) {
+        // If not JSON, use the text as is or default message
+        errorMessage = errorText || errorMessage;
+      }
+      
+      throw new Error(`${errorMessage} (Status: ${response.status})`);
     }
 
-    // Get the response to check if item was added or removed
+    // Parse successful response
     const result = await response.json();
     console.log('🎬 Watchlist result:', result);
 
-    // Update UI based on the action returned from server
+    // Handle different actions returned from server
     if (result.action === 'removed') {
-      userWatchlist = userWatchlist.filter(item => !(item.itemId === itemId && item.type === itemType));
+      userWatchlist = userWatchlist.filter(item => 
+        !(item.itemId === itemId && item.type === itemType)
+      );
       button.classList.remove('added');
       button.innerHTML = `<i class="bi bi-plus-circle me-1"></i> Watchlist`;
+      showAlert(`"${itemData.title}" removed from watchlist`, 'success');
       console.log('✅ Item removed from watchlist');
+      
       await saveUserInteraction('remove from watchlist', { 
-        itemDetails: { itemId, title: button.closest('.card').querySelector('h6').textContent, type: itemType } 
+        itemDetails: { itemId, title: itemData.title, type: itemType } 
       });
+      
     } else if (result.action === 'added') {
+      // Check if item already exists before adding to local array
       if (!userWatchlist.some(item => item.itemId === itemId && item.type === itemType)) {
         userWatchlist.push(watchlistData);
       }
       button.classList.add('added');
       button.innerHTML = `<i class="bi bi-check-circle me-1"></i> Added`;
+      showAlert(`"${itemData.title}" added to watchlist!`, 'success');
       console.log('✅ Item added to watchlist');
+      
       await saveUserInteraction('add to watchlist', { 
-        itemDetails: { itemId, title: button.closest('.card').querySelector('h6').textContent, type: itemType } 
+        itemDetails: { itemId, title: itemData.title, type: itemType } 
       });
+      
+    } else if (result.action === 'already_exists') {
+      // Handle case where server reports item already exists
+      showAlert(`"${itemData.title}" is already in your watchlist!`, 'info');
+      button.classList.add('added');
+      button.innerHTML = `<i class="bi bi-check-circle me-1"></i> Added`;
+      
+      // Ensure local array is in sync
+      if (!userWatchlist.some(item => item.itemId === itemId && item.type === itemType)) {
+        userWatchlist.push(watchlistData);
+      }
+    } else {
+      // Unknown action
+      console.warn('Unknown action returned from server:', result.action);
+      showAlert('Watchlist updated successfully', 'success');
     }
 
   } catch (err) {
     console.error('Watchlist error:', err);
     
-    // Check if it's an authentication error
+    // Handle different types of errors
     if (err.message.includes('401') || err.message.includes('unauthorized')) {
-      alert('Please log in to use this feature');
+      showAlert('Please log in to use this feature', 'warning');
       window.location.href = `/account/login?redirect=${encodeURIComponent(window.location.pathname)}`;
     } else if (err.message.includes('404')) {
-      alert('Watchlist feature is currently unavailable. Please contact support.');
+      showAlert('Watchlist feature is currently unavailable. Please contact support.', 'error');
+    } else if (err.message.includes('409') || err.message.toLowerCase().includes('already exists')) {
+      showAlert('This item is already in your watchlist!', 'info');
+    } else if (err.message.includes('Network')) {
+      showAlert('Network error. Please check your connection and try again.', 'error');
     } else {
-      // Other errors
-      alert('Unable to update watchlist. Please try again.');
+      // Generic error with specific message if available
+      const errorMsg = err.message || 'Unable to update watchlist. Please try again.';
+      showAlert(errorMsg, 'error');
     }
     
+    // Reset button to original state on error
     button.innerHTML = originalHtml;
   } finally {
     button.disabled = false;
   }
 }
 
+// Enhanced alert function to show user-friendly messages
+function showAlert(message, type = 'info') {
+  // Remove any existing alerts
+  const existingAlert = document.querySelector('.custom-alert');
+  if (existingAlert) {
+    existingAlert.remove();
+  }
+
+  // Create alert element
+  const alert = document.createElement('div');
+  alert.className = `custom-alert alert-${type}`;
+  
+  // Set styles based on type
+  const styles = {
+    info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: 'bi-info-circle' },
+    success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: 'bi-check-circle' },
+    warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: 'bi-exclamation-triangle' },
+    error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: 'bi-x-circle' }
+  };
+  
+  const style = styles[type] || styles.info;
+  
+  alert.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 12px 16px;
+    background-color: ${style.bg};
+    border: 1px solid ${style.border};
+    border-radius: 6px;
+    color: ${style.text};
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+  `;
+  
+  alert.innerHTML = `
+    <div style="display: flex; align-items: center;">
+      <i class="bi ${style.icon}" style="margin-right: 8px; font-size: 16px;"></i>
+      <span style="flex: 1;">${message}</span>
+      <button onclick="this.parentElement.parentElement.remove()" 
+              style="background: none; border: none; color: ${style.text}; font-size: 18px; cursor: pointer; margin-left: 8px; padding: 0; line-height: 1;">
+        ×
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(alert);
+  
+  // Animate in
+  setTimeout(() => {
+    alert.style.transform = 'translateX(0)';
+  }, 10);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    if (alert.parentNode) {
+      alert.style.transform = 'translateX(100%)';
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.remove();
+        }
+      }, 300);
+    }
+  }, 5000);
+}
 async function initializeWatchlistButtons() {
   try {
+    console.log('🔄 Initializing watchlist buttons...');
+    
     const response = await fetch('/api/watchlist', {
       credentials: 'include'
     });
     
     if (response.ok) {
       userWatchlist = await response.json();
+      console.log('✅ Loaded watchlist:', userWatchlist.length, 'items');
+      
+      // Update button states
       document.querySelectorAll('.watchlist-btn').forEach(button => {
         const itemId = button.dataset.id;
         const itemType = button.dataset.type;
@@ -369,12 +504,19 @@ async function initializeWatchlistButtons() {
           button.innerHTML = `<i class="bi bi-check-circle me-1"></i> Added`;
         }
       });
+      
     } else if (response.status === 401) {
-      // User not logged in, but don't show error - just leave buttons in default state
-      console.log('User not logged in - watchlist buttons will show login prompt when clicked');
+      // User not logged in - this is normal, don't show error
+      console.log('ℹ️ User not logged in - watchlist buttons will prompt for login');
+      userWatchlist = [];
+    } else {
+      console.warn('⚠️ Unexpected response when loading watchlist:', response.status);
     }
+    
   } catch (error) {
-    console.error('Error initializing watchlist buttons:', error);
+    console.error('❌ Error initializing watchlist buttons:', error);
+    // Don't show user error for initialization failures
+    userWatchlist = [];
   }
 }
 

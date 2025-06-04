@@ -26,91 +26,170 @@ router.get('/test', (req, res) => {
 
 // Apply auth middleware to all watchlist routes
 router.use(requireAuth);
+// Middleware to validate session and add error handling
+router.use((err, req, res, next) => {
+  console.error('❌ Watchlist route error:', err);
+  
+  res.status(500).json({
+    success: false,
+    error: 'Internal server error',
+    message: 'An unexpected error occurred'
+  });
+});
 
-// Add/remove item from watchlist
+// POST /api/watchlist/add - Add or remove item from watchlist
 router.post('/add', async (req, res) => {
   try {
-    console.log('📝 POST /add route hit');
-    console.log('📝 Request body:', req.body);
-    console.log('📝 User ID:', req.session.user.id);
-    const { itemId, title, type, image, rating, genres,synopsis } = req.body;
-    const userId = req.session.user.id; // Get from session instead of body
-    
-    if (!itemId || !title || !type) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    // Check if user is authenticated
+    if (!req.session?.user?.id) {
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Authentication required',
+        message: 'Please log in to manage your watchlist'
+      });
     }
 
-    // Find or create watchlist for user
+    const { itemId, type, title, image, rating, genres, synopsis } = req.body;
+    const userId = req.session.user.id;
+
+    // Validate required fields
+    if (!itemId || !type) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required fields',
+        message: 'Item ID and type are required'
+      });
+    }
+
+    console.log('🎬 Watchlist add request:', { userId, itemId, type, title });
+
+    // Find or create user's watchlist
     let watchlist = await Watchlist.findOne({ userId });
-    
     if (!watchlist) {
       watchlist = new Watchlist({ userId, items: [] });
     }
 
-    // Check if item already exists in watchlist
-    const existingItemIndex = watchlist.items.findIndex(item => item.itemId === itemId && item.type === type);
-    
-    if (existingItemIndex >= 0) {
-      // Item exists, remove it
+    // Check if item already exists
+    const existingItemIndex = watchlist.items.findIndex(
+      item => item.itemId === itemId && item.type === type
+    );
+
+    if (existingItemIndex !== -1) {
+      // Item exists - remove it (toggle behavior)
       watchlist.items.splice(existingItemIndex, 1);
       await watchlist.save();
-      return res.json({ 
-        success: true, 
-        message: 'Item removed from watchlist',
-        action: 'removed'
+      
+      console.log('✅ Item removed from watchlist:', { itemId, title });
+      
+      return res.json({
+        success: true,
+        action: 'removed',
+        message: `"${title}" removed from watchlist`,
+        itemId,
+        type
       });
     } else {
-      // Add new item
-      watchlist.items.push({
+      // Item doesn't exist - add it
+      const newItem = {
         itemId,
-        title,
         type,
-        image,
-        rating,
-        genres,
-        synopsis
-      });
+        title: title || 'Unknown Title',
+        image: image || '',
+        rating: rating || 0,
+        genres: genres || [],
+        synopsis: synopsis || 'No synopsis available',
+        addedAt: new Date()
+      };
+
+      watchlist.items.push(newItem);
       await watchlist.save();
-      return res.json({ 
-        success: true, 
-        message: 'Item added to watchlist',
-        action: 'added'
+      
+      console.log('✅ Item added to watchlist:', { itemId, title });
+      
+      return res.json({
+        success: true,
+        action: 'added',
+        message: `"${title}" added to watchlist`,
+        itemId,
+        type,
+        item: newItem
       });
     }
+
   } catch (error) {
-    console.error('Error updating watchlist:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Watchlist add error:', error);
+    
+    // Handle specific MongoDB errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation error',
+        message: 'Invalid data provided',
+        details: error.message
+      });
+    }
+    
+    if (error.name === 'MongoError' || error.name === 'MongoServerError') {
+      return res.status(500).json({
+        success: false,
+        error: 'Database error',
+        message: 'Unable to update watchlist due to database error'
+      });
+    }
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Server error',
+      message: 'An unexpected error occurred'
+    });
   }
 });
 
-// Mark item as completed (move to history)
+// Enhanced POST /api/watchlist/complete - Mark item as completed
 router.post('/complete', async (req, res) => {
   try {
-    console.log('✅ POST /complete route hit');
+    if (!req.session?.user?.id) {
+      return res.status(401).json({ 
+        success: false,
+        error: 'Authentication required'
+      });
+    }
+
     const { itemId, type } = req.body;
     const userId = req.session.user.id;
-    
+
     if (!itemId || !type) {
-      return res.status(400).json({ error: 'Missing itemId or type' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'Missing required fields'
+      });
     }
 
-    // Find user's watchlist
-    const watchlist = await Watchlist.findOne({ userId });
-    if (!watchlist) {
-      return res.status(404).json({ error: 'Watchlist not found' });
-    }
+    console.log('✅ Marking as completed:', { userId, itemId, type });
 
     // Find the item in watchlist
-    const itemIndex = watchlist.items.findIndex(item => 
-      item.itemId === itemId && item.type === type
-    );
+    const watchlist = await Watchlist.findOne({ userId });
     
+    if (!watchlist) {
+      return res.status(404).json({
+        success: false,
+        error: 'Watchlist not found'
+      });
+    }
+
+    const itemIndex = watchlist.items.findIndex(
+      item => item.itemId === itemId && item.type === type
+    );
+
     if (itemIndex === -1) {
-      return res.status(404).json({ error: 'Item not found in watchlist' });
+      return res.status(404).json({
+        success: false,
+        error: 'Item not found in watchlist'
+      });
     }
 
     // Get the item data
-    const completedItem = watchlist.items[itemIndex];
+    const item = watchlist.items[itemIndex];
     
     // Remove from watchlist
     watchlist.items.splice(itemIndex, 1);
@@ -122,76 +201,144 @@ router.post('/complete', async (req, res) => {
       history = new History({ userId, items: [] });
     }
 
-    // Add completion date and mark as completed
-    const historyItem = {
-      ...completedItem.toObject(),
-      completedAt: new Date(),
-      status: 'completed'
-    };
+    // Check if already in history (prevent duplicates)
+    const existsInHistory = history.items.some(
+      historyItem => historyItem.itemId === itemId && historyItem.type === type
+    );
 
-    history.items.unshift(historyItem); // Add to beginning of array
-    await history.save();
+    if (!existsInHistory) {
+      history.items.push({
+        ...item.toObject(),
+        completedAt: new Date()
+      });
+      await history.save();
+    }
 
-    res.json({ 
-      success: true, 
-      message: 'Item marked as completed and moved to history'
+    console.log('✅ Item moved to history:', item.title);
+
+    res.json({
+      success: true,
+      message: `"${item.title}" marked as completed`,
+      item
     });
+
   } catch (error) {
-    console.error('Error completing item:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Error marking as completed:', error);
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Server error',
+      message: 'Unable to mark item as completed'
+    });
   }
 });
 
-// Remove item from watchlist permanently
+// Enhanced DELETE /api/watchlist/remove - Remove specific item
 router.delete('/remove', async (req, res) => {
   try {
-    console.log('🗑️ DELETE /remove route hit');
+    if (!req.session?.user?.id) {
+      return res.status(401).json({ 
+        success: false,
+        error: 'Authentication required',
+        message: 'Please log in to manage your watchlist'
+      });
+    }
+
     const { itemId, type } = req.body;
     const userId = req.session.user.id;
-    
+
     if (!itemId || !type) {
-      return res.status(400).json({ error: 'Missing itemId or type' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'Missing required fields',
+        message: 'Item ID and type are required'
+      });
     }
 
-    // Find user's watchlist
+    console.log('🗑️ Removing from watchlist:', { userId, itemId, type });
+
     const watchlist = await Watchlist.findOne({ userId });
-    if (!watchlist) {
-      return res.status(404).json({ error: 'Watchlist not found' });
-    }
-
-    // Find and remove the item
-    const itemIndex = watchlist.items.findIndex(item => 
-      item.itemId === itemId && item.type === type
-    );
     
-    if (itemIndex === -1) {
-      return res.status(404).json({ error: 'Item not found in watchlist' });
+    if (!watchlist) {
+      return res.status(404).json({
+        success: false,
+        error: 'Watchlist not found',
+        message: 'No watchlist found for this user'
+      });
     }
 
-    // Remove the item
+    const itemIndex = watchlist.items.findIndex(
+      item => item.itemId === itemId && item.type === type
+    );
+
+    if (itemIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        error: 'Item not found',
+        message: 'Item not found in watchlist'
+      });
+    }
+
+    const removedItem = watchlist.items[itemIndex];
     watchlist.items.splice(itemIndex, 1);
     await watchlist.save();
 
-    res.json({ 
-      success: true, 
-      message: 'Item removed from watchlist'
+    console.log('✅ Item removed from watchlist:', removedItem.title);
+
+    res.json({
+      success: true,
+      message: `"${removedItem.title}" removed from watchlist`,
+      removedItem
     });
+
   } catch (error) {
-    console.error('Error removing item:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Error removing from watchlist:', error);
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Server error',
+      message: 'Unable to remove item from watchlist'
+    });
   }
 });
 
-// Get user's watchlist
-router.get('/', async (req, res) => { // Changed from '/:userId' to '/'
-  console.log('📋 GET / route hit');
-  console.log('📋 User ID:', req.session.user.id);
-    try {
-    const watchlist = await Watchlist.findOne({ userId: req.session.user.id });
-    res.json(watchlist?.items || []);
+// Enhanced GET /api/watchlist - Get user's watchlist with error handling
+router.get('/', async (req, res) => {
+  try {
+    if (!req.session?.user?.id) {
+      return res.status(401).json({ 
+        success: false,
+        error: 'Authentication required',
+        message: 'Please log in to view your watchlist'
+      });
+    }
+
+    const userId = req.session.user.id;
+    console.log('📋 Getting watchlist for user:', userId);
+
+    const watchlist = await Watchlist.findOne({ userId });
+    
+    if (!watchlist) {
+      // Return empty array instead of error for new users
+      return res.json([]);
+    }
+
+    // Sort items by most recently added first
+    const sortedItems = watchlist.items.sort((a, b) => 
+      new Date(b.addedAt) - new Date(a.addedAt)
+    );
+
+    console.log('✅ Watchlist retrieved:', sortedItems.length, 'items');
+    res.json(sortedItems);
+
   } catch (error) {
-    console.error('Error fetching watchlist:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Error fetching watchlist:', error);
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Server error',
+      message: 'Unable to fetch watchlist'
+    });
   }
 });
 
