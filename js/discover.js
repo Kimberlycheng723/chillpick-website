@@ -128,8 +128,10 @@ function renderCards(page) {
   }
 
   container.innerHTML = html;
-}
 
+  // ✅ Add this to sync button states after DOM is updated
+  initializeWatchlistButtons();
+}
 async function trackItemClickAndNavigate(itemId, itemTitle, itemType, linkElement) {
   await trackItemClick(itemId, itemTitle, itemType);
   window.location.href = linkElement.href;
