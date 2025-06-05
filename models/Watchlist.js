@@ -6,7 +6,16 @@ const watchlistItemSchema = new mongoose.Schema({
   synopsis: {type: String,default: ''},
   type: {type: String,required: true,enum: ['movie', 'book'] },// Restrict to valid types
   image: {type: String,default: ''},
-  rating: {type: Number,default: 0},
+rating: {
+  type: Number,
+  default: null,
+  validate: {
+    validator: function (v) {
+      return v === null || typeof v === 'number';
+    },
+    message: props => `${props.value} is not a valid number`
+  }
+},
   genres: [{type: String}],
   addedAt: {type: Date,default: Date.now}
 });
@@ -35,6 +44,6 @@ watchlistSchema.pre('save', function(next) {
 });
 
 // Index for faster queries
-watchlistSchema.index({ userId: 1 });
+
 watchlistSchema.index({ 'items.itemId': 1, 'items.type': 1 });
 module.exports = mongoose.model('Watchlist', watchlistSchema);

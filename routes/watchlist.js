@@ -89,18 +89,22 @@ router.post('/add', async (req, res) => {
         type
       });
     } else {
-      // Item doesn't exist - add it
-      const newItem = {
-        itemId,
-        type,
-        title: title || 'Unknown Title',
-        image: image || '',
-        rating: rating || 0,
-        genres: genres || [],
-        synopsis: synopsis || 'No synopsis available',
-        addedAt: new Date()
-      };
+  // Sanitize rating
+let safeRating = null;
+if (rating !== undefined && rating !== null && rating !== 'N/A' && !isNaN(Number(rating))) {
+  safeRating = Number(rating);
+}
 
+const newItem = {
+  itemId,
+  type,
+  title: title || 'Unknown Title',
+  image: image || '',
+  rating: safeRating,
+  genres: genres || [],
+  synopsis: synopsis || 'No synopsis available',
+  addedAt: new Date()
+};
       watchlist.items.push(newItem);
       await watchlist.save();
       

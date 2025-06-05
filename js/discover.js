@@ -8,22 +8,12 @@ let searchResults = [];
 
 async function getCurrentUserId() {
   try {
-    // Try to get user data from a simple endpoint that checks session
-    const response = await fetch('/account/profile', {
-      method: 'HEAD', // Just check if we can access the profile
-      credentials: 'include'
-    });
-    
-    if (response.ok) {
-      // If profile is accessible, user is logged in
-      // Return a simple user identifier (you can modify this based on your needs)
-      return 'logged-in-user';
-    } else {
-      console.error('User not authenticated:', response.status);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error checking authentication:', error);
+    const res = await fetch('/account/me');
+    if (!res.ok) throw new Error('Not authenticated');
+    const data = await res.json();
+    return data.id;
+  } catch (err) {
+    console.error('❌ Failed to get current user ID:', err);
     return null;
   }
 }

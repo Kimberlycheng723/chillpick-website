@@ -295,7 +295,18 @@ req.session.user = {
 });
 
 
-
+// ---Return session user info---
+router.get('/me', (req, res) => {
+  if (req.session?.user) {
+    res.json({
+      id: req.session.user.id,
+      username: req.session.user.username,
+      email: req.session.user.email
+    });
+  } else {
+    res.status(401).json({ error: 'Not authenticated' });
+  }
+});
 //check session-status
 router.get("/session-status", async (req, res) => {
   if (!req.session.userId || !req.session.token) {
