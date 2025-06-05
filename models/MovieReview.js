@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const replySchema = new Schema({
+  userId: String,
+  username: String,
+  text: String,
+  date: { type: Date, default: Date.now }
+});
+
 const reviewSchema = new Schema(
   {
     movieId: {
@@ -9,7 +16,6 @@ const reviewSchema = new Schema(
       trim: true,
     },
     userId: {
-      // FIXED: Changed to String to match your test user ID
       type: String,
       required: [true, 'User ID is required'],
     },
@@ -35,14 +41,21 @@ const reviewSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    likes: {
+      type: Number,
+      default: 0,
+    },
+    likedBy: [{
+      userId: String
+    }],
+    replies: [replySchema],
   },
   {
     timestamps: true,
   }
 );
 
-
-// Add logging middleware for debugging
+// Logging middleware for debugging
 reviewSchema.pre('save', function (next) {
   console.log('📝 Saving review:', {
     movieId: this.movieId,
@@ -55,7 +68,7 @@ reviewSchema.pre('save', function (next) {
 });
 
 // Method to return client-safe JSON
-reviewSchema.methods.toClientJSON = function() {
+reviewSchema.methods.toClientJSON = function () {
   return {
     id: this._id,
     movieId: this.movieId,
@@ -63,7 +76,10 @@ reviewSchema.methods.toClientJSON = function() {
     rating: this.rating,
     comment: this.comment,
     spoiler: this.spoiler,
-    createdAt: this.createdAt
+    likes: this.likes,
+    likedBy: this.likedBy || [],
+    replies: this.replies,
+    createdAt: this.createdAt,
   };
 };
 
@@ -71,6 +87,5 @@ reviewSchema.post('save', function (doc) {
   console.log('✅ Review saved successfully:', doc._id);
 });
 
-const Review = mongoose.model('Review', reviewSchema);
-
+const Review = mongoose.model('MovieReview', reviewSchema);
 module.exports = Review;

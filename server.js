@@ -68,9 +68,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ Movie detail routes must come AFTER session middleware
+// ✅ Movie detail and Book detail routes must come AFTER session middleware
 const movieDetailRoutes = require('./routes/movie_detail');
 app.use('/movie_detail', movieDetailRoutes);
+const bookDetailRoutes = require('./routes/book_detail');
+app.use('/book_detail' , bookDetailRoutes);
+
 
 // Other routes
 const accountRoutes = require('./routes/account');
