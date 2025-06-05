@@ -151,27 +151,53 @@ function renderPagination(totalPages) {
   const paginationContainer = document.getElementById('pagination');
   paginationContainer.innerHTML = '';
 
-  let paginationHTML = `
+  const maxVisiblePages = 5;
+  let html = '';
+
+  // Previous
+  html += `
     <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-      <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
+      <button class="page-link" onclick="changePage(${currentPage - 1})">Previous</button>
     </li>
   `;
 
-  for (let i = 1; i <= totalPages; i++) {
-    paginationHTML += `
-      <li class="page-item ${i === currentPage ? 'active' : ''}">
-        <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
-      </li>
-    `;
+  let pages = [];
+
+  if (totalPages <= maxVisiblePages) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    pages.push(1);
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    if (start > 2) pages.push('...');
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < totalPages - 1) pages.push('...');
+    pages.push(totalPages);
   }
 
-  paginationHTML += `
+  pages.forEach(p => {
+    if (p === '...') {
+      html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    } else {
+      html += `
+        <li class="page-item ${p === currentPage ? 'active' : ''}">
+          <button class="page-link" onclick="changePage(${p})">${p}</button>
+        </li>
+      `;
+    }
+  });
+
+  // Next
+  html += `
     <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-      <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
+      <button class="page-link" onclick="changePage(${currentPage + 1})">Next</button>
     </li>
   `;
 
-  paginationContainer.innerHTML = paginationHTML;
+  paginationContainer.innerHTML = html;
 }
 
 function changePage(pageNumber) {
