@@ -1,5 +1,6 @@
 let currentPage = 1;
 const itemsPerPage = 20;
+
 let combined = [];
 let allMovies = [];
 let allBooks = [];
@@ -20,10 +21,25 @@ async function getCurrentUserId() {
 
 async function fetchData() {
   try {
-    const movieRes = await fetch('/api/discover/movies');
-    const bookRes = await fetch('/api/discover/books');
-    const movies = await movieRes.json();
-    const books = await bookRes.json();
+    document.getElementById('loadingIndicator').style.display = 'block';
+    document.getElementById('mediaContainer').style.opacity = '0.3';
+
+    // Fetch 5 random movie pages
+   const fixedPages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Fixed 5 pages
+const moviePromises = fixedPages.map(page =>
+  fetch(`/api/discover/movies?page=${page}&_=${Date.now()}`)
+);
+
+    // Fetch 5 random book sets
+const fixedStartIndexes = [0, 10, 20, 30, 40,50,60,70,80,90,100]; // Fixed Google Books indexes
+const bookPromises = fixedStartIndexes.map(startIndex =>
+  fetch(`/api/discover/books?startIndex=${startIndex}&_=${Date.now()}`)
+);
+    const movieResults = await Promise.all(moviePromises);
+    const bookResults = await Promise.all(bookPromises);
+
+    const movies = (await Promise.all(movieResults.map(r => r.json()))).flat();
+    const books = (await Promise.all(bookResults.map(r => r.json()))).flat();
 
     allMovies = movies;
     allBooks = books;
@@ -48,9 +64,11 @@ async function fetchData() {
     renderPagination(Math.ceil(filteredData.length / itemsPerPage));
   } catch (err) {
     console.error('❌ Failed to load content:', err);
+  } finally {
+    document.getElementById('loadingIndicator').style.display = 'none';
+    document.getElementById('mediaContainer').style.opacity = '1';
   }
 }
-
 function shuffleArray(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

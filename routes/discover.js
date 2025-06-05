@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+
 const router = express.Router();
 require('dotenv').config();
 
@@ -28,12 +29,13 @@ const genreMap = {
   37: 'Western'
 };
 router.get('/movies', async (req, res) => {
-    const { page = 1, genre, rating } = req.query;
-  
+  const { page = 1, genre, rating } = req.query;
+
+  try {
     const response = await axios.get(
       `https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB_API_KEY}&language=en-US&page=${page}`
     );
-  
+
     let movies = response.data.results.map(m => ({
       id: m.id,
       title: m.title,
@@ -44,18 +46,20 @@ router.get('/movies', async (req, res) => {
         : '/images/default-movie.jpg',
       genres: m.genre_ids.map(id => genreMap[id] || 'Unknown')
     }));
-  
+
     if (genre) {
       movies = movies.filter(m => m.genres.includes(genre));
     }
     if (rating) {
       movies = movies.filter(m => parseFloat(m.rating) >= parseFloat(rating));
     }
-  
-    res.json(movies);
-  });
-  
 
+    res.json(movies);
+  } catch (error) {
+    console.error('❌ Error fetching movies:', error.message);
+    res.status(500).send('Movie list error');
+  }
+});
   router.get('/movie_detail/:id', async (req, res) => {
     const id = req.params.id;
     try {
@@ -72,33 +76,32 @@ router.get('/movies', async (req, res) => {
 
  // ✅ Route for book list (used in Discover page)
 router.get('/books', async (req, res) => {
-    const { page = 1, genre, rating } = req.query;
-    const startIndex = (page - 1) * 10;
-  
-    try {
-      const response = await axios.get(`${process.env.GOOGLE_BOOKS_API}&startIndex=${startIndex}`);
-      let books = (response.data.items || []).map(item => ({
-        id: item.id,
-        title: item.volumeInfo.title,
-        type: 'book',
-        rating: item.volumeInfo.averageRating || 'N/A',
-        image: item.volumeInfo.imageLinks?.thumbnail || '/images/default-book.jpg',
-        genres: item.volumeInfo.categories || ['General']
-      }));
-  
-      if (genre) {
-        books = books.filter(b => b.genres.includes(genre));
-      }
-      if (rating) {
-        books = books.filter(b => parseFloat(b.rating) >= parseFloat(rating));
-      }
-  
-      res.json(books);
-    } catch (err) {
-      console.error('❌ Failed to fetch book list:', err.message);
-      res.status(500).send('Book list error');
+  const { genre, rating } = req.query;
+const startIndex = Number.isInteger(parseInt(req.query.startIndex)) ? parseInt(req.query.startIndex) : 0;
+  try {
+    const response = await axios.get(`${process.env.GOOGLE_BOOKS_API}&startIndex=${startIndex}`);
+    let books = (response.data.items || []).map(item => ({
+      id: item.id,
+      title: item.volumeInfo.title,
+      type: 'book',
+      rating: item.volumeInfo.averageRating || 'N/A',
+      image: item.volumeInfo.imageLinks?.thumbnail || '/images/default-book.jpg',
+      genres: item.volumeInfo.categories || ['General']
+    }));
+
+    if (genre) {
+      books = books.filter(b => b.genres.includes(genre));
     }
-  });
+    if (rating) {
+      books = books.filter(b => parseFloat(b.rating) >= parseFloat(rating));
+    }
+
+    res.json(books);
+  } catch (err) {
+    console.error('❌ Failed to fetch book list:', err.message);
+    res.status(500).send('Book list error');
+  }
+});
   
   // ✅ Route for book detail (with ID)
   router.get('/book_detail/:id', async (req, res) => {
