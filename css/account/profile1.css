@@ -222,6 +222,14 @@
   border-top: 4px solid #ffc107;
 }
 
+select:disabled {
+  background-color: #fff !important;
+  color: #212529; /* optional: make sure text stays readable */
+  -webkit-text-fill-color: #212529; /* for Safari */
+  opacity: 1; /* prevent gray-out in some browsers */
+  cursor: not-allowed;
+}
+
 @media (max-width: 767.98px) {
   .profile-sidebar,
   .profile-content {

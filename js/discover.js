@@ -445,7 +445,14 @@ async function handleWatchlistClick(event) {
     button.disabled = false;
   }
 }
+function saveSearchHistory(query) {
+  if (!query) return;
 
+  let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+  // Avoid duplicates and keep max 5 entries
+  history = [query, ...history.filter(q => q !== query)].slice(0, 5);
+  localStorage.setItem('searchHistory', JSON.stringify(history));
+}
 // Enhanced alert function to show user-friendly messages
 function showAlert(message, type = 'info') {
   // Remove any existing alerts
@@ -598,6 +605,7 @@ window.onload = () => {
   initializeWatchlistButtons();
 };
 
+
 async function saveUserInteraction(interactionType, payload = {}) {
   const userId = await getCurrentUserId();
   if (!userId) {
@@ -631,3 +639,5 @@ async function saveUserInteraction(interactionType, payload = {}) {
     console.error('⚠️ Failed to save interaction:', err.message);
   }
 }
+
+

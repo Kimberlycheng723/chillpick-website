@@ -185,18 +185,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateStarDisplay();
     };
+const displayNoReviews = () => {
+    const container = document.getElementById('reviewsContainer');
+    const loadMoreBtn = document.querySelector('.load-more-reviews-btn');
+    
+    if (container) {
+        container.innerHTML = `
+            <div class="alert alert-info text-center">
+                <h5>No reviews yet</h5>
+                <p>Be the first to review this movie!</p>
+            </div>
+        `;
+    }
 
-    const displayNoReviews = () => {
-        const container = document.getElementById('reviewsContainer');
-        if (container) {
-            container.innerHTML = `
-                <div class="alert alert-info text-center">
-                    <h5>No reviews yet</h5>
-                    <p>Be the first to review this movie!</p>
-                </div>
-            `;
-        }
-    };
+    if (loadMoreBtn) {
+        loadMoreBtn.style.display = 'none'; // hide the button
+    }
+};
 
     const displayReviews = (reviews) => {
         const container = document.getElementById('reviewsContainer');
@@ -216,14 +221,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const rating = review.rating || 0;
         const comment = review.comment || '';
         const spoiler = review.spoiler || false;
-        const reviewId = review.id || review._id || '';
+       const reviewId = String(review.id || review._id || '');
         
         // Get likes count from database
         const likes = parseInt(review.likes) || 0;
         
         // Check if current user has liked this review based on session data
-        const isLikedByCurrentUser = userLikedReviews.includes(reviewId);
-        
+const isLikedByCurrentUser = userLikedReviews.some(id => String(id) === String(reviewId));
         console.log(`Review ${reviewId}: likes=${likes}, isLiked=${isLikedByCurrentUser}, userLikedReviews:`, userLikedReviews);
         
         let repliesHTML = '';
@@ -246,32 +250,59 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${spoiler ? '<button class="btn btn-sm btn-outline-secondary eye-btn" title="Show Spoiler"><i class="bi bi-eye"></i></button>' : ''}
                         </div>
                     </div>
-                    <div class="review-content ${spoiler ? 'blurred-content' : ''}">
-                        <p class="card-text">${escapeHtml(comment)}</p>
-                    </div>
-                    <div class="review-actions mt-3 d-flex gap-3">
-                        <button class="btn btn-sm btn-outline-primary like-btn ${isLikedByCurrentUser ? 'liked' : ''}" 
-                                data-review-id="${reviewId}" 
-                                data-liked="${isLikedByCurrentUser}">
-                            <i class="bi ${isLikedByCurrentUser ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
-                            <span class="like-count">${likes}</span>
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary reply-btn">
-                            <i class="bi bi-reply"></i> Reply
-                        </button>
-                    </div>
-                    <div class="reply-form mt-3" style="display: none;">
-                        <div class="mb-2">
-                            <textarea class="form-control reply-textarea" rows="2" placeholder="Write your reply..."></textarea>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-primary reply-submit-btn">Submit</button>
-                            <button class="btn btn-sm btn-secondary reply-cancel-btn">Cancel</button>
-                        </div>
-                    </div>
-                    <div class="replies-section mt-3">${repliesHTML}</div>
-                </div>
-            </div>
+                   ${spoiler ? `
+<div class="blurred-content ${spoiler ? '' : 'show-content'}">
+  <div class="review-content">
+    <p class="card-text">${escapeHtml(comment)}</p>
+  </div>
+  <div class="review-actions mt-3 d-flex gap-3">
+ <button class="btn btn-sm btn-outline-primary like-btn ${isLikedByCurrentUser ? 'liked' : ''}" 
+        data-review-id="${reviewId}" 
+        data-liked="${isLikedByCurrentUser}">
+<i class="bi ${isLikedByCurrentUser ? 'bi-heart-fill' : 'bi-heart'} ${isLikedByCurrentUser ? 'text-danger' : ''}"></i>
+  <span class="like-count">${likes}</span>
+</button>
+    <button class="btn btn-sm btn-outline-secondary reply-btn">
+      <i class="bi bi-reply"></i> Reply
+    </button>
+  </div>
+  <div class="reply-form mt-3" style="display: none;">
+    <div class="mb-2">
+      <textarea class="form-control reply-textarea" rows="2" placeholder="Write your reply..."></textarea>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-primary reply-submit-btn">Submit</button>
+      <button class="btn btn-sm btn-secondary reply-cancel-btn">Cancel</button>
+    </div>
+  </div>
+  <div class="replies-section mt-3">${repliesHTML}</div>
+</div>
+` : `
+<div class="review-content">
+  <p class="card-text">${escapeHtml(comment)}</p>
+</div>
+<div class="review-actions mt-3 d-flex gap-3">
+  <button class="btn btn-sm btn-outline-primary like-btn ${isLikedByCurrentUser ? 'liked' : ''}" 
+          data-review-id="${reviewId}" 
+          data-liked="${isLikedByCurrentUser}">
+<i class="bi ${isLikedByCurrentUser ? 'bi-heart-fill' : 'bi-heart'} ${isLikedByCurrentUser ? 'text-danger' : ''}"></i>
+    <span class="like-count">${likes}</span>
+  </button>
+  <button class="btn btn-sm btn-outline-secondary reply-btn">
+    <i class="bi bi-reply"></i> Reply
+  </button>
+</div>
+<div class="reply-form mt-3" style="display: none;">
+  <div class="mb-2">
+    <textarea class="form-control reply-textarea" rows="2" placeholder="Write your reply..."></textarea>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-sm btn-primary reply-submit-btn">Submit</button>
+    <button class="btn btn-sm btn-secondary reply-cancel-btn">Cancel</button>
+  </div>
+</div>
+<div class="replies-section mt-3">${repliesHTML}</div>
+`}
         `;
     };
 
@@ -287,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 
                 const reviewCard = eyeBtn.closest('.review-card');
-                const contentBox = reviewCard.querySelector('.review-content');
+             const contentBox = reviewCard.querySelector('.blurred-content');
                 const icon = eyeBtn.querySelector('i');
                 
                 if (contentBox && icon) {
@@ -613,7 +644,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initialize the page
-    setupReviewForm();
-    setupEventDelegation();
-    loadReviews();
+// CORRECT ORDER
+checkAuthStatus().then(() => {
+  setupReviewForm();
+  setupEventDelegation();
+  loadReviews(); // only load after liked reviews are available
+});
 });

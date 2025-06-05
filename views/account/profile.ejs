@@ -276,14 +276,12 @@
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label" style="font-size: 1.1rem;">Gender</label>
-                    <select class="form-control form-control-lg" id="genderField">
-                      <option value="<%= user.gender %>" selected>
-                        <%= user.gender || 'Please select your gender' %>
-                      </option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
+            <select class="form-control form-control-lg" id="genderField" disabled>
+  <option value="" disabled <%= !user.gender ? 'selected' : '' %>>Please select your gender</option>
+  <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
+  <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
+  <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
+</select>
                   </div>
                 </div>
               </div>
