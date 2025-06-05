@@ -6,7 +6,7 @@ const thumbBase = 'https://image.tmdb.org/t/p/w342';
 
 let movieData = [], chart, bookChart;
 
-// --- Movie Data ---
+// Load movie data and then render chart + hero section
 async function loadMovieData() {
   try {
     const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${tmdbApiKey}`);
@@ -21,13 +21,21 @@ async function loadMovieData() {
       thumb: m.poster_path ? thumbBase + m.poster_path : 'https://via.placeholder.com/342x513?text=No+Poster',
     }));
     document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleString();
+
+    // 🔥 Ensure cinematic renders
     renderByMetric("rating");
   } catch (err) {
     console.error("Movie API error:", err);
   }
 }
 
-// --- Book Data ---
+// ⚙️ Ensure this is globally accessible
+function updateChartMetric(metric) {
+  renderByMetric(metric);
+}
+window.updateChartMetric = updateChartMetric; // ✅ Ensure dropdown works
+
+// Book Data
 async function loadBookData() {
   try {
     const nytRes = await fetch(`https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${nytApiKey}`);
@@ -36,7 +44,6 @@ async function loadBookData() {
       const title = nytBook.title;
       const author = nytBook.author;
       let googleBook = null;
-
       try {
         const googleRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=intitle:"${title}"+inauthor:"${author}"&key=${googleApiKey}`);
         const googleData = await googleRes.json();
@@ -46,7 +53,6 @@ async function loadBookData() {
       } catch (err) {
         console.warn(`Google fetch failed for ${title}:`, err);
       }
-
       const info = googleBook?.volumeInfo || {};
       return {
         id: googleBook?.id || title + '-' + author,
@@ -57,7 +63,6 @@ async function loadBookData() {
         rank: nytBook.rank
       };
     }));
-
     document.getElementById('booksLastUpdated').textContent = 'Last updated: ' + new Date().toLocaleString();
     renderBookHeroSection(combinedBooks);
     renderBookChart(combinedBooks);
@@ -67,7 +72,16 @@ async function loadBookData() {
   }
 }
 
-// --- Render Movie Chart ---
+function renderByMetric(metric) {
+  const topMovies = [...movieData].sort((a, b) => b[metric] - a[metric]).slice(0, 5);
+  renderMovieChart(metric, topMovies);
+  renderHeroSection(topMovies);
+}
+
+function updateChartMetric(metric) {
+  renderByMetric(metric);
+}
+
 function renderMovieChart(metric, sortedData) {
   const options = {
     chart: { type: 'bar', height: 400 },
@@ -79,15 +93,21 @@ function renderMovieChart(metric, sortedData) {
       title: { text: metric === 'rating' ? 'IMDb Ratings' : 'Popularity Score', style: { color: '#6B4F3D' } },
       max: metric === 'rating' ? 10 : undefined
     },
-    tooltip: {
-      custom: ({ dataPointIndex }) => {
-        const m = sortedData[dataPointIndex];
-        return `<div><strong>${m.title}</strong><br>⭐ ${m.rating}<br>🔥 ${Math.round(m.popularity)}</div>`;
-      }
-    },
+  tooltip: {
+  custom: ({ dataPointIndex }) => {
+    const m = sortedData[dataPointIndex];
+    return `
+      <div style="padding: 10px; max-width: 220px;">
+        <div style="font-weight: 600; font-size: 15px;">${m.title}</div>
+        <div style="font-size: 14px;">Rating: ${m.rating.toFixed(1)}</div>
+        <div style="font-size: 14px;">Popularity: ${Math.round(m.popularity)}</div>
+      
+      </div>
+    `;
+  }
+},
     colors: ['#6B4F3D'], legend: { show: false }
   };
-
   if (!chart) {
     chart = new ApexCharts(document.querySelector("#entertainmentChart"), options);
     chart.render();
@@ -95,8 +115,45 @@ function renderMovieChart(metric, sortedData) {
     chart.updateOptions(options);
   }
 }
+function renderHeroSection(movies) {
+  const hero = document.getElementById("cinematicSection");
+  const carousel = document.getElementById("nezhaCarousel");
+  const dots = document.getElementById("nezhaDots");
+  const info = document.getElementById("nezhaInfo");
 
-// --- Render Book Chart ---
+  carousel.innerHTML = "";
+  dots.innerHTML = "";
+
+  if (movies.length === 0) return;
+
+  const first = movies[0];
+  hero.style.backgroundImage = `url('${first.image}')`;
+  info.innerHTML = `<h1>${first.title}</h1><p>${first.overview}</p><a href="/movie_detail/${first.id}" class="btn btn-outline-light">Details</a>`;
+
+  movies.forEach((m, i) => {
+    const card = document.createElement("div");
+    card.className = "nezha-card";
+    if (i === 0) card.classList.add("active");
+    card.innerHTML = `<img src="${m.thumb}" alt="${m.title}">`;
+
+    card.onclick = () => {
+      hero.style.backgroundImage = `url('${m.image}')`;
+      info.innerHTML = `<h1>${m.title}</h1><p>${m.overview}</p><a href="/movie_detail/${m.id}" class="btn btn-outline-light">Details</a>`;
+      document.querySelectorAll('.nezha-card').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.nezha-dot').forEach(d => d.classList.remove('active'));
+      card.classList.add('active');
+      dots.children[i].classList.add('active');
+    };
+
+    carousel.appendChild(card);
+
+    const dot = document.createElement("div");
+    dot.className = "nezha-dot";
+    if (i === 0) dot.classList.add("active");
+    dot.onclick = card.onclick;
+    dots.appendChild(dot);
+  });
+}
 function renderBookChart(books) {
   const options = {
     chart: { type: 'bar', height: 400 },
@@ -110,14 +167,19 @@ function renderBookChart(books) {
     xaxis: { categories: books.map(b => b.title), labels: { rotate: -30, style: { fontSize: '13px', colors: '#6B4F3D' } } },
     yaxis: { min: 0, max: 10, title: { text: 'Ranking', style: { color: '#6B4F3D' } } },
     tooltip: {
-      custom: ({ dataPointIndex }) => {
-        const b = books[dataPointIndex];
-        return `<div><strong>${b.title}</strong><br>✍️ ${b.author}<br>📝 ${b.description}</div>`;
-      }
-    },
+  custom: ({ dataPointIndex }) => {
+    const b = books[dataPointIndex];
+    return `
+      <div style="padding: 10px; max-width: 220px;">
+        <div style="font-weight: 600; font-size: 15px;">${b.title}</div>
+        <div style="font-size: 14px;">Author: ${b.author}</div>
+
+      </div>
+    `;
+  }
+},
     colors: ['#6B4F3D'], legend: { show: false }
   };
-
   if (!bookChart) {
     bookChart = new ApexCharts(document.querySelector("#booksChart"), options);
     bookChart.render();
@@ -125,53 +187,16 @@ function renderBookChart(books) {
     bookChart.updateOptions(options);
   }
 }
-
-// --- Hero Rendering ---
-function renderByMetric(metric) {
-  const topMovies = [...movieData].sort((a, b) => b[metric] - a[metric]).slice(0, 5);
-  renderMovieChart(metric, topMovies);
-  renderHeroSection(topMovies);
-}
-
-function renderHeroSection(movies) {
-  const hero = document.getElementById("cinematicSection");
-  const carousel = document.getElementById("nezhaCarousel");
-  const dots = document.getElementById("nezhaDots");
-  const info = document.getElementById("nezhaInfo");
-  carousel.innerHTML = ""; dots.innerHTML = "";
-
-  const first = movies[0];
-  hero.style.backgroundImage = `url('${first.image}')`;
-  info.innerHTML = `<h1>${first.title}</h1><p>${first.overview}</p><a href="/movie_detail/${first.id}" class="btn btn-outline-light">Details</a>`;
-
-  movies.forEach((m, i) => {
-    const card = document.createElement("div");
-    card.className = "nezha-card";
-    if (i === 0) card.classList.add("active");
-    card.innerHTML = `<img src="${m.thumb}" alt="${m.title}">`;
-    card.onclick = () => {
-      hero.style.backgroundImage = `url('${m.image}')`;
-      info.innerHTML = `<h1>${m.title}</h1><p>${m.overview}</p><a href="/movie_detail/${m.id}" class="btn btn-outline-light">Details</a>`;
-      document.querySelectorAll('.nezha-card').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.nezha-dot').forEach(d => d.classList.remove('active'));
-      card.classList.add('active'); dots.children[i].classList.add('active');
-    };
-    carousel.appendChild(card);
-
-    const dot = document.createElement("div");
-    dot.className = "nezha-dot";
-    if (i === 0) dot.classList.add("active");
-    dot.onclick = card.onclick;
-    dots.appendChild(dot);
-  });
-}
-
 function renderBookHeroSection(books) {
   const hero = document.getElementById("bookCinematicSection");
   const carousel = document.getElementById("bookCarousel");
   const dots = document.getElementById("bookDots");
   const info = document.getElementById("bookInfo");
-  carousel.innerHTML = ""; dots.innerHTML = "";
+
+  carousel.innerHTML = "";
+  dots.innerHTML = "";
+
+  if (books.length === 0) return;
 
   const first = books[0];
   hero.style.backgroundImage = `linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.2)), url('${first.image}')`;
@@ -182,13 +207,16 @@ function renderBookHeroSection(books) {
     card.className = "nezha-card";
     if (i === 0) card.classList.add("active");
     card.innerHTML = `<img src="${b.image}" alt="${b.title}">`;
+
     card.onclick = () => {
       hero.style.backgroundImage = `linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.2)), url('${b.image}')`;
       info.innerHTML = `<h1>${b.title}</h1><p>${b.description}</p><a href="/book_detail/${b.id}" class="btn btn-outline-light">Details</a>`;
       document.querySelectorAll('#bookCarousel .nezha-card').forEach(c => c.classList.remove('active'));
       document.querySelectorAll('#bookDots .nezha-dot').forEach(d => d.classList.remove('active'));
-      card.classList.add('active'); dots.children[i].classList.add('active');
+      card.classList.add('active');
+      dots.children[i].classList.add('active');
     };
+
     carousel.appendChild(card);
 
     const dot = document.createElement("div");
@@ -198,13 +226,32 @@ function renderBookHeroSection(books) {
     dots.appendChild(dot);
   });
 }
+function checkLoginAndToggleCTA() {
+  fetch("/account/profile-data", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include"
+  })
+    .then(res => res.ok ? res.json() : null)
+    .then(data => {
+      const callToAction = document.getElementById("callToAction");
+      if (data && data.username) {
+        callToAction?.classList.add("d-none");
+      } else {
+        callToAction?.classList.remove("d-none");
+      }
+    })
+    .catch(() => {
+      // On error, default to show CTA
+      document.getElementById("callToAction")?.classList.remove("d-none");
+    });
+}
 
-// --- Footer only ---
+// --- Footer and Startup ---
 window.addEventListener('DOMContentLoaded', () => {
-  
   loadMovieData();
   loadBookData();
-
+  checkLoginAndToggleCTA();
 
   fetch('../partials/footer.html')
     .then(res => res.ok ? res.text() : Promise.reject())
