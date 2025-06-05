@@ -101,7 +101,7 @@
                      <!--button for Booklist & mark view-->
                      <div class="row mt-4">
                         <div class="col-lg-3">
-                        <button class="btn" id="btnBooklist"><i class="bi bi-plus-lg"></i> Add to Watchlist</button>
+                        <button class="btn btn-outline-primary" id="btnBooklist"><i class="bi bi-plus-lg"></i> Add to Watchlist</button>
                         </div>
                         <div class="col-lg-4">
                         <button class="btn" id="btnRead" data-title="<%= book.volumeInfo.title %>">Read Now</button>
@@ -175,7 +175,6 @@
        </div>
     </section>
 
-    <!--Recommendations-->
     <!--Recommendations-->
 <section class="mb-5">
   <h3 class="mb-4">You May Also Like</h3>
@@ -268,6 +267,7 @@
 
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
      <script src="../../js/detail_page/book_detail.js"></script>
+     <script src="../../js/watchlist-handler.js"></script>
      </main>
      <%- include('../partials/footer') %>
     </body>

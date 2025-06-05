@@ -15,6 +15,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Handle More buttons (both watchlist and history)
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('more-btn')) {
+            handleMoreButton(e.target);
+        }
+    });
+
+    // Function to handle More button clicks
+    function handleMoreButton(button) {
+        try {
+            // Check if we're on the watchlist page or history page
+            const watchlistItem = button.closest('.watchlist-item');
+            const historyItem = button.closest('.history-item');
+            
+            let itemType, itemId;
+            
+            if (watchlistItem) {
+                // Handle watchlist items
+                itemType = watchlistItem.getAttribute('data-type');
+                itemId = watchlistItem.getAttribute('data-id');
+            } else if (historyItem) {
+                // Handle history items
+                itemType = historyItem.getAttribute('data-type');
+                itemId = historyItem.getAttribute('data-id');
+            } else {
+                throw new Error('Could not find watchlist or history item');
+            }
+
+            if (!itemId) {
+                throw new Error('Missing item ID');
+            }
+
+            // Navigate to appropriate detail page based on type
+            if (itemType === 'movie') {
+                window.location.href = `/movie_detail/${itemId}`;
+            } else if (itemType === 'book') {
+                window.location.href = `/books/${itemId}`;
+            } else {
+                throw new Error(`Unknown item type: ${itemType}`);
+            }
+
+        } catch (error) {
+            console.error('Error navigating to details:', error);
+            showToast('Error: ' + error.message, 'error');
+        }
+    }
+
     // Function to mark item as completed
     async function handleMarkCompleted(button) {
         try {
@@ -37,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                showNotification('Item marked as completed and moved to history!', 'success');
+                showToast('Item marked as completed and moved to history!', 'success');
                 watchlistItem.style.transition = 'opacity 0.3s ease';
                 watchlistItem.style.opacity = '0';
                 setTimeout(() => {
@@ -50,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Error marking item as completed:', error);
-            showNotification('Error: ' + error.message, 'error');
+            showToast('Error: ' + error.message, 'error');
             button.disabled = false;
             button.textContent = 'Mark as completed';
         }
@@ -78,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                showNotification('Item removed from watchlist!', 'success');
+                showToast('Item removed from watchlist!', 'success');
                 watchlistItem.style.transition = 'opacity 0.3s ease';
                 watchlistItem.style.opacity = '0';
                 setTimeout(() => {
@@ -91,18 +138,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Error removing item:', error);
-            showNotification('Error: ' + error.message, 'error');
+            showToast('Error: ' + error.message, 'error');
             button.disabled = false;
             button.textContent = 'Remove';
         }
     }
 
-    // ✅ Modified function to use actual data-id
+    // Function to extract item data from watchlist item element
     function extractItemData(watchlistItem) {
         const title = watchlistItem.querySelector('h2').textContent.trim();
         const type = watchlistItem.getAttribute('data-type');
         const image = watchlistItem.querySelector('.item-image').src;
-        const itemId = watchlistItem.getAttribute('data-id'); // 👈 this is now directly from HTML
+        const itemId = watchlistItem.getAttribute('data-id');
 
         if (!itemId) {
             throw new Error('Missing itemId. Ensure each .watchlist-item has a data-id attribute.');
@@ -111,44 +158,48 @@ document.addEventListener('DOMContentLoaded', function() {
         return { itemId, title, type, image };
     }
 
-    // Notification and empty state functions remain unchanged
-    function showNotification(message, type = 'info') {
-        const existingNotification = document.querySelector('.notification');
-        if (existingNotification) existingNotification.remove();
-
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.style.cssText = `
-            position: fixed; top: 20px; right: 20px;
-            padding: 15px 20px; border-radius: 5px;
-            color: white; z-index: 1000;
-            max-width: 300px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: opacity 0.3s ease;
+    // Function to show toast notification (reusing the existing showToast implementation)
+    function showToast(message, type = 'info') {
+        // Create toast element
+        const toastContainer = document.getElementById('toast-container') || createToastContainer();
+        
+        const toastId = 'toast-' + Date.now();
+        const toastClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : 'bg-info';
+        
+        const toastHTML = `
+            <div id="${toastId}" class="toast ${toastClass} text-white" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header ${toastClass} text-white border-0">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                    <strong class="me-auto">Watchlist</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
         `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+        
+        // Initialize and show toast
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+        
+        // Remove toast element after it's hidden
+        toastElement.addEventListener('hidden.bs.toast', () => {
+            toastElement.remove();
+        });
+    }
 
-        switch (type) {
-            case 'success':
-                notification.style.backgroundColor = '#28a745';
-                break;
-            case 'error':
-                notification.style.backgroundColor = '#dc3545';
-                break;
-            default:
-                notification.style.backgroundColor = '#17a2b8';
-        }
-
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, 3000);
+    // Function to create toast container if it doesn't exist
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '1050';
+        document.body.appendChild(container);
+        return container;
     }
 
     function updateEmptyState() {
@@ -176,5 +227,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-
 });

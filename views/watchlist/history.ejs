@@ -45,7 +45,7 @@
         <!-- Movies -->
         <% if (items && items.length > 0) { %>
             <% items.forEach(item => { %>
-                <section class="history-item" data-type="<%= item.type %>">
+                <section class="history-item" data-type="<%= item.type %>" data-id="<%= item.itemId %>">
                     <img src="<%= item.image || '/images/placeholder.jpg' %>" 
                          alt="<%= item.title %>" 
                          class="item-image">
@@ -157,6 +157,7 @@
     <%- include('../partials/footer') %>
 
     <script src="../../js/share.js"></script>
+    <script src="../../js/watchlist_actions.js"></script>
     
 </body>
 </html>
