@@ -12,27 +12,17 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="../../css/app.css">
         <link rel="stylesheet" href="../../css/detail_page/book_detail.css">
+         <script>
+  const currentUser = <%- JSON.stringify(currentUser || null) %>;
+  console.log("Current user:", currentUser);
+</script>
 
-
-
-
-
-
-
-
-     
 </head>  
-
-
-
 
 <body>
   <%- include('../partials/header') %>
    <!--Main Body-->
     <main class="container my-5">
-
-
-
 
         <!--Media Detail Section-->
         <section class="mb-5">
@@ -41,17 +31,11 @@
                 <div class="col-md-4 text center">
                   <img src="<%= book.volumeInfo.imageLinks?.thumbnail || '/images/default-book.jpg' %>" alt="<%= book.volumeInfo.title %>" class="img-fluid mb-3" style="width: 1000px; height: auto;">
 
-
-
-
                 </div>
                
                 <!--Synopsis-->
                 <div class="col-md-8">
                     <h3 class="display-5 fw-bold mb-3"><%= book.volumeInfo.title %></h3>
-
-
-
 
                    <div class="mb-4">
                       <span class="badge bg-secondary"><i class="bi bi-book"></i> Book</span>
@@ -59,9 +43,6 @@
                       <span class="badge bg-secondary ms-1"><i class="bi bi-calendar3"></i> Published: <%= book.volumeInfo.publishedDate %></span>
                      <% } %>
                   </div>
-
-
-
 
                   <% if (book.volumeInfo.authors) { %>
                   <div class="mb-4">
@@ -71,9 +52,6 @@
                      <% }); %>
                   </div>
                   <% } %>
-
-
-
 
                  <!--Genres-->
                   <% if (book.volumeInfo.categories) { %>
@@ -85,9 +63,6 @@
                    </div>
                    <% } %>
 
-
-
-
                 <!--Synopsis-->
                 <div class="mb-4">
                   <h6>Synopsis</h6>
@@ -95,9 +70,6 @@
                   <%= book.volumeInfo.description || 'No description available.' %>
                   </p>
                 </div>
-
-
-
 
                 <script>
                    document.addEventListener('DOMContentLoaded', function() {
@@ -119,9 +91,6 @@
                     });
                     </script>
 
-
-
-
                    <!--Rating-->
                    <% if (book.volumeInfo.averageRating) { %>
                    <div class="mb-4">
@@ -129,10 +98,6 @@
                    </div>
                    <% } %>
 
-
-
-
-                   
                      <!--button for Booklist & mark view-->
                      <div class="row mt-4">
                         <div class="col-lg-3">
@@ -161,9 +126,6 @@
             </div>
         </section>
 
-
-
-
         <!--Book Detail-->
         <section class="content-section animated delay-1">
         <h2 class="section-title mb-4" id="BookDetailSectionTitle">Book Details</h2>
@@ -180,9 +142,6 @@
             </div>
             <% } %>
 
-
-
-
             <!-- Published -->
             <% if (book.volumeInfo.publishedDate) { %>
             <div class="col-md-6">
@@ -192,9 +151,6 @@
               </div>
             </div>
             <% } %>
-
-
-
 
             <!-- Pages -->
             <% if (book.volumeInfo.pageCount) { %>
@@ -206,9 +162,6 @@
               </div>
             <% } %>
 
-
-
-
             <!-- Language -->
             <% if (book.volumeInfo.language) { %>
             <div class="col-md-6">
@@ -218,167 +171,100 @@
             </div>
             </div>
             <% } %>
-
-
-
-
         </div>
        </div>
     </section>
 
-
-
-
-       <!--Recommendations-->
-            <section class="mb-5">
-              <h3 class="mb-4">You May Also Like</h3>
-                <div class="row g-4">
-                   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="RecommendationBook">
-                   <!-- Cards will be injected here by renderCards() -->
-                   </div>
-                </div>
-            </section>
-
-
-
+    <!--Recommendations-->
+    <!--Recommendations-->
+<section class="mb-5">
+  <h3 class="mb-4">You May Also Like</h3>
+  
+  <% if (typeof recommendations !== 'undefined' && recommendations.length > 0) { %>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+      <% recommendations.forEach(book => { %>
+        <div class="col">
+          <div class="card h-100">
+            <a href="/books/<%= book.id %>">
+              <img src="<%= book.image %>" 
+                   class="card-img-top" 
+                   alt="<%= book.title %>"
+                   onerror="this.onerror=null;this.src='/images/default-book.jpg'"
+                   style="height: 300px; object-fit: contain; background-color: #f8f9fa; padding: 10px;">
+            </a>
+            <div class="card-body">
+              <h5 class="card-title"><%= book.title %></h5>
+              <p class="card-text text-muted">
+                <%= book.year %> • <%= book.authors %>
+                <% if (book.genres && book.genres.length > 0) { %>
+                  <br><small><%= book.genres.slice(0, 2).join(' • ') %></small>
+                <% } %>
+              </p>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <div class="alert alert-info">
+      <p>No recommendations found for this book.</p>
+    </div>
+  <% } %>
+</section>
 
      <!-- Review Section -->
-     <section class="details-section" style="background-color: white; border-radius: 15px; height:900px">
-        <div class="d-flex justify-content-between align-items-center mb-4 " style="margin-left: 10px; margin-top: px; padding-top: 15px;">
-           <h3><i class="bi bi-chat-left-dots me-2"></i> User Reviews</h3>
-           <button class="btn" id="writeReviewBtn">Write a Review</button>
-        </div>
+<section class="details-section" style="background-color: white; padding: 2rem;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="bi bi-chat-left-dots me-2"></i> User Reviews</h3>
+    <% if (currentUser) { %>
+      <button class="btn btn-warning" id="writeReviewBtn">Write a Review</button>
+    <% } else { %>
+      <p class="text-muted mb-0">You must log in to rate this item.</p>
+    <% } %>
+  </div>
 
-
-        <!-- Write Review Form (hidden by default) -->
-       <div id="reviewForm" class="card mb-4 my-3 p-3 border shadow-sm d-none">
-             <h5 style="margin-right: 3px;">Write Your Review</h5>
-          <div class="mb-2">
-              <div id="ratingInput">
-                <i class="bi bi-star-fill" data-value="1"></i>
-                <i class="bi bi-star-fill" data-value="2"></i>
-                <i class="bi bi-star-fill" data-value="3"></i>
-                <i class="bi bi-star-fill" data-value="4"></i>
-                <i class="bi bi-star-fill" data-value="5"></i>
-             </div>
-             <div class="form-check">
-               <input class="form-check-input" type="checkbox" id="confirmRatingCheck">
-               <label class="form-check-label" for="confirmRatingCheck"> Spoiler</label>
-             </div>
-         </div>
-         <div class="mb-2">
-           <textarea class="form-control" rows="3" placeholder="Write your comment..."></textarea>
-         </div>
-         <button class="btn" style="background-color: #FFC107;">Submit</button>
-       </div>
-
-
-      <!-- Review Card 1 -->
-      <div class="card mb-3 mt-5 my-5 border-0 shadow-sm review-card">
-         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <div>
-                   <strong>Movie.Buff99</strong>
-                     <div class="rating-stars text-warning small">
-                       <i class="bi bi-star-fill"></i>
-                       <i class="bi bi-star-fill"></i>
-                       <i class="bi bi-star-fill"></i>
-                       <i class="bi bi-star-fill"></i>
-                       <i class="bi bi-star-half"></i>
-                     </div>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                   <small class="text-muted">2 weeks ago</small>
-                   <button class="btn btn-sm btn-outline-primary toggle-blur-btn" title="Show comment">
-                     <i class="bi bi-eye"></i>
-                   </button>
-               </div>
-                 
-            </div>
-
-
-             <!-- Blurred content -->
-             <div class="blurred-box position-relative">
-             <h5 class="card-title fw-bold">Creative but exhausting</h5>
-             <div class="comment-text card-text text-secondary">While the writing is beautiful, I found the characters largely unlikable and the plot somewhat thin. It's an important historical document of the Jazz Age, but as a novel, it hasn't aged as well as some of its contemporaries.</div>
-             </div>
-
-
-            <div class="d-flex justify-content-end">
-               <button class="btn btn-sm btn-outline-secondary me-2 like-btn">
-                   <i class="bi bi-hand-thumbs-up"></i> <span class="like-count">100</span>
-               </button>                      
-               <button class="btn btn-sm btn-outline-secondary reply-btn"><i class="bi bi-chat-square-dots"></i> Reply</button>
-            </div>
-
-
-            <!-- Reply Form (hidden by default) -->
-            <div class="reply-form mt-3 d-none">
-               <textarea class="form-control mb-2" rows="2" placeholder="Write your reply..."></textarea>
-               <button class="btn" style="background-color: #FFC107;">Submit Reply</button>
-           </div>
-          </div>
-        </div>
-
-
-
-
-      <!-- Review Card 2 -->
-      <div class="card mb-3 mt-3 my-5 border-0 shadow-sm review-card">
-       <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-2">
-              <div>
-                 <strong>Sarah J.</strong>
-                   <div class="rating-stars text-warning small">
-                     <i class="bi bi-star-fill"></i>
-                     <i class="bi bi-star-fill"></i>
-                     <i class="bi bi-star-fill"></i>
-                     <i class="bi bi-star-fill"></i>
-                     <i class="bi bi-star-fill"></i>
-                   </div>
-              </div>
-              <div class="d-flex align-items-center gap-2">
-               <small class="text-muted">1 month ago</small>
-               <button class="btn btn-sm btn-outline-primary toggle-blur-btn" title="Show comment">
-                 <i class="bi bi-eye"></i>
-               </button>
-           </div>
-          </div>
-
-
-          <!-- Blurred content -->
-          <div class="blurred-box position-relative">
-          <h5 class="card-title fw-bold">That was amazing!</h5>
-          <div class="comment-text card-text text-secondary">The Great Gatsby is a masterpiece of American literature. Fitzgerald's prose is breathtaking, and his portrayal of the American Dream's corruption is as relevant today as it was in the 1920s. The characters are complex and unforgettable.</div>
-          </div>
-
-
-          <div class="d-flex justify-content-end">
-           <button class="btn btn-sm btn-outline-secondary me-2 like-btn">
-               <i class="bi bi-hand-thumbs-up"></i> <span class="like-count">18</span>
-           </button>                  
-           <button class="btn btn-sm btn-outline-secondary reply-btn"><i class="bi bi-chat-square-dots"></i> Reply</button>
-          </div>
-
-
-          <!-- Reply Form (hidden by default) -->
-          <div class="reply-form mt-3 d-none">
-             <textarea class="form-control mb-2" rows="2" placeholder="Write your reply..."></textarea>
-             <button class="btn btn-sm btn-primary">Submit Reply</button>
-         </div>
-        </div>
+  <!-- Review Form -->
+  <div id="reviewForm" class="card mb-4 p-3 border shadow-sm d-none">
+    <h5 class="mb-3">Write Your Review</h5>
+    <div class="mb-3">
+      <label class="form-label">Rating:</label>
+      <div id="ratingInput" class="mb-2">
+        <i class="bi bi-star-fill" data-value="1" style="font-size: 1.5rem; cursor: pointer; color: #ddd;"></i>
+        <i class="bi bi-star-fill" data-value="2" style="font-size: 1.5rem; cursor: pointer; color: #ddd;"></i>
+        <i class="bi bi-star-fill" data-value="3" style="font-size: 1.5rem; cursor: pointer; color: #ddd;"></i>
+        <i class="bi bi-star-fill" data-value="4" style="font-size: 1.5rem; cursor: pointer; color: #ddd;"></i>
+        <i class="bi bi-star-fill" data-value="5" style="font-size: 1.5rem; cursor: pointer; color: #ddd;"></i>
       </div>
-
-
-       <!-- Load More -->
-       <div class="text-center mt-4 mb-10">
-           <button class="btn" style="background-color: #FFC107;">Load More Reviews</button>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="confirmRatingCheck">
+        <label class="form-check-label" for="confirmRatingCheck">Contains Spoilers</label>
       </div>
-   </section>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Review:</label>
+      <textarea class="form-control" rows="4" placeholder="Write your review..." maxlength="500"></textarea>
+      <div class="form-text">Maximum 500 characters</div>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-warning">Submit Review</button>
+      <button type="button" class="btn btn-secondary" onclick="document.getElementById('reviewForm').classList.add('d-none')">Cancel</button>
+    </div>
+  </div>
 
+  <!-- Reviews Container -->
+  <div id="reviewsContainer">
+    <!-- Reviews will be loaded here dynamically -->
+  </div>
 
-   
-
+  <!-- Load More Button -->
+  <div class="text-center mt-4">
+    <button class="btn btn-outline-warning load-more-reviews-btn" style="display: none;">
+      Load More Reviews
+    </button>
+  </div>
+</section>
+    </main>
+  
 
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
      <script src="../../js/detail_page/book_detail.js"></script>
@@ -389,5 +275,7 @@
 
 
 </html>
+
+
 
 
