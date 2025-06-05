@@ -228,14 +228,20 @@ app.get('/account/forgotPassword', (req, res) => res.render('account/forgotPassw
 app.post('/account/login', async (req, res) => {
   const { email, password } = req.body;
   if (email === 'test@example.com' && password === '123456') {
-    req.session.user = {
-      id: 'fake-user-id-123',
-      username: 'TestUser',
-      email
-    };
-    return req.session.save(() => {
-      res.redirect('/account/profile');
-    });
+req.session.regenerate((err) => {
+  if (err) return res.send('Session error');
+
+  req.session.user = {
+    id: 'fake-user-id-123',
+    username: 'TestUser',
+    email
+  };
+
+  req.session.save((err) => {
+    if (err) return res.send('Session save error');
+    res.redirect('/account/profile');
+  });
+});
   } else {
     return res.send('❌ Invalid email or password');
   }

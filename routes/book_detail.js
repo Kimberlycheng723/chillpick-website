@@ -230,6 +230,10 @@ function calculateRelevanceScore(bookGenres, targetGenres) {
 
 // Book detail route with improved error handling
 router.get('/:id', async (req, res) => {
+    if (!req.session?.userId) {
+    return res.redirect(`/account/login?redirect=/book_detail/${req.params.id}`);
+  }
+
   try {
     console.log(`🔍 Fetching book details for ID: ${req.params.id}`);
     

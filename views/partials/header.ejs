@@ -16,7 +16,7 @@
 </div>
     <!-- Centered Nav Links -->
     <div class="collapse navbar-collapse justify-content-center desktop-center" id="navbarNav">
-      <div id="authNav">
+      <div id="authNav" style="display: none">
         <ul class="navbar-nav flex-row flex-wrap text-center">
           <li class="nav-item"><a class="nav-link nav-custom" href="/">Home</a></li>
           <li class="nav-item"><a class="nav-link nav-custom" href="/dashboard">Dashboard</a></li>
@@ -146,21 +146,20 @@
 
       const currentUser = await response.json();
 
-      if (currentUser) {
-        // Show items for logged-in users
+      const loggedIn = currentUser && currentUser.username;
+
+      if (loggedIn) {
         mobileMenuToggle?.classList.remove("d-none");
         userIcon?.classList.remove("d-none");
         userTextLink?.classList.remove("d-none");
         loginLink?.classList.add("d-none");
         authNav?.style.setProperty("display", "block");
 
-        // Load profile picture if available
         const headerImg = userIcon.querySelector("img");
         if (headerImg) {
           headerImg.src = currentUser.profilePicture || "/images/profile_pic.png";
         }
       } else {
-        // Treat as not logged in
         mobileMenuToggle?.classList.add("d-none");
         userIcon?.classList.add("d-none");
         userTextLink?.classList.add("d-none");
@@ -170,7 +169,6 @@
 
     } catch (error) {
       console.error("Error fetching user data:", error);
-      // Default to logged-out view on error
       mobileMenuToggle?.classList.add("d-none");
       userIcon?.classList.add("d-none");
       userTextLink?.classList.add("d-none");
@@ -178,7 +176,7 @@
       authNav?.style.setProperty("display", "none");
     }
 
-    // Close mobile menu when a nav link is clicked
+    // Close mobile menu when link clicked
     document.querySelectorAll(".navbar-nav .nav-link").forEach(link => {
       link.addEventListener("click", () => {
         const toggler = document.querySelector(".navbar-toggler");
@@ -189,4 +187,11 @@
       });
     });
   });
+
+  window.addEventListener("pageshow", function (event) {
+  // Force a session recheck if the page was restored from cache
+  if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
+    window.location.reload();
+  }
+});
 </script>
