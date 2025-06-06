@@ -98,15 +98,115 @@ app.use('/api/watchlist', watchlistRoutes);
 
 // Views
 app.get('/', (req, res) => res.render('landing'));
+// app.get('/dashboard', async (req, res) => {
+//   try {
+//     const userId = req.session?.userId;
+//     if (!userId) return res.redirect('/account/login');
+
+//     // get recommendations
+//     const recommendations = await recommendationService.getRecommendations(userId);
+
+//     // get top 3 recently added watchlist items
+//     const watchlist = await Watchlist.findOne({ userId });
+//     const recentlyAdded = watchlist?.items
+//       ? watchlist.items
+//           .sort((a, b) => new Date(b.createdAt || b.addedAt) - new Date(a.createdAt || a.addedAt))
+//           .slice(0, 3)
+//       : [];
+
+//     // Fetch recent activity
+//     const [bookReviews, movieReviews] = await Promise.all([
+//       BookReview.find().sort({ createdAt: -1 }).limit(3).lean(),
+//       MovieReview.find().sort({ createdAt: -1 }).limit(3).lean()
+//     ]);
+
+//     // Get all unique user IDs from reviews
+//     const allUserIds = [
+//       ...new Set([
+//         ...bookReviews.map(r => r.userId),
+//         ...movieReviews.map(r => r.userId)
+//       ])
+//     ];
+
+//     // Fetch all users data at once for better performance
+//     const users = await User.find({ _id: { $in: allUserIds } })
+//       .select('_id username profilePicture')
+//       .lean();
+
+//     // Create a user map for quick lookup
+//     const userMap = users.reduce((map, user) => {
+//       map[user._id.toString()] = user;
+//       return map;
+//     }, {});
+
+//     // Format recent activity data with proper title and user info
+//     const recentActivity = await Promise.all([
+//       ...bookReviews.map(async (r) => {
+//         const user = userMap[r.userId.toString()] || {};
+//         const isCurrentUser = r.userId.toString() === userId.toString();
+//         const detailUrl = `/book_detail/${r.bookId}`;
+//         console.log('Book detail URL:', detailUrl); // Debug log
+//         return {
+//           type: 'book',
+//           username: isCurrentUser ? 'You' : (user.username || r.username),
+//           itemId: r.bookId,
+//           // itemTitle: await getBookTitle(r.bookId) || `Book ID: ${r.bookId}`,
+//           itemTitle: r.bookTitle || `Book ID: ${r.bookId}`,
+//           rating: r.rating,
+//           comment: r.comment,
+//           createdAt: r.createdAt,
+//           profilePic: user.profilePicture || '../images/profile_pic.png',
+//           timeAgo: getTimeAgo(r.createdAt),
+//           detailUrl: detailUrl
+//         };
+//       }),
+//       ...movieReviews.map(async (r) => {
+//         const user = userMap[r.userId.toString()] || {};
+//         const isCurrentUser = r.userId.toString() === userId.toString();
+//         const detailUrl = `/movie_detail/${r.movieId}`;
+//         console.log('Movie detail URL:', detailUrl); // Debug log
+//         return {
+//           type: 'movie',
+//           username: isCurrentUser ? 'You' : (user.username || r.username),
+//           itemId: r.movieId,
+//           // itemTitle: await getMovieTitle(r.movieId) || `Movie ID: ${r.movieId}`,
+//           itemTitle: r.movieTitle || `Movie ID: ${r.movieId}`,
+//           rating: r.rating,
+//           comment: r.comment,
+//           createdAt: r.createdAt,
+//           profilePic: user.profilePicture || '../images/profile_pic.png',
+//           timeAgo: getTimeAgo(r.createdAt),
+//           detailUrl: detailUrl
+//         };
+//       })
+//     ]);
+
+//     // Sort by most recent and take top 3
+//     const sortedActivity = recentActivity
+//       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+//       .slice(0, 3);
+
+//     res.render('dashboard', {
+//       recommendations,
+//       recentlyAdded,
+//       recentActivity: sortedActivity,
+//       currentUser: req.session.user
+//     });
+//   } catch (error) {
+//     console.error('Error loading dashboard:', error);
+//     res.status(500).send('Error loading dashboard');
+//   }
+// });
+
 app.get('/dashboard', async (req, res) => {
   try {
     const userId = req.session?.userId;
     if (!userId) return res.redirect('/account/login');
 
-    // get recommendations
+    // Get recommendations
     const recommendations = await recommendationService.getRecommendations(userId);
 
-    // get top 3 recently added watchlist items
+    // Get top 3 recently added watchlist items
     const watchlist = await Watchlist.findOne({ userId });
     const recentlyAdded = watchlist?.items
       ? watchlist.items
@@ -114,17 +214,77 @@ app.get('/dashboard', async (req, res) => {
           .slice(0, 3)
       : [];
 
-    // Fetch recent activity
-    const [bookReviews, movieReviews] = await Promise.all([
+    // Fetch recent activity - now including replies and likes
+    const [bookReviews, movieReviews, bookReplies, movieReplies, bookLikes, movieLikes] = await Promise.all([
       BookReview.find().sort({ createdAt: -1 }).limit(3).lean(),
-      MovieReview.find().sort({ createdAt: -1 }).limit(3).lean()
+      MovieReview.find().sort({ createdAt: -1 }).limit(3).lean(),
+      BookReview.aggregate([
+        { $unwind: "$replies" },
+        { $sort: { "replies.createdAt": -1 } },
+        { $limit: 3 },
+        { $project: {
+            _id: 0,
+            type: { $literal: "book_reply" },
+            reply: "$replies",
+            bookId: 1,
+            bookTitle: 1,
+            reviewId: "$_id"
+          }
+        }
+      ]),
+      MovieReview.aggregate([
+        { $unwind: "$replies" },
+        { $sort: { "replies.createdAt": -1 } },
+        { $limit: 3 },
+        { $project: {
+            _id: 0,
+            type: { $literal: "movie_reply" },
+            reply: "$replies",
+            movieId: 1,
+            movieTitle: 1,
+            reviewId: "$_id"
+          }
+        }
+      ]),
+      BookReview.aggregate([
+        { $unwind: "$likes" },
+        { $sort: { "likes.createdAt": -1 } },
+        { $limit: 3 },
+        { $project: {
+            _id: 0,
+            type: { $literal: "book_like" },
+            like: "$likes",
+            bookId: 1,
+            bookTitle: 1,
+            reviewId: "$_id"
+          }
+        }
+      ]),
+      MovieReview.aggregate([
+        { $unwind: "$likedBy" },
+        { $sort: { "likedBy.date": -1 } },
+        { $limit: 3 },
+        { $project: {
+            _id: 0,
+            type: { $literal: "movie_like" },
+            like: "$likedBy",
+            movieId: 1,
+            movieTitle: 1,
+            reviewId: "$_id"
+          }
+        }
+      ])
     ]);
 
-    // Get all unique user IDs from reviews
+    // Get all unique user IDs from all activity types
     const allUserIds = [
       ...new Set([
         ...bookReviews.map(r => r.userId),
-        ...movieReviews.map(r => r.userId)
+        ...movieReviews.map(r => r.userId),
+        ...bookReplies.map(r => r.reply.userId),
+        ...movieReplies.map(r => r.reply.userId),
+        ...bookLikes.map(r => r.like.userId),
+        ...movieLikes.map(r => r.like.userId)
       ])
     ];
 
@@ -139,46 +299,26 @@ app.get('/dashboard', async (req, res) => {
       return map;
     }, {});
 
-    // Format recent activity data with proper title and user info
+    // Format all activity data
     const recentActivity = await Promise.all([
-      ...bookReviews.map(async (r) => {
-        const user = userMap[r.userId.toString()] || {};
-        const isCurrentUser = r.userId.toString() === userId.toString();
-        return {
-          type: 'book',
-          username: isCurrentUser ? 'You' : (user.username || r.username),
-          itemId: r.bookId,
-          // itemTitle: await getBookTitle(r.bookId) || `Book ID: ${r.bookId}`,
-          itemTitle: r.bookTitle || `Book ID: ${r.bookId}`,
-          rating: r.rating,
-          comment: r.comment,
-          createdAt: r.createdAt,
-          profilePic: user.profilePicture || '../images/profile_pic.png',
-          timeAgo: getTimeAgo(r.createdAt)
-        };
-      }),
-      ...movieReviews.map(async (r) => {
-        const user = userMap[r.userId.toString()] || {};
-        const isCurrentUser = r.userId.toString() === userId.toString();
-        return {
-          type: 'movie',
-          username: isCurrentUser ? 'You' : (user.username || r.username),
-          itemId: r.movieId,
-          // itemTitle: await getMovieTitle(r.movieId) || `Movie ID: ${r.movieId}`,
-          itemTitle: r.movieTitle || `Movie ID: ${r.movieId}`,
-          rating: r.rating,
-          comment: r.comment,
-          createdAt: r.createdAt,
-          profilePic: user.profilePicture || '../images/profile_pic.png',
-          timeAgo: getTimeAgo(r.createdAt)
-        };
-      })
+      // Book reviews
+      ...bookReviews.map(r => formatReviewActivity(r, 'book', userMap, userId)),
+      // Movie reviews
+      ...movieReviews.map(r => formatReviewActivity(r, 'movie', userMap, userId)),
+      // Book replies
+      ...bookReplies.map(r => formatReplyActivity(r, 'book', userMap, userId)),
+      // Movie replies
+      ...movieReplies.map(r => formatReplyActivity(r, 'movie', userMap, userId)),
+      // Book likes
+      ...bookLikes.map(r => formatLikeActivity(r, 'book', userMap, userId)),
+      // Movie likes
+      ...movieLikes.map(r => formatLikeActivity(r, 'movie', userMap, userId))
     ]);
 
     // Sort by most recent and take top 3
     const sortedActivity = recentActivity
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 3);
+      .slice(0, 3); // Show 3 most recent activities
 
     res.render('dashboard', {
       recommendations,
@@ -191,6 +331,80 @@ app.get('/dashboard', async (req, res) => {
     res.status(500).send('Error loading dashboard');
   }
 });
+
+// Helper functions to format different types of activities
+function formatReviewActivity(review, type, userMap, currentUserId) {
+  const user = userMap[review.userId.toString()] || {};
+  const isCurrentUser = review.userId.toString() === currentUserId.toString();
+  
+  return {
+    type: `${type}_review`,
+    activityType: 'review',
+    username: isCurrentUser ? 'You' : (user.username || review.username),
+    userId: review.userId,
+    itemId: review[`${type}Id`],
+    itemTitle: review[`${type}Title`] || `${type} ID: ${review[`${type}Id`]}`,
+    rating: review.rating,
+    comment: review.comment,
+    createdAt: review.createdAt,
+    profilePic: user.profilePicture || '../images/profile_pic.png',
+    timeAgo: getTimeAgo(review.createdAt),
+    detailUrl: `/${type}_detail/${review[`${type}Id`]}`,
+    reviewId: review._id.toString()
+  };
+}
+
+function formatReplyActivity(replyData, type, userMap, currentUserId) {
+  const reply = replyData.reply;
+  const user = userMap[reply.userId.toString()] || {};
+  const isCurrentUser = reply.userId.toString() === currentUserId.toString();
+  
+  return {
+    type: `${type}_reply`,
+    activityType: 'reply',
+    username: isCurrentUser ? 'You' : (user.username || reply.username),
+    userId: reply.userId,
+    itemId: replyData[`${type}Id`],
+    itemTitle: replyData[`${type}Title`] || `${type} ID: ${replyData[`${type}Id`]}`,
+    content: reply.content || reply.text,
+    createdAt: reply.createdAt || reply.date,
+    profilePic: user.profilePicture || '../images/profile_pic.png',
+    timeAgo: getTimeAgo(reply.createdAt || reply.date),
+    detailUrl: `/${type}_detail/${replyData[`${type}Id`]}`,
+    reviewId: replyData.reviewId.toString()
+  };
+}
+
+function formatLikeActivity(likeData, type, userMap, currentUserId) {
+  const like = likeData.like;
+  const user = userMap[like.userId.toString()] || {};
+  const isCurrentUser = like.userId.toString() === currentUserId.toString();
+  
+  return {
+    type: `${type}_like`,
+    activityType: 'like',
+    username: isCurrentUser ? 'You' : (user.username || like.username),
+    userId: like.userId,
+    itemId: likeData[`${type}Id`],
+    itemTitle: likeData[`${type}Title`] || `${type} ID: ${likeData[`${type}Id`]}`,
+    createdAt: like.createdAt || like.date,
+    profilePic: user.profilePicture || '../images/profile_pic.png',
+    timeAgo: getTimeAgo(like.createdAt || like.date),
+    detailUrl: `/${type}_detail/${likeData[`${type}Id`]}`,
+    reviewId: likeData.reviewId.toString()
+  };
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - new Date(date)) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+}
 
 // Helper function to format time ago (if not already present)
 function getTimeAgo(date) {

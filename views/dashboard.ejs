@@ -40,6 +40,7 @@
                   <% movies.forEach(item => { %>
                     <div class="col-md-3 mb-3">
                       <div class="card media-card">
+                        <a href="/movie_detail/<%= item.id %>" class="media-link">
                         <img src="<%= item.posterPath %>" alt="<%= item.title %> Poster" class="media-image">
                         <div class="card-body p-2">
                           <h5 class="card-title"><%= item.title %></h5>
@@ -49,6 +50,7 @@
                             <%= item.year %>
                           </div>
                         </div>
+                        </a>
                       </div>
                     </div>
                   <% }) %>
@@ -62,6 +64,7 @@
                   <% books.forEach(item => { %>
                     <div class="col-md-3 mb-3">
                       <div class="card media-card">
+                        <a href="/book_detail/<%= item.id %>" class="media-link">
                         <img src="<%= item.posterPath %>" alt="<%= item.title %> Poster" class="media-image">
                         <div class="card-body p-2">
                           <h5 class="card-title"><%= item.title %></h5>
@@ -71,6 +74,7 @@
                             <%= item.year %>
                           </div>
                         </div>
+                        </a>
                       </div>
                     </div>
                   <% }) %>
@@ -131,8 +135,9 @@
             <h2 class="section-title">Recent Activity</h2>
           </div>
 
-          <% if (recentActivity && recentActivity.length > 0) { %>
+          <!-- <% if (recentActivity && recentActivity.length > 0) { %>
             <% recentActivity.forEach((activity, index) => { %>
+              <a href="<%= activity.detailUrl %>" class="activity-link">
               <div class="activity-card">
                 <div class="row">
                   <div class="col-2">
@@ -153,6 +158,7 @@
                   </div>
                 </div>
               </div>
+              </a>
               <% if (index < recentActivity.length - 1) { %>
                 <hr class="divider">
               <% } %>
@@ -162,8 +168,61 @@
               <p>No recent activity to show.</p>
               <small class="text-muted">Reviews and ratings will appear here.</small>
             </div>
-          <% } %>
+          <% } %> -->
 
+          <% if (recentActivity && recentActivity.length > 0) { %>
+            <% recentActivity.forEach((activity, index) => { %>
+              <div class="activity-container">
+                <a href="<%= activity.detailUrl %>" class="activity-link">
+                  <div class="activity-card">
+                    <div class="row">
+                      <div class="col-2">
+                        <img src="<%= activity.profilePic %>" alt="profile_pic" class="profile_pic-image">
+                      </div>
+                      <div class="col-10">
+                        <% if (activity.activityType === 'review') { %>
+                          <div class="Recent-activity-description">
+                            <%= activity.username %> rated 
+                            <em>"<%= activity.itemTitle %>"</em>
+                            <span class="rating-number">(<%= activity.rating %> stars)</span>
+                          </div>
+                          <% if (activity.comment && activity.comment.length > 0) { %>
+                            <div class="activity-comment">
+                              "<%= activity.comment.length > 50 ? activity.comment.substring(0, 50) + '...' : activity.comment %>"
+                            </div>
+                          <% } %>
+                        <% } else if (activity.activityType === 'reply') { %>
+                          <div class="Recent-activity-description">
+                            <%= activity.username %> replied to a review of 
+                            <em>"<%= activity.itemTitle %>"</em>
+                          </div>
+                          <% if (activity.content && activity.content.length > 0) { %>
+                            <div class="activity-comment">
+                              "<%= activity.content.length > 50 ? activity.content.substring(0, 50) + '...' : activity.content %>"
+                            </div>
+                          <% } %>
+                        <% } else if (activity.activityType === 'like') { %>
+                          <div class="Recent-activity-description">
+                            <%= activity.username %> liked a review of 
+                            <em>"<%= activity.itemTitle %>"</em>
+                          </div>
+                        <% } %>
+                        <div class="activity-time"><%= activity.timeAgo %></div>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+                <% if (index < recentActivity.length - 1) { %>
+                  <hr class="divider">
+                <% } %>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="no-activity">
+              <p>No recent activity to show.</p>
+              <small class="text-muted">Reviews, replies, and likes will appear here.</small>
+            </div>
+          <% } %>
 
         </div>
 
