@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
-//const Review = require('../models/Review');
+const Review = require('../models/Review');
 const User = require('../models/User');
 require('dotenv').config();
 
