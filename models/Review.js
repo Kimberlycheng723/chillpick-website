@@ -15,6 +15,11 @@ const reviewSchema = new Schema(
       required: [true, 'Movie ID is required'],
       trim: true,
     },
+    movieTitle: {
+      type: String,
+      required: [true, 'Movie title is required'],
+      trim: true,
+    },
     userId: {
       type: String,
       required: [true, 'User ID is required'],
@@ -59,6 +64,7 @@ const reviewSchema = new Schema(
 reviewSchema.pre('save', function (next) {
   console.log('📝 Saving review:', {
     movieId: this.movieId,
+    movieTitle: this.movieTitle,
     userId: this.userId,
     username: this.username,
     rating: this.rating,
@@ -72,6 +78,7 @@ reviewSchema.methods.toClientJSON = function () {
   return {
     id: this._id,
     movieId: this.movieId,
+    movieTitle: this.movieTitle,
     username: this.username,
     rating: this.rating,
     comment: this.comment,

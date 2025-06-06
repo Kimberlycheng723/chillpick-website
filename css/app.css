@@ -118,7 +118,7 @@ body {
     background-color: #deedfc;
     margin-top: 8px;
 }
-.in-progress {
+/* .in-progress {
     width: 100px;
     height: 20px;
     border-radius: 5px;
@@ -128,11 +128,11 @@ body {
     color: #eab523;
     background-color: #fcf8ed;
     margin-top: 8px;
-}
+} */
 
 .added-description{
-    font-size: 0.75rem;
-    color: #655f5a;
+    font-size: 0.8rem;
+    color: #655f5aa0;
     margin-left: 20px;
     padding: 3px;
 }
@@ -142,6 +142,7 @@ body {
   font-size: medium;
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
+  padding-right: 3px;
 }
 
 .activity-card {
@@ -162,10 +163,23 @@ body {
   font-size: 0.8rem;
 }
 
+.Recent-activity-description{
+  text-align: center;
+  font-size: 0.9rem;
+}
+
 .activity-time {
     font-size: 0.75rem;
     color: #6c757d;
     text-align: center;
+    margin-top: 5px;
+}
+
+.activity-comment {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #555555aa; 
+  font-style: italic; 
 }
 
   .navbar-chillpick {

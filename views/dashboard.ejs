@@ -28,32 +28,6 @@
           </div>
 
         <div class="row p-2">
-          <!-- without filtering the book and movie -->
-          <!-- <% if (recommendations && recommendations.length > 0) { %>
-            <% recommendations.forEach(item => { %>
-              <div class="col-md-3 mb-3">
-                <div class="card media-card">
-                  <img src="<%= item.posterPath %>" alt="<%= item.title %> Poster" class="media-image">
-                  <div class="card-body p-2">
-                    <h5 class="card-title"><%= item.title %></h5>
-                    <div class="card-description">
-                      <% if (item.type === 'Book') { %>
-                        <%= item.type %> · <%= item.author || 'Unknown Author' %> · <%= item.year %>
-                      <% } else { %>
-                        <%= item.type %> · <%= Array.isArray(item.genre) ? item.genre.join('-') : item.genre %> · <%= item.year %>
-                      <% } %>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-            <% }); %>
-          <% } else { %>
-            <div class="col-12">
-              <p>No recommendations available right now. Check back soon!</p>
-            </div>
-          <% } %> -->
-
           <% if (recommendations && recommendations.length > 0) { %>
 
               <% const movies = recommendations.filter(item => item.type === 'Movie'); %>
@@ -61,6 +35,7 @@
 
               <% if (movies.length > 0) { %>
                 <h3 class="section-label">Movies</h3>
+                <hr class="divider">
                 <div class="row">
                   <% movies.forEach(item => { %>
                     <div class="col-md-3 mb-3">
@@ -82,6 +57,7 @@
 
               <% if (books.length > 0) { %>
                 <h3 class="section-label">Books</h3>
+                <hr class="divider">
                 <div class="row">
                   <% books.forEach(item => { %>
                     <div class="col-md-3 mb-3">
@@ -116,90 +92,84 @@
         <div class="section-card">
           <div class="section-header">
             <h2 class="section-title">Recently Added</h2>
-            <a href="#" class="see-all">View all</a>
+            <a href="/watchlist" class="see-all">View all</a>
           </div>
 
-          <!-- Ne Zha -->
-          <div class="small-media-card">
-            <img src="../images/Detail/Image/哪吒.jpg" alt="Ne Zha Movie Poster" class="small-media-image">
-            <div class="small-media-info">
-              <h5 class="added-title">哪吒之魔童降世 Ne Zha</h5>
-              <div class="added-description">Movie</div>
-              <div class="plan-to-watch">Plan to watch</div>
+          <% if (recentlyAdded && recentlyAdded.length > 0) { %>
+            <% recentlyAdded.forEach((item, index) => { %>
+              <div class="small-media-card">
+                <img src="<%= item.posterPath || item.image || '/images/placeholder.jpg' %>" 
+                    alt="<%= item.title %> Poster" 
+                    class="small-media-image"
+                    onerror="this.src='/images/placeholder.jpg'">
+                <div class="small-media-info">
+                  <h5 class="added-title"><%= item.title %></h5>
+                  <div class="added-description">
+                    <%= item.type === 'movie' ? 'Movie' : item.type === 'book' ? 'Book' : item.type %>
+                  </div>
+                  <div class="status-badge plan-to-watch">
+                    Plan to Watch
+                  </div>
+                </div>
+              </div>
+              <% if (index < recentlyAdded.length - 1) { %>
+                <hr class="divider">
+              <% } %>
+            <% }) %>
+          <% } else { %>
+            <div class="no-content">
+              <p>No items in your watchlist yet.</p>
+              <a href="/discover" class="btn btn-primary btn-sm">Start discovering</a>
             </div>
-          </div>
-          <hr class="divider">
+          <% } %>
 
-          <!-- Your Name -->
-          <div class="small-media-card">
-            <img src="../images/Detail/Image/你的名字.jpeg" alt="Your Name Movie Poster" class="small-media-image">
-            <div class="small-media-info">
-              <h5 class="added-title">Your Name</h5>
-              <div class="added-description">Movie</div>
-              <div class="in-progress">In progress</div>
-            </div>
-          </div>
-          <hr class="divider">
-
-          <!-- Totoro -->
-          <div class="small-media-card">
-            <img src="../images/Detail/Image/龙猫.jpg" alt="Totoro Movie Poster" class="small-media-image">
-            <div class="small-media-info">
-              <h5 class="added-title">Totoro</h5>
-              <div class="added-description">Movie</div>
-              <div class="plan-to-watch">Plan to watch</div>
-            </div>
-          </div>
         </div>
 
         <!-- Top 3 Recent Activity Section -->
         <div class="section-card">
           <div class="section-header">
             <h2 class="section-title">Recent Activity</h2>
-            
           </div>
 
-          <!-- Activity 1 -->
-          <div class="activity-card">
-            <div class="row">
-              <div class="col-2">
-                <img src="../images/profile_pic.png" alt="profile_pic" class="profile_pic-image">
+          <% if (recentActivity && recentActivity.length > 0) { %>
+            <% recentActivity.forEach((activity, index) => { %>
+              <div class="activity-card">
+                <div class="row">
+                  <div class="col-2">
+                    <img src="<%= activity.profilePic %>" alt="profile_pic" class="profile_pic-image">
+                  </div>
+                  <div class="col-10">
+                    <div class="Recent-activity-description">
+                      <%= activity.username %> rated 
+                      <em>"<%= activity.itemTitle %>"</em>
+                      <span class="rating-number">(<%= activity.rating %> stars)</span>
+                    </div>
+                    <% if (activity.comment && activity.comment.length > 0) { %>
+                      <div class="activity-comment">
+                        "<%= activity.comment.length > 50 ? activity.comment.substring(0, 50) + '...' : activity.comment %>"
+                      </div>
+                    <% } %>
+                    <div class="activity-time"><%= activity.timeAgo %></div>
+                  </div>
+                </div>
               </div>
-              <div class="col-10">
-                <div class="activity-description">Mike rated Dune: Part Two 5 stars</div>
-                <div class="activity-time">2 hours ago</div>
-              </div>
+              <% if (index < recentActivity.length - 1) { %>
+                <hr class="divider">
+              <% } %>
+            <% }) %>
+          <% } else { %>
+            <div class="no-activity">
+              <p>No recent activity to show.</p>
+              <small class="text-muted">Reviews and ratings will appear here.</small>
             </div>
-          </div>
-          <hr class="divider">
+          <% } %>
 
-          <!-- Activity 2 -->
-          <div class="activity-card">
-            <div class="row">
-              <div class="col-2">
-                <img src="../images/profile_pic.png" alt="profile_pic" class="profile_pic-image">
-              </div>
-              <div class="col-10">
-                <div class="activity-description">Emma added adolescence to their watchlist</div>
-                <div class="activity-time">5 hours ago</div>
-              </div>
-            </div>
-          </div>
-          <hr class="divider">
 
-          <!-- Activity 3 -->
-          <div class="activity-card">
-            <div class="row">
-              <div class="col-2">
-                <img src="../images/profile_pic.png" alt="profile_pic" class="profile_pic-image">
-              </div>
-              <div class="col-10">
-                <div class="activity-description">You reviewed The Three-Body Problem</div>
-                <div class="activity-time">1 day ago</div>
-              </div>
-            </div>
-          </div>
         </div>
+
+
+
+
       </div>
     </div>
 

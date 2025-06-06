@@ -304,27 +304,43 @@ router.post('/reviews', requireAuth, async (req, res) => {
   const normalizedBookId = bookId.toString().trim();
   console.log('📚 Normalized bookId:', normalizedBookId);
 
-  const review = new Review({
-    bookId: normalizedBookId,
-    userId: req.session.user.id,
-    username: req.session.user.username,
-    rating: parseInt(rating),
-    comment: comment.trim(),
-    spoiler: Boolean(spoiler),
-    likes: [], // Initialize empty likes array
-    replies: [], // Initialize empty replies array
-    likeCount: 0 // Initialize like count
-  });
-
   try {
+    // Fetch book details from Google Books API to get the title
+    console.log('📖 Fetching book details from Google Books API...');
+    const { data: bookData } = await axios.get(
+      `https://www.googleapis.com/books/v1/volumes/${normalizedBookId}`,
+      { 
+        params: { key: GOOGLE_BOOKS_API_KEY },
+        timeout: 10000 
+      }
+    );
+
+    const bookTitle = bookData.volumeInfo?.title || 'Unknown Title';
+
+    const review = new Review({
+      bookId: normalizedBookId,
+      bookTitle: bookTitle,
+      userId: req.session.user.id,
+      username: req.session.user.username,
+      rating: parseInt(rating),
+      comment: comment.trim(),
+      spoiler: Boolean(spoiler),
+      likes: [], // Initialize empty likes array
+      replies: [], // Initialize empty replies array
+      likeCount: 0 // Initialize like count
+    });
+
     const saved = await review.save();
     console.log('✅ Review saved successfully:', saved._id);
     
-    // Return the review with proper ID formatting
+    // Return the review with proper ID formatting and book details
     const reviewResponse = {
       id: saved._id.toString(), // Convert ObjectId to string
       _id: saved._id.toString(),
       bookId: saved.bookId,
+      bookTitle: saved.bookTitle,
+      bookAuthor: saved.bookAuthor,
+      bookImage: saved.bookImage,
       userId: saved.userId,
       username: saved.username,
       rating: saved.rating,
@@ -340,9 +356,98 @@ router.post('/reviews', requireAuth, async (req, res) => {
     res.json({ success: true, review: reviewResponse });
   } catch (err) {
     console.error('❌ Error saving review:', err);
-    res.status(500).json({ success: false, message: err.message });
+    
+    // If Google Books API fails, still try to save the review with minimal info
+    if (err.response?.status === 404 || err.code === 'ECONNABORTED') {
+      console.log('📚 Google Books API failed, saving review with basic info...');
+      
+      try {
+        const review = new Review({
+          bookId: normalizedBookId,
+          bookTitle: 'Unknown Title',
+          bookAuthor: 'Unknown Author',
+          bookImage: null,
+          userId: req.session.user.id,
+          username: req.session.user.username,
+          rating: parseInt(rating),
+          comment: comment.trim(),
+          spoiler: Boolean(spoiler),
+          likes: [],
+          replies: [],
+          likeCount: 0
+        });
+
+        const saved = await review.save();
+        console.log('✅ Review saved with fallback data:', saved._id);
+        
+        const reviewResponse = {
+          id: saved._id.toString(),
+          _id: saved._id.toString(),
+          bookId: saved.bookId,
+          bookTitle: saved.bookTitle,
+          userId: saved.userId,
+          username: saved.username,
+          rating: saved.rating,
+          comment: saved.comment,
+          spoiler: saved.spoiler,
+          likes: saved.likes || [],
+          replies: saved.replies || [],
+          likeCount: saved.likeCount || 0,
+          createdAt: saved.createdAt,
+          updatedAt: saved.updatedAt
+        };
+        
+        res.json({ success: true, review: reviewResponse });
+      } catch (saveErr) {
+        console.error('❌ Error saving review with fallback:', saveErr);
+        res.status(500).json({ success: false, message: saveErr.message });
+      }
+    } else {
+      res.status(500).json({ success: false, message: err.message });
+    }
   }
 });
+
+  //nhbhv
+//   const review = new Review({
+//     bookId: normalizedBookId,
+//     userId: req.session.user.id,
+//     username: req.session.user.username,
+//     rating: parseInt(rating),
+//     comment: comment.trim(),
+//     spoiler: Boolean(spoiler),
+//     likes: [], // Initialize empty likes array
+//     replies: [], // Initialize empty replies array
+//     likeCount: 0 // Initialize like count
+//   });
+
+//   try {
+//     const saved = await review.save();
+//     console.log('✅ Review saved successfully:', saved._id);
+    
+//     // Return the review with proper ID formatting
+//     const reviewResponse = {
+//       id: saved._id.toString(), // Convert ObjectId to string
+//       _id: saved._id.toString(),
+//       bookId: saved.bookId,
+//       userId: saved.userId,
+//       username: saved.username,
+//       rating: saved.rating,
+//       comment: saved.comment,
+//       spoiler: saved.spoiler,
+//       likes: saved.likes || [],
+//       replies: saved.replies || [],
+//       likeCount: saved.likeCount || 0,
+//       createdAt: saved.createdAt,
+//       updatedAt: saved.updatedAt
+//     };
+    
+//     res.json({ success: true, review: reviewResponse });
+//   } catch (err) {
+//     console.error('❌ Error saving review:', err);
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// });
 
 // Get reviews route
 router.get('/reviews/:bookId', async (req, res) => {
@@ -413,6 +518,7 @@ router.get('/reviews/:bookId', async (req, res) => {
         id: reviewObj._id.toString(), // Convert ObjectId to string for frontend
         _id: reviewObj._id.toString(),
         bookId: reviewObj.bookId,
+        bookTitle: reviewObj.bookTitle || 'Unknown Title',
         userId: reviewObj.userId,
         username: reviewObj.username,
         rating: reviewObj.rating || 0,

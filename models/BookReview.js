@@ -31,6 +31,11 @@ const reviewSchema = new Schema(
       required: [true, 'Book ID is required'],
       trim: true,
     },
+    bookTitle: {
+      type: String,
+      required: [true, 'Book title is required'],
+      trim: true,
+    },
     userId: {
       type: String,
       required: [true, 'User ID is required'],
@@ -86,6 +91,7 @@ const reviewSchema = new Schema(
 reviewSchema.pre('save', function (next) {
   console.log('📝 Saving book review:', {
     bookId: this.bookId,
+    bookTitle: this.bookTitle,
     userId: this.userId,
     username: this.username,
     rating: this.rating,
@@ -101,6 +107,7 @@ reviewSchema.methods.toClientJSON = function(currentUserId = null) {
   return {
     _id: this._id,
     bookId: this.bookId,
+    bookTitle: this.bookTitle,
     username: this.username,
     rating: this.rating,
     comment: this.comment,

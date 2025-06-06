@@ -16,8 +16,9 @@ const Contact = require('./models/Contact');
 const User = require('./models/User');
 const recommendationService = require('./services/recommendationService');
 const watchlistRoutes = require('./routes/watchlist');
-const Watchlist=require('./models/Watchlist')
 const History=require('./models/History')
+const BookReview = require('./models/BookReview');
+const MovieReview = require('./models/Review');
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -86,6 +87,7 @@ const accountRoutes = require('./routes/account');
 const discoverRoutes = require('./routes/discover');
 const saveSearchRoutes = require('./routes/save-search');
 const recommendationRoutes = require('./routes/recommendations');
+const Watchlist = require('./models/Watchlist'); 
 
 app.use('/account', accountRoutes);
 app.use('/api/discover', discoverRoutes);
@@ -100,11 +102,88 @@ app.get('/dashboard', async (req, res) => {
   try {
     const userId = req.session?.userId;
     if (!userId) return res.redirect('/account/login');
+
+    // get recommendations
     const recommendations = await recommendationService.getRecommendations(userId);
+
+    // get top 3 recently added watchlist items
+    const watchlist = await Watchlist.findOne({ userId });
+    const recentlyAdded = watchlist?.items
+      ? watchlist.items
+          .sort((a, b) => new Date(b.createdAt || b.addedAt) - new Date(a.createdAt || a.addedAt))
+          .slice(0, 3)
+      : [];
+
+    // Fetch recent activity
+    const [bookReviews, movieReviews] = await Promise.all([
+      BookReview.find().sort({ createdAt: -1 }).limit(3).lean(),
+      MovieReview.find().sort({ createdAt: -1 }).limit(3).lean()
+    ]);
+
+    // Get all unique user IDs from reviews
+    const allUserIds = [
+      ...new Set([
+        ...bookReviews.map(r => r.userId),
+        ...movieReviews.map(r => r.userId)
+      ])
+    ];
+
+    // Fetch all users data at once for better performance
+    const users = await User.find({ _id: { $in: allUserIds } })
+      .select('_id username profilePicture')
+      .lean();
+
+    // Create a user map for quick lookup
+    const userMap = users.reduce((map, user) => {
+      map[user._id.toString()] = user;
+      return map;
+    }, {});
+
+    // Format recent activity data with proper title and user info
+    const recentActivity = await Promise.all([
+      ...bookReviews.map(async (r) => {
+        const user = userMap[r.userId.toString()] || {};
+        const isCurrentUser = r.userId.toString() === userId.toString();
+        return {
+          type: 'book',
+          username: isCurrentUser ? 'You' : (user.username || r.username),
+          itemId: r.bookId,
+          // itemTitle: await getBookTitle(r.bookId) || `Book ID: ${r.bookId}`,
+          itemTitle: r.bookTitle || `Book ID: ${r.bookId}`,
+          rating: r.rating,
+          comment: r.comment,
+          createdAt: r.createdAt,
+          profilePic: user.profilePicture || '../images/profile_pic.png',
+          timeAgo: getTimeAgo(r.createdAt)
+        };
+      }),
+      ...movieReviews.map(async (r) => {
+        const user = userMap[r.userId.toString()] || {};
+        const isCurrentUser = r.userId.toString() === userId.toString();
+        return {
+          type: 'movie',
+          username: isCurrentUser ? 'You' : (user.username || r.username),
+          itemId: r.movieId,
+          // itemTitle: await getMovieTitle(r.movieId) || `Movie ID: ${r.movieId}`,
+          itemTitle: r.movieTitle || `Movie ID: ${r.movieId}`,
+          rating: r.rating,
+          comment: r.comment,
+          createdAt: r.createdAt,
+          profilePic: user.profilePicture || '../images/profile_pic.png',
+          timeAgo: getTimeAgo(r.createdAt)
+        };
+      })
+    ]);
+
+    // Sort by most recent and take top 3
+    const sortedActivity = recentActivity
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 3);
+
     res.render('dashboard', {
       recommendations,
-      recentlyAdded: [],
-      recentActivity: [],
+      recentlyAdded,
+      recentActivity: sortedActivity,
       currentUser: req.session.user
     });
   } catch (error) {
@@ -112,6 +191,18 @@ app.get('/dashboard', async (req, res) => {
     res.status(500).send('Error loading dashboard');
   }
 });
+
+// Helper function to format time ago (if not already present)
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - new Date(date)) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+}
 
 app.get('/discover', (req, res) => res.render('discover'));
 app.get('/watchlist', async (req, res) => {

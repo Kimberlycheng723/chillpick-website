@@ -128,23 +128,72 @@ router.post('/reviews', requireAuth, async (req, res) => {
     return res.status(400).json({ success: false, message: 'All fields required' });
   }
 
-  const review = new Review({
-    movieId: movieId.trim(),
-    userId: req.session.user.id,
-    username: req.session.user.username,
-    rating: parseInt(rating),
-    comment: comment.trim(),
-    spoiler: Boolean(spoiler)
-  });
-
   try {
+    // 1. Fetch movie details from TMDB
+    let movieTitle = 'Unknown Movie';
+    try {
+      const { data: movie } = await axios.get(
+        `https://api.themoviedb.org/3/movie/${movieId}`,
+        { 
+          params: { api_key: TMDB_API_KEY },
+          timeout: 5000 // 5 second timeout
+        }
+      );
+      movieTitle = movie.title || 'Unknown Movie';
+      console.log('🎬 Found movie title:', movieTitle);
+    } catch (apiError) {
+      console.error('⚠️ Could not fetch movie details:', apiError.message);
+    }
+
+    // 2. Create and save the review with movie title
+    const review = new Review({
+      movieId: movieId.trim(),
+      movieTitle: movieTitle, // Store the title
+      userId: req.session.user.id,
+      username: req.session.user.username,
+      rating: parseInt(rating),
+      comment: comment.trim(),
+      spoiler: Boolean(spoiler)
+    });
+
     const saved = await review.save();
-    res.json({ success: true, review: saved.toClientJSON() });
+    res.json({ 
+      success: true, 
+      review: {
+        ...saved.toClientJSON(),
+        movieTitle: saved.movieTitle // Include title in response
+      }
+    });
   } catch (err) {
-    console.error('❌ Save review failed:', err); // 🔍 Log the exact error!
-res.status(500).json({ success: false, message: err.message, details: err });
+    console.error('❌ Save review failed:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: err.message,
+      details: err 
+    });
   }
 });
+
+  //nfugvrt
+//   const review = new Review({
+//     movieId: movieId.trim(),
+//     userId: req.session.user.id,
+//     username: req.session.user.username,
+//     rating: parseInt(rating),
+//     comment: comment.trim(),
+//     spoiler: Boolean(spoiler)
+//   });
+
+//   try {
+//     const saved = await review.save();
+//     res.json({ success: true, review: saved.toClientJSON() });
+//   } catch (err) {
+//     console.error('❌ Save review failed:', err); // 🔍 Log the exact error!
+// res.status(500).json({ success: false, message: err.message, details: err });
+//   }
+// });
+
+
 // ✅ Get reviews route
 router.get('/reviews/:movieId', async (req, res) => {
   const page = parseInt(req.query.page) || 1;
