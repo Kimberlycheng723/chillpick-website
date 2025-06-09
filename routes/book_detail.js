@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY || 'your_api_key_here';
 
+
 router.get('/check-session', (req, res) => {
   console.log('=== SESSION CHECK ===');
   console.log('Session data:', req.session);
@@ -56,6 +57,7 @@ async function getBookRecommendations(book) {
       .filter((genre, index, self) => 
         genre.length > 0 && self.indexOf(genre) === index // Remove duplicates and empty
       );
+
 
     console.log('📚 Processing book:', book.volumeInfo.title);
     console.log('📋 Original categories:', rawCategories);

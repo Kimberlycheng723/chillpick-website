@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (itemType === 'movie') {
                 window.location.href = `/movie_detail/${itemId}`;
             } else if (itemType === 'book') {
-                window.location.href = `/books/${itemId}`;
+                window.location.href = `/book_detail/${itemId}`;
             } else {
                 throw new Error(`Unknown item type: ${itemType}`);
             }
