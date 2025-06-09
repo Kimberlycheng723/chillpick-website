@@ -512,30 +512,32 @@ router.get('/reviews/:bookId', async (req, res) => {
     }
 
     // Format the response properly
-    let formattedReviews = reviews.map(review => {
-      const reviewObj = review.toObject();
-      
-      // Ensure proper ID formatting
-      const formattedReview = {
-        id: reviewObj._id.toString(), // Convert ObjectId to string for frontend
-        _id: reviewObj._id.toString(),
-        bookId: reviewObj.bookId,
-        bookTitle: reviewObj.bookTitle || 'Unknown Title',
-        userId: reviewObj.userId,
-        username: reviewObj.username,
-        rating: reviewObj.rating || 0,
-        comment: reviewObj.comment || '',
-        spoiler: reviewObj.spoiler || false,
-        likes: reviewObj.likes || [],
-        replies: reviewObj.replies || [],
-        likeCount: reviewObj.likeCount || 0,
-        createdAt: reviewObj.createdAt,
-        updatedAt: reviewObj.updatedAt,
-        isLiked: false // We don't track individual likes anymore
-      };
-      
-      return formattedReview;
-    });
+  const currentUserId = req.session?.user?.id || null;
+
+let formattedReviews = reviews.map(review => {
+  const reviewObj = review.toObject();
+  const isLiked = currentUserId
+    ? reviewObj.likes?.some(like => like.userId === currentUserId)
+    : false;
+
+  return {
+    id: reviewObj._id.toString(),
+    _id: reviewObj._id.toString(),
+    bookId: reviewObj.bookId,
+    bookTitle: reviewObj.bookTitle || 'Unknown Title',
+    userId: reviewObj.userId,
+    username: reviewObj.username,
+    rating: reviewObj.rating || 0,
+    comment: reviewObj.comment || '',
+    spoiler: reviewObj.spoiler || false,
+    likes: reviewObj.likes || [],
+    replies: reviewObj.replies || [],
+    likeCount: reviewObj.likeCount || 0,
+    createdAt: reviewObj.createdAt,
+    updatedAt: reviewObj.updatedAt,
+    isLiked // ✅ Correctly reflect if this user liked
+  };
+});
 
     console.log(`📊 Final result: ${formattedReviews.length} reviews returned`);
     console.log('Sample review IDs:', formattedReviews.map(r => r.id));
@@ -562,51 +564,51 @@ router.get('/reviews/:bookId', async (req, res) => {
 });
 
 // SIMPLIFIED: Like review functionality - only increment/decrement likeCount
-router.post('/reviews/:id/like', async (req, res) => {
-  const { id: reviewId } = req.params;
-
-  console.log('=== LIKE REVIEW REQUEST ===');
-  console.log('Review ID:', reviewId);
+// Toggle like/unlike logic
+router.post('/reviews/:id/like', requireAuth, async (req, res) => {
+  const reviewId = req.params.id;
+  const userId = req.session.user.id;
+  const username = req.session.user.username;
 
   try {
-    // Validate ObjectId format
     if (!mongoose.Types.ObjectId.isValid(reviewId)) {
-      console.log('❌ Invalid review ID format');
       return res.status(400).json({ success: false, message: 'Invalid review ID' });
     }
 
-    // Find and update the review - increment likeCount by 1
-    const review = await Review.findByIdAndUpdate(
-      reviewId,
-      { $inc: { likeCount: 1 } }, // Simply increment the count
-      { new: true } // Return the updated document
-    );
-
+    const review = await Review.findById(reviewId);
     if (!review) {
-      console.log('❌ Review not found');
       return res.status(404).json({ success: false, message: 'Review not found' });
     }
 
-    console.log('✅ Like count updated:', review.likeCount);
+    // Check if user already liked
+    const existingLikeIndex = review.likes.findIndex(like => like.userId === userId);
+    let liked;
 
-    // Return simple response with new count
+    if (existingLikeIndex !== -1) {
+      // Unlike: remove from array
+      review.likes.splice(existingLikeIndex, 1);
+      review.likeCount -= 1;
+      liked = false;
+    } else {
+      // Like: add to array
+      review.likes.push({ userId, username, createdAt: new Date() });
+      review.likeCount += 1;
+      liked = true;
+    }
+
+    await review.save();
+
     res.json({
       success: true,
-      liked: true, // Always true since we only increment
-      likeCount: review.likeCount,
-      message: 'Like added'
+      liked,
+      likeCount: review.likeCount
     });
 
   } catch (err) {
-    console.error('❌ Error updating like count:', err);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to update like count',
-      error: err.message 
-    });
+    console.error('❌ Like toggle error:', err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
-
 // Reply to review functionality with proper validation and error handling
 router.post('/reviews/reply', requireAuth, async (req, res) => {
   const { reviewId, content } = req.body;

@@ -263,10 +263,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="card-text">${escapeHtml(comment)}</p>
                     </div>
                     <div class="review-actions mt-3 d-flex gap-3">
-                        <button class="btn btn-sm btn-outline-primary like-btn" data-review-id="${reviewId}">
-                            <i class="bi bi-heart"></i>
-                            <span class="like-count">${likeCount}</span>
-                        </button>
+                        <button class="btn btn-sm like-btn ${review.isLiked ? 'text-danger' : 'btn-outline-primary'}" 
+        data-review-id="${reviewId}" 
+        data-liked="${review.isLiked}">
+  <i class="bi ${review.isLiked ? 'bi-heart-fill' : 'bi-heart'}"></i>
+  <span class="like-count">${likeCount}</span>
+</button>
                         <button class="btn btn-sm btn-outline-secondary reply-btn">
                             <i class="bi bi-reply"></i> Reply
                         </button>
@@ -328,92 +330,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // SIMPLIFIED: Event delegation for like buttons - only increment count
-        container.addEventListener('click', async function(e) {
-            const likeBtn = e.target.closest('.like-btn');
-            if (likeBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                console.log('👍 Like button clicked!');
-                
-                const reviewCard = likeBtn.closest('.review-card');
-                if (!reviewCard) {
-                    console.error('Review card not found');
-                    return;
-                }
-                
-                const reviewId = reviewCard.dataset.reviewId;
-                const countSpan = likeBtn.querySelector('.like-count');
-                
-                if (!reviewId) {
-                    console.error('Review ID not found');
-                    return;
-                }
-                
-                if (!countSpan) {
-                    console.error('Like count element not found');
-                    return;
-                }
-                
-                console.log('Processing like for review ID:', reviewId);
-                
-                // Disable button temporarily to prevent double clicks
-                likeBtn.disabled = true;
-                
-                // Get current count for optimistic update
-                const currentCount = parseInt(countSpan.textContent) || 0;
-                const newCount = currentCount + 1;
-                
-                // Optimistic update - show new count immediately
-                countSpan.textContent = newCount;
-                
-                try {
-                    const response = await fetch(`/book_detail/reviews/${reviewId}/like`, {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    console.log('Like response:', data);
-                    
-                    if (data.success) {
-                        // Update with actual count from server
-                        const serverCount = parseInt(data.likeCount) || 0;
-                        countSpan.textContent = serverCount;
-                        console.log('Like count updated to:', serverCount);
-                        
-                        // Optional: Show brief feedback animation
-                        likeBtn.style.transform = 'scale(1.1)';
-                        setTimeout(() => {
-                            likeBtn.style.transform = 'scale(1)';
-                        }, 150);
-                        
-                    } else {
-                        console.error('Like failed:', data.message);
-                        // Revert optimistic update on failure
-                        countSpan.textContent = currentCount;
-                        alert(data.message || 'Failed to process like');
-                    }
-                } catch (error) {
-                    console.error('Like request failed:', error);
-                    // Revert optimistic update on error
-                    countSpan.textContent = currentCount;
-                    alert('Error processing like. Please try again.');
-                } finally {
-                    // Re-enable button
-                    likeBtn.disabled = false;
-                }
-            }
-        });
-           
+      container.addEventListener('click', async function (e) {
+  const likeBtn = e.target.closest('.like-btn');
+  if (!likeBtn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const reviewCard = likeBtn.closest('.review-card');
+  const reviewId = reviewCard?.dataset?.reviewId;
+  const countSpan = likeBtn.querySelector('.like-count');
+  const icon = likeBtn.querySelector('i');
+
+  if (!reviewId || !countSpan || !icon) return;
+
+  const wasLiked = likeBtn.dataset.liked === 'true';
+  const currentCount = parseInt(countSpan.textContent) || 0;
+
+  likeBtn.disabled = true;
+
+  // Optimistically update UI
+  if (wasLiked) {
+    likeBtn.classList.remove('text-danger');
+    likeBtn.classList.add('btn-outline-primary');
+    icon.classList.remove('bi-heart-fill');
+    icon.classList.add('bi-heart');
+    countSpan.textContent = currentCount - 1;
+  } else {
+    likeBtn.classList.add('text-danger');
+    likeBtn.classList.remove('btn-outline-primary');
+    icon.classList.add('bi-heart-fill');
+    icon.classList.remove('bi-heart');
+    countSpan.textContent = currentCount + 1;
+  }
+
+  try {
+    const res = await fetch(`/book_detail/reviews/${reviewId}/like`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      countSpan.textContent = data.likeCount;
+      likeBtn.dataset.liked = data.liked;
+    } else {
+      throw new Error(data.message || 'Like toggle failed');
+    }
+  } catch (err) {
+    console.error('❌ Like toggle error:', err);
+    countSpan.textContent = currentCount;
+    alert('Failed to toggle like. Try again.');
+  } finally {
+    likeBtn.disabled = false;
+  }
+});
         // Event delegation for reply buttons
         container.addEventListener('click', async function(e) {
             if (e.target.closest('.reply-btn')) {
