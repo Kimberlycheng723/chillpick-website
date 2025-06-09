@@ -1,11 +1,27 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+// Shared reply schema
 const replySchema = new Schema({
-  userId: String,
-  username: String,
-  text: String,
-  date: { type: Date, default: Date.now }
+  username: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  userId: {
+    type: String,
+    required: true
+  },
+  content: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: [300, 'Reply cannot exceed 300 characters']
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 const reviewSchema = new Schema(
@@ -46,23 +62,34 @@ const reviewSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    likes: {
-      type: Number,
-      default: 0,
-    },
-    likedBy: [{
-      userId: String
+    likes: [{
+      userId: {
+        type: String,
+        required: true
+      },
+      username: {
+        type: String,
+        required: true
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
     }],
-    replies: [replySchema],
+    likeCount: {
+      type: Number,
+      default: 0
+    },
+    replies: [replySchema]
   },
   {
     timestamps: true,
   }
 );
 
-// Logging middleware for debugging
+// Logging middleware
 reviewSchema.pre('save', function (next) {
-  console.log('📝 Saving review:', {
+  console.log('📝 Saving movie review:', {
     movieId: this.movieId,
     movieTitle: this.movieTitle,
     userId: this.userId,
@@ -73,26 +100,34 @@ reviewSchema.pre('save', function (next) {
   next();
 });
 
-// Method to return client-safe JSON
-reviewSchema.methods.toClientJSON = function () {
+// Return client-friendly JSON
+reviewSchema.methods.toClientJSON = function(currentUserId = null) {
+  const isLiked = currentUserId ? this.likes.some(like => like.userId === currentUserId) : false;
+
   return {
-    id: this._id,
+    _id: this._id,
     movieId: this.movieId,
     movieTitle: this.movieTitle,
     username: this.username,
     rating: this.rating,
     comment: this.comment,
     spoiler: this.spoiler,
-    likes: this.likes,
-    likedBy: this.likedBy || [],
-    replies: this.replies,
     createdAt: this.createdAt,
+    likeCount: this.likeCount,
+    isLiked: isLiked,
+    replies: this.replies.map(reply => ({
+      _id: reply._id,
+      username: reply.username,
+      userId: reply.userId,
+      content: reply.content,
+      createdAt: reply.createdAt
+    }))
   };
 };
 
 reviewSchema.post('save', function (doc) {
-  console.log('✅ Review saved successfully:', doc._id);
+  console.log('✅ Movie review saved successfully:', doc._id);
 });
 
-const Review = mongoose.model('MovieReview', reviewSchema);
-module.exports = Review;
+const MovieReview = mongoose.model('MovieReview', reviewSchema);
+module.exports = MovieReview;

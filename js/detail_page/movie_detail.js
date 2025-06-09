@@ -224,10 +224,10 @@ const displayNoReviews = () => {
        const reviewId = String(review.id || review._id || '');
         
         // Get likes count from database
-        const likes = parseInt(review.likes) || 0;
+      const likes = parseInt(review.likeCount) || 0;
         
         // Check if current user has liked this review based on session data
-const isLikedByCurrentUser = userLikedReviews.some(id => String(id) === String(reviewId));
+const isLikedByCurrentUser = review.isLiked || false;
         console.log(`Review ${reviewId}: likes=${likes}, isLiked=${isLikedByCurrentUser}, userLikedReviews:`, userLikedReviews);
         
         let repliesHTML = '';
@@ -506,10 +506,10 @@ const isLikedByCurrentUser = userLikedReviews.some(id => String(id) === String(r
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
-                        body: JSON.stringify({
-                            reviewId,
-                            text: textarea.value.trim()
-                        })
+                      body: JSON.stringify({
+  reviewId,
+  content: textarea.value.trim()
+})
                     });
 
                     const result = await response.json();

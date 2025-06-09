@@ -193,7 +193,73 @@ router.post('/reviews', requireAuth, async (req, res) => {
 //   }
 // });
 
+router.post('/reviews/:reviewId/like', requireAuth, async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.reviewId);
+    if (!review) {
+      return res.status(404).json({ success: false, message: 'Review not found' });
+    }
 
+    const userId = req.user.id;
+    const username = req.user.username;
+
+    const existingIndex = review.likes.findIndex(like => like.userId === userId);
+
+    let liked;
+    if (existingIndex !== -1) {
+      // User already liked → remove like
+      review.likes.splice(existingIndex, 1);
+      review.likeCount = Math.max(0, review.likeCount - 1);
+      liked = false;
+    } else {
+      // Add new like
+      review.likes.push({ userId, username, createdAt: new Date() });
+      review.likeCount += 1;
+      liked = true;
+    }
+
+    await review.save();
+
+    res.json({
+      success: true,
+      likes: review.likeCount,
+      liked
+    });
+  } catch (err) {
+    console.error('❌ Like error:', err);
+    res.status(500).json({ success: false, message: 'Error updating like' });
+  }
+});
+
+router.post('/reviews/reply', requireAuth, async (req, res) => {
+  const { reviewId, content } = req.body;
+
+  if (!reviewId || !content || content.trim().length === 0) {
+    return res.status(400).json({ success: false, message: 'Missing reviewId or content' });
+  }
+
+  try {
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ success: false, message: 'Review not found' });
+    }
+
+    const reply = {
+      userId: req.user.id,
+      username: req.user.username,
+      content: content.trim(),
+      createdAt: new Date()
+    };
+
+    review.replies.push(reply);
+    await review.save();
+
+    res.json({ success: true, reply });
+  } catch (error) {
+    console.error('❌ Reply error:', error);
+    res.status(500).json({ success: false, message: 'Error submitting reply' });
+  }
+});
 // ✅ Get reviews route
 router.get('/reviews/:movieId', async (req, res) => {
   const page = parseInt(req.query.page) || 1;
