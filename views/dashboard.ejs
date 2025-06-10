@@ -130,8 +130,8 @@
         </div>
 
         <!-- Top 3 Recent Activity Section -->
-        <div class="section-card">
-          <div class="section-header">
+        <div class="section-card" >
+          <div class="section-header" >
             <h2 class="section-title">Recent Activity</h2>
           </div>
 
@@ -172,7 +172,7 @@
 
           <% if (recentActivity && recentActivity.length > 0) { %>
             <% recentActivity.forEach((activity, index) => { %>
-              <div class="activity-container">
+              <div class="activity-container" style="padding-right: 16px;">
                 <a href="<%= activity.detailUrl %>" class="activity-link">
                   <div class="activity-card">
                     <div class="row">

@@ -309,10 +309,7 @@ app.get('/dashboard', async (req, res) => {
       ...bookReplies.map(r => formatReplyActivity(r, 'book', userMap, userId)),
       // Movie replies
       ...movieReplies.map(r => formatReplyActivity(r, 'movie', userMap, userId)),
-      // Book likes
-      ...bookLikes.map(r => formatLikeActivity(r, 'book', userMap, userId)),
-      // Movie likes
-      ...movieLikes.map(r => formatLikeActivity(r, 'movie', userMap, userId))
+
     ]);
 
     // Sort by most recent and take top 3

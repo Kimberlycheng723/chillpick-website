@@ -215,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Displaying reviews:', reviews);
         
         reviews.forEach(review => {
+            if (review.activityType === 'like') return; // Skip 'like' activities
             const reviewHTML = createReviewHTML(review);
             console.log('Generated HTML for review:', reviewHTML);
             container.insertAdjacentHTML('beforeend', reviewHTML);
