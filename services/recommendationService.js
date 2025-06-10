@@ -54,16 +54,14 @@ const getDefaultRecommendations = async () => {
       );
       return [];
     }
-    const normalize = (rec, type) => ({
-      ...rec,
-      type,
-      genre:
-        Array.isArray(rec.genre) && rec.genre.length > 0
-          ? rec.genre
-          : ["Unknown"],
-      year: rec.year || new Date().getFullYear(),
-      description: rec.description || "No description available.",
-    });
+const normalize = (rec, type) => ({
+  ...rec,
+  id: rec.id || rec.tmdbId || rec.bookId, // Ensure 'id' is always present!
+  type,
+  genre: Array.isArray(rec.genre) && rec.genre.length > 0 ? rec.genre : ["Unknown"],
+  year: rec.year || new Date().getFullYear(),
+  description: rec.description || "No description available.",
+});
     const shuffledMovies = shuffleArray(movies)
       .slice(0, movieCount)
       .map((rec) => normalize(rec, "Movie"));
