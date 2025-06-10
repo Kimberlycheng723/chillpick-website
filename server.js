@@ -320,12 +320,16 @@ app.get('/dashboard', async (req, res) => {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 3); // Show 3 most recent activities
 
-    res.render('dashboard', {
-      recommendations,
-      recentlyAdded,
-      recentActivity: sortedActivity,
-      currentUser: req.session.user
-    });
+ res.render('dashboard', {
+  recommendations: [],
+  recentActivities: [
+    {
+      userImage: null,
+      message: 'You liked a review on “Inception”',
+      timeAgo: '5 minutes ago'
+    }
+  ]
+});
   } catch (error) {
     console.error('Error loading dashboard:', error);
     res.status(500).send('Error loading dashboard');
