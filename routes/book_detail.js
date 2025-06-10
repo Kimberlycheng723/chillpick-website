@@ -598,11 +598,11 @@ router.post('/reviews/:reviewId/like', requireAuth, async (req, res) => {
 
     // ✅ Removed interaction logging block here
 
-    res.json({
-      success: true,
-      likes: review.likeCount,
-      liked
-    });
+ res.json({
+  success: true,
+  likeCount: review.likeCount, // ✅ match what frontend expects
+  liked
+});
   } catch (err) {
     console.error('❌ Like error:', err);
     res.status(500).json({ success: false, message: 'Error updating like' });
