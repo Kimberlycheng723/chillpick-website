@@ -212,6 +212,8 @@ body {
   background-color: #f9f3c2;
   border-color: #f1dd93;
 }
+
+
 /* Responsive Tweaks */
 @media (max-width: 576px) {
   .filter-section {

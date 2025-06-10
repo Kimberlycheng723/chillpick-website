@@ -35,7 +35,8 @@
                
                 <!--Synopsis-->
                 <div class="col-md-8">
-                    <h3 class="display-5 fw-bold mb-3"><%= book.volumeInfo.title %></h3>
+                  <h3 class="display-5 fw-bold mb-3 book-title"><%= (book && book.volumeInfo && book.volumeInfo.title) ? book.volumeInfo.title : 'Unknown Book' %></h3>
+               
 
                    <div class="mb-4">
                       <span class="badge bg-secondary"><i class="bi bi-book"></i> Book</span>
@@ -53,6 +54,9 @@
                   </div>
                   <% } %>
 
+                     <h5 class="d-inline me-2 book-rating" style="font-size: 15px;">
+                    Rating: <%= book.volumeInfo.averageRating?.toFixed(1) || 'N/A' %> / 5
+                  </h5>
                  <!--Genres-->
                   <% if (book.volumeInfo.categories) { %>
                    <div class="mb-4">

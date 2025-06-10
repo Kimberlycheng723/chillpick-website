@@ -1,6 +1,6 @@
 const tmdbApiKey = '4154b8dfb44ef69e6cf3a7d880438188';
 const nytApiKey = 'MPAFCu7iswN9hpJgf7Exv2MG2tkVsru6';
-const googleApiKey = 'AIzaSyBwif3CjkeE_8oy4vEIDltxZTaioeFzUhc';
+const googleApiKey = 'AIzaSyCxv9BKg9D2rhxNqNmMGevau7Ot2BVLmlI';
 const imageBase = 'https://image.tmdb.org/t/p/w780';
 const thumbBase = 'https://image.tmdb.org/t/p/w342';
 

@@ -54,15 +54,12 @@
                     
                     <div class="item-content">
                         <h2><%= item.title %></h2>
-                        <% if (item.synopsis && item.synopsis.length > 0) { %>
-                        <p><%= item.synopsis %></p>
-                        <% } %>
-                        <% if (item.genres && item.genres.length > 0) { %>
-                        <p>Genres: <%= item.genres.join(', ') %></p>
-                        <% } %>
-                        <% if (item.rating) { %>
-                        <p>Rating: <%= item.rating %></p>
-                        <% } %>
+                        <div class="d-flex flex-column mb-2">
+  <div><i class="bi <%= item.type === 'book' ? 'bi-book' : 'bi-film' %>"></i> <%= item.type.charAt(0).toUpperCase() + item.type.slice(1) %></div>
+  <div><%= item.rating || 'N/A' %> <i class="bi bi-star-fill text-warning"></i></div>
+</div>
+
+
                         <button class="more-btn">More</button>
                     </div>
                     <div class="item-actions">
@@ -85,7 +82,7 @@
                 </div>
                 <h3 class="text-muted">Your watchlist is empty</h3>
                 <p class="text-muted">Start adding movies and books to keep track of what you want to watch or read!</p>
-                <a href="/discover" class="btn btn-primary">Discover Content</a>
+                <a href="/discover" class="btn btn-warning">Discover Content</a>
             </div>
         <% } %>
 

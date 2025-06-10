@@ -51,11 +51,12 @@
                          class="item-image">
                     
                     <div class="item-content">
-                        <h3><%= item.title %> <% if (item.year) { %>(<%= item.year %>)<% } %></h3>
-                        <% if (item.synopsis) { %>
-                            <p><%= item.synopsis %></p>
-                        <% } %>
-                        <button class="more-btn">More</button>
+                       <h5 class="fw-semibold"><%= item.title %></h5>
+<div class="d-flex flex-column mb-2">
+  <div><i class="bi <%= item.type === 'book' ? 'bi-book' : 'bi-film' %>"></i> <%= item.type.charAt(0).toUpperCase() + item.type.slice(1) %></div>
+  <div><%= item.rating || 'N/A' %> <i class="bi bi-star-fill text-warning"></i></div>
+</div>
+<a href="/<%= item.type %>_detail/<%= item.itemId %>" class="btn btn-outline-secondary more-btn">More</a>
                     </div>
                     
                     <h6>Completed on <%= item.completedAt.toLocaleDateString('en-US', { 
