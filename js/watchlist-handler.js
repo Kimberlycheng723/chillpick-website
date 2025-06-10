@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isInWatchlist) {
             watchlistBtn.innerHTML = '<i class="bi bi-check-lg"></i> In Watchlist';
             watchlistBtn.classList.remove('btn-outline-primary');
-            watchlistBtn.classList.add('btn-success');
+            watchlistBtn.classList.add('btn-warning');
         } else {
             watchlistBtn.innerHTML = '<i class="bi bi-plus-lg"></i> Add to Watchlist';
             watchlistBtn.classList.remove('btn-success');
