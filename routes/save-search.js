@@ -17,7 +17,7 @@ router.post('/save', async (req, res) => {
     }
     
     // Validate interaction type
-    const validTypes = ['search', 'filter genre', 'filter rating', 'add to watchlist', 'item clicked'];
+  const validTypes = ['search', 'filter genre', 'filter rating', 'add to watchlist', 'item clicked', 'like', 'reply'];
     if (!validTypes.includes(interactionType)) {
       console.error('❌ Invalid interaction type:', interactionType);
       return res.status(400).json({ 

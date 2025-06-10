@@ -10,7 +10,7 @@ const userInteractionSchema = new mongoose.Schema({
   interactionType: { 
     type: String,
     required: true,
-    enum: ['search', 'filter genre', 'filter rating', 'add to watchlist', 'item clicked']
+    enum: ['search', 'filter genre', 'filter rating', 'add to watchlist', 'item clicked','like']
   },
 
   // For search interactions

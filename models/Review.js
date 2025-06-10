@@ -102,7 +102,7 @@ reviewSchema.pre('save', function (next) {
 
 // Return client-friendly JSON
 reviewSchema.methods.toClientJSON = function(currentUserId = null) {
-  const isLiked = currentUserId ? this.likes.some(like => like.userId === currentUserId) : false;
+  const isLiked = currentUserId ? this.likes?.some(like => like.userId === currentUserId) : false;
 
   return {
     _id: this._id,
@@ -113,7 +113,7 @@ reviewSchema.methods.toClientJSON = function(currentUserId = null) {
     comment: this.comment,
     spoiler: this.spoiler,
     createdAt: this.createdAt,
-    likeCount: this.likeCount,
+    likeCount: this.likes?.length || 0,
     isLiked: isLiked,
     replies: this.replies.map(reply => ({
       _id: reply._id,

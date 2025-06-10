@@ -212,8 +212,9 @@ const displayNoReviews = () => {
             container.insertAdjacentHTML('beforeend', reviewHTML);
         });
     };
-
-    const createReviewHTML = (review) => {
+  const createReviewHTML = (review) => {
+        console.log('Creating HTML for review:', review);
+        
         const reviewDate = new Date(review.createdAt).toLocaleDateString('en-US', {
             year: 'numeric', month: 'short', day: 'numeric'
         });
@@ -221,17 +222,16 @@ const displayNoReviews = () => {
         const rating = review.rating || 0;
         const comment = review.comment || '';
         const spoiler = review.spoiler || false;
-       const reviewId = String(review.id || review._id || '');
+        const reviewId = review.id || review._id || '';
+        const likeCount = review.likeCount || 0;
         
-        // Get likes count from database
-      const likes = parseInt(review.likeCount) || 0;
+        console.log('Review ID being used:', reviewId);
+        console.log('Like count:', likeCount);
         
-        // Check if current user has liked this review based on session data
-const isLikedByCurrentUser = review.isLiked || false;
-        console.log(`Review ${reviewId}: likes=${likes}, isLiked=${isLikedByCurrentUser}, userLikedReviews:`, userLikedReviews);
-        
+        // Generate replies HTML if replies exist
         let repliesHTML = '';
         if (review.replies && review.replies.length > 0) {
+            console.log('Found replies for review:', review.replies);
             repliesHTML = review.replies.map(reply => createReplyHTML(reply)).join('');
         }
 
@@ -250,59 +250,32 @@ const isLikedByCurrentUser = review.isLiked || false;
                             ${spoiler ? '<button class="btn btn-sm btn-outline-secondary eye-btn" title="Show Spoiler"><i class="bi bi-eye"></i></button>' : ''}
                         </div>
                     </div>
-                   ${spoiler ? `
-<div class="blurred-content ${spoiler ? '' : 'show-content'}">
-  <div class="review-content">
-    <p class="card-text">${escapeHtml(comment)}</p>
-  </div>
-  <div class="review-actions mt-3 d-flex gap-3">
- <button class="btn btn-sm btn-outline-primary like-btn ${isLikedByCurrentUser ? 'liked' : ''}" 
+                    <div class="review-content ${spoiler ? 'blurred-content' : ''}">
+                        <p class="card-text">${escapeHtml(comment)}</p>
+                    </div>
+                    <div class="review-actions mt-3 d-flex gap-3">
+                        <button class="btn btn-sm like-btn ${review.isLiked ? 'text-danger' : 'btn-outline-primary'}" 
         data-review-id="${reviewId}" 
-        data-liked="${isLikedByCurrentUser}">
-<i class="bi ${isLikedByCurrentUser ? 'bi-heart-fill' : 'bi-heart'} ${isLikedByCurrentUser ? 'text-danger' : ''}"></i>
-  <span class="like-count">${likes}</span>
+        data-liked="${review.isLiked}">
+  <i class="bi ${review.isLiked ? 'bi-heart-fill' : 'bi-heart'}"></i>
+  <span class="like-count">${likeCount}</span>
 </button>
-    <button class="btn btn-sm btn-outline-secondary reply-btn">
-      <i class="bi bi-reply"></i> Reply
-    </button>
-  </div>
-  <div class="reply-form mt-3" style="display: none;">
-    <div class="mb-2">
-      <textarea class="form-control reply-textarea" rows="2" placeholder="Write your reply..."></textarea>
-    </div>
-    <div class="d-flex gap-2">
-      <button class="btn btn-sm btn-primary reply-submit-btn">Submit</button>
-      <button class="btn btn-sm btn-secondary reply-cancel-btn">Cancel</button>
-    </div>
-  </div>
-  <div class="replies-section mt-3">${repliesHTML}</div>
-</div>
-` : `
-<div class="review-content">
-  <p class="card-text">${escapeHtml(comment)}</p>
-</div>
-<div class="review-actions mt-3 d-flex gap-3">
-  <button class="btn btn-sm btn-outline-primary like-btn ${isLikedByCurrentUser ? 'liked' : ''}" 
-          data-review-id="${reviewId}" 
-          data-liked="${isLikedByCurrentUser}">
-<i class="bi ${isLikedByCurrentUser ? 'bi-heart-fill' : 'bi-heart'} ${isLikedByCurrentUser ? 'text-danger' : ''}"></i>
-    <span class="like-count">${likes}</span>
-  </button>
-  <button class="btn btn-sm btn-outline-secondary reply-btn">
-    <i class="bi bi-reply"></i> Reply
-  </button>
-</div>
-<div class="reply-form mt-3" style="display: none;">
-  <div class="mb-2">
-    <textarea class="form-control reply-textarea" rows="2" placeholder="Write your reply..."></textarea>
-  </div>
-  <div class="d-flex gap-2">
-    <button class="btn btn-sm btn-primary reply-submit-btn">Submit</button>
-    <button class="btn btn-sm btn-secondary reply-cancel-btn">Cancel</button>
-  </div>
-</div>
-<div class="replies-section mt-3">${repliesHTML}</div>
-`}
+                        <button class="btn btn-sm btn-outline-secondary reply-btn">
+                            <i class="bi bi-reply"></i> Reply
+                        </button>
+                    </div>
+                    <div class="reply-form mt-3" style="display: none;">
+                        <div class="mb-2">
+                            <textarea class="form-control reply-textarea" rows="2" placeholder="Write your reply..."></textarea>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-primary reply-submit-btn">Submit</button>
+                            <button class="btn btn-sm btn-secondary reply-cancel-btn">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="replies-section mt-3">${repliesHTML}</div>
+                </div>
+            </div>
         `;
     };
 

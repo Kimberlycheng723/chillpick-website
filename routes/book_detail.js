@@ -565,48 +565,47 @@ let formattedReviews = reviews.map(review => {
 
 // SIMPLIFIED: Like review functionality - only increment/decrement likeCount
 // Toggle like/unlike logic
-router.post('/reviews/:id/like', requireAuth, async (req, res) => {
-  const reviewId = req.params.id;
-  const userId = req.session.user.id;
-  const username = req.session.user.username;
-
+router.post('/reviews/:reviewId/like', requireAuth, async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(reviewId)) {
-      return res.status(400).json({ success: false, message: 'Invalid review ID' });
-    }
-
-    const review = await Review.findById(reviewId);
+    const review = await Review.findById(req.params.reviewId);
     if (!review) {
       return res.status(404).json({ success: false, message: 'Review not found' });
     }
 
-    // Check if user already liked
-    const existingLikeIndex = review.likes.findIndex(like => like.userId === userId);
-    let liked;
+    review.likes = review.likes || [];
 
-    if (existingLikeIndex !== -1) {
-      // Unlike: remove from array
-      review.likes.splice(existingLikeIndex, 1);
-      review.likeCount -= 1;
+    const userId = req.user.id;
+    const username = req.user.username;
+
+    const existingIndex = review.likes.findIndex(like => like.userId === userId);
+
+    let liked;
+    if (existingIndex !== -1) {
+      review.likes.splice(existingIndex, 1);
+      review.likeCount = Math.max(0, review.likeCount - 1);
       liked = false;
     } else {
-      // Like: add to array
-      review.likes.push({ userId, username, createdAt: new Date() });
+      review.likes.push({
+        userId,
+        username,
+        createdAt: new Date()
+      });
       review.likeCount += 1;
       liked = true;
     }
 
     await review.save();
 
+    // ✅ Removed interaction logging block here
+
     res.json({
       success: true,
-      liked,
-      likeCount: review.likeCount
+      likes: review.likeCount,
+      liked
     });
-
   } catch (err) {
-    console.error('❌ Like toggle error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error('❌ Like error:', err);
+    res.status(500).json({ success: false, message: 'Error updating like' });
   }
 });
 // Reply to review functionality with proper validation and error handling

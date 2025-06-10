@@ -200,26 +200,50 @@ router.post('/reviews/:reviewId/like', requireAuth, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Review not found' });
     }
 
+    // Ensure likes is at least an empty array
+    review.likes = review.likes || [];
+
     const userId = req.user.id;
     const username = req.user.username;
 
-    const existingIndex = review.likes.findIndex(like => like.userId === userId);
+    const existingIndex = review.likes.findIndex(
+      like => like.userId === userId
+    );
 
     let liked;
     if (existingIndex !== -1) {
-      // User already liked → remove like
+      // Unlike
       review.likes.splice(existingIndex, 1);
       review.likeCount = Math.max(0, review.likeCount - 1);
       liked = false;
     } else {
-      // Add new like
-      review.likes.push({ userId, username, createdAt: new Date() });
+      // Like
+      review.likes.push({
+        userId,
+        username,
+        createdAt: new Date()
+      });
       review.likeCount += 1;
       liked = true;
     }
 
     await review.save();
 
+    // ✅ Save interaction (if needed)
+    const UserInteraction = require('../models/SavedSearch.js');
+  await UserInteraction.create({
+  userId,
+  interactionType: 'like',
+  itemDetails: {
+    title: review.movieTitle,
+    rating: review.rating?.toString() || '',
+    type: 'movie',
+    detailURL: `/movie_detail/${review.movieId}`,
+    image: '/images/default-movie.jpg', // or dynamically fetch with TMDB API
+    genres: [] // optional, but good to include
+  },
+  timestamp: new Date()
+});
     res.json({
       success: true,
       likes: review.likeCount,
@@ -261,27 +285,35 @@ router.post('/reviews/reply', requireAuth, async (req, res) => {
   }
 });
 // ✅ Get reviews route
+// movie_detail.js
+
 router.get('/reviews/:movieId', async (req, res) => {
+  const movieId = req.params.movieId;
   const page = parseInt(req.query.page) || 1;
-  const limit = 2; // ✅ Make sure you only load 2 at a time
+  const limit = 2;
   const skip = (page - 1) * limit;
 
   try {
-    const reviews = await Review.find({ movieId: req.params.movieId })
+    const reviews = await Review.find({ movieId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await Review.countDocuments({ movieId: req.params.movieId });
+    const total = await Review.countDocuments({ movieId });
+
+    const currentUserId = req.session?.user?.id || null;
+
+   const formattedReviews = reviews.map(r => r.toClientJSON(currentUserId));
 
     res.json({
       success: true,
-      reviews: reviews.map(r => r.toClientJSON()),
+      reviews: formattedReviews,
       page,
-      hasMore: page * limit < total // ✅ Proper hasMore flag
+      hasMore: page * limit < total
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to fetch reviews' });
+    console.error('❌ Error fetching movie reviews:', err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
