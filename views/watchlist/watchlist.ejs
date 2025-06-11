@@ -86,8 +86,80 @@
             </div>
         <% } %>
 
-     
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+        <nav aria-label="Watchlist pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <!-- Previous button -->
+                <li class="page-item <%= !pagination.hasPrevPage ? 'disabled' : '' %>">
+                    <% if (pagination.hasPrevPage) { %>
+                        <a class="page-link" href="?page=<%= pagination.prevPage %>">Previous</a>
+                    <% } else { %>
+                        <span class="page-link" tabindex="-1" aria-disabled="true">Previous</span>
+                    <% } %>
+                </li>
+
+                <!-- Page numbers -->
+                <% 
+                let startPage = Math.max(1, pagination.currentPage - 2);
+                let endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
                 
+                // Adjust if we're near the beginning or end
+                if (endPage - startPage < 4) {
+                    if (startPage === 1) {
+                        endPage = Math.min(pagination.totalPages, startPage + 4);
+                    } else if (endPage === pagination.totalPages) {
+                        startPage = Math.max(1, endPage - 4);
+                    }
+                }
+                %>
+                
+                <!-- First page if not visible -->
+                <% if (startPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">1</a>
+                    </li>
+                    <% if (startPage > 2) { %>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <% } %>
+                <% } %>
+
+                <!-- Visible page numbers -->
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <li class="page-item <%= i === pagination.currentPage ? 'active' : '' %>">
+                        <% if (i === pagination.currentPage) { %>
+                            <span class="page-link"><%= i %></span>
+                        <% } else { %>
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        <% } %>
+                    </li>
+                <% } %>
+
+                <!-- Last page if not visible -->
+                <% if (endPage < pagination.totalPages) { %>
+                    <% if (endPage < pagination.totalPages - 1) { %>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <% } %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= pagination.totalPages %>"><%= pagination.totalPages %></a>
+                    </li>
+                <% } %>
+
+                <!-- Next button -->
+                <li class="page-item <%= !pagination.hasNextPage ? 'disabled' : '' %>">
+                    <% if (pagination.hasNextPage) { %>
+                        <a class="page-link" href="?page=<%= pagination.nextPage %>">Next</a>
+                    <% } else { %>
+                        <span class="page-link" tabindex="-1" aria-disabled="true">Next</span>
+                    <% } %>
+                </li>
+            </ul>
+        </nav>
+        <% } %>
     </main>
 
     <%- include('../partials/footer') %>
