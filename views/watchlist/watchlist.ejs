@@ -55,9 +55,9 @@
                     <div class="item-content">
                         <h2><%= item.title %></h2>
                         <div class="d-flex flex-column mb-2">
-  <div><i class="bi <%= item.type === 'book' ? 'bi-book' : 'bi-film' %>"></i> <%= item.type.charAt(0).toUpperCase() + item.type.slice(1) %></div>
-  <div><%= item.rating || 'N/A' %> <i class="bi bi-star-fill text-warning"></i></div>
-</div>
+                        <div><i class="bi <%= item.type === 'book' ? 'bi-book' : 'bi-film' %>"></i> <%= item.type.charAt(0).toUpperCase() + item.type.slice(1) %></div>
+                        <div><%= item.rating || 'N/A' %> <i class="bi bi-star-fill text-warning"></i></div>
+                    </div>
 
 
                         <button class="more-btn">More</button>
@@ -112,6 +112,14 @@
                         startPage = Math.max(1, endPage - 4);
                     }
                 }
+                // Helper function for pagination URLs
+                const getPaginationUrl = (pageNum) => {
+                    let url = '?page=' + pageNum;
+                    if (currentFilter && currentFilter !== 'all') {
+                        url += '&filter=' + currentFilter;
+                    }
+                    return url;
+                };
                 %>
                 
                 <!-- First page if not visible -->

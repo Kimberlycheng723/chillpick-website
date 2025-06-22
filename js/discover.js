@@ -551,7 +551,7 @@ function showAlert(message, type = "info") {
 
   alert.style.cssText = `
     position: fixed;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
     z-index: 1050;
     min-width: 300px;
