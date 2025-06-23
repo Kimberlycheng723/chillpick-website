@@ -8,7 +8,9 @@ const cors = require("cors");
 const MongoStore = require("connect-mongo");
 const app = express();
 const UserInteraction = require("./models/savedsearch");
+const compression = require("compression");
 
+app.use(compression()); // Enable compression for all routes
 // Models and services
 const SessionModel = require("./models/Session");
 const Contact = require("./models/Contact");

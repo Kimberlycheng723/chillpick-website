@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema(
   {
@@ -9,7 +8,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     gender: { type: String, default: "" },
     phone: { type: String, required: true, default: "" },
-    verified: { type: Boolean, default: false },
+verified: { type: Boolean, default: false },
     bio: { type: String, default: "" },
     profilePicture: { type: String, default: "/images/profile_pic.png" },
     resetPasswordToken: { type: String },

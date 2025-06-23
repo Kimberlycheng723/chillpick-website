@@ -34,21 +34,23 @@ async function enforceSingleSession(req, res, next) {
   next();
 }
 
-// POST /account/check-username
-router.post("/check-username", async (req, res) => {
-  const { username } = req.body;
-  const user = await User.findOne({
-    username: new RegExp(`^${username}$`, "i"),
-  });
-  res.json({ exists: !!user });
-});
+// // POST /account/check-username
+// router.post("/check-username", async (req, res) => {
+//   const { username } = req.body;
+//   const user = await User.findOne({
+//     username: new RegExp(`^${username}$`, "i"),
+//   });
+//   res.json({ exists: !!user });
+// });
 
-// POST /account/check-email
-router.post("/check-email", async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email: new RegExp(`^${email}$`, "i") });
-  res.json({ exists: !!user });
-});
+// // POST /account/check-email
+// router.post("/check-email", async (req, res) => {
+//   const { email } = req.body;
+//   const user = await User.findOne({ email: new RegExp(`^${email}$`, "i") });
+//   res.json({ exists: !!user });
+// });
+
+
 
 // POST /account/register
 router.post("/register", async (req, res) => {
@@ -102,7 +104,6 @@ req.session.regenerate((err) => {
       return res.status(500).json({ message: "Session save error" });
     }
 
-    return res.status(200).json({ message: "Registration successful" });
   });
 });
     // Email setup
@@ -229,15 +230,29 @@ router.post("/resend-verification", async (req, res) => {
 
 // ---Login with session management---
 router.post("/login", async (req, res) => {
+    console.log("🚨 Login route HIT");
+
   const { username, password, force } = req.body;
 
+
   try {
-    const user = await User.findOne({ username });
+   // First check if user exists
+       const user = await User.findOne({ username });
+  console.log("Login attempt:", username, "Verified:", user?.verified);
+
     if (!user) {
       return res
         .status(400)
         .json({ type: "username", message: "Username does not exist" });
     }
+
+ if (!user.verified) {
+  console.log("User not verified:", user.username);
+  // If user is not verified, return a specific error
+  return res
+    .status(403)
+    .json({ type: "verification", message: "Account not verified" });
+}
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -246,6 +261,7 @@ router.post("/login", async (req, res) => {
         .json({ type: "password", message: "Wrong password" });
     }
 
+    
     const existingSession = await SessionModel.findOne({ userId: user._id });
 
     if (
@@ -622,6 +638,8 @@ router.get("/profile", enforceSingleSession, async (req, res) => {
     console.log("No userId in session. Redirecting to login.");
     return res.redirect("/account/login"); // Redirect to login if no session
   }
+
+  
 
   try {
     const user = await User.findById(req.session.userId).select("-password"); // Exclude password
